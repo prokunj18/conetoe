@@ -6,6 +6,7 @@ import { ArrowLeft, RotateCcw, Zap, Crown, Trophy } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ConeCell } from "./ConeCell";
 import { PlayerInventory } from "./PlayerInventory";
+import { WinningModal } from "./WinningModal";
 import { useGameLogic } from "@/hooks/useGameLogic";
 import { useToast } from "@/hooks/use-toast";
 
@@ -30,17 +31,13 @@ export const GameBoard = () => {
 
   const [selectedCone, setSelectedCone] = useState<number | null>(null);
   const [hoveredCell, setHoveredCell] = useState<number | null>(null);
+  const [showWinModal, setShowWinModal] = useState(false);
 
   useEffect(() => {
     if (gameStatus === "finished" && winner) {
-      const winnerText = winner === 1 ? "Player 1" : winner === 2 ? "Player 2" : "AI";
-      toast({
-        title: "Game Over!",
-        description: `🎉 ${winnerText} wins!`,
-        duration: 5000,
-      });
+      setShowWinModal(true);
     }
-  }, [gameStatus, winner, toast]);
+  }, [gameStatus, winner]);
 
   const handleCellClick = (position: number) => {
     if (gameStatus !== "playing" || !selectedCone) return;
@@ -106,38 +103,29 @@ export const GameBoard = () => {
         </div>
 
         {/* Game Status */}
-        <div className="text-center space-y-2">
-          {gameStatus === "playing" && (
-            <>
-              <h2 className="text-2xl font-bold">
-                <span className={`${getPlayerGradient(currentPlayer)} bg-clip-text text-transparent`}>
+        {gameStatus === "playing" && (
+          <div className="text-center space-y-3 animate-fade-in">
+            <div className="relative">
+              <h2 className="text-3xl font-bold">
+                <span className={`${getPlayerGradient(currentPlayer)} bg-clip-text text-transparent animate-glow-pulse`}>
                   {currentPlayer === 1 ? "Player 1" : gameState.mode === "ai" ? "Your" : "Player 2"} Turn
                 </span>
               </h2>
-              <p className="text-muted-foreground">
-                Move #{Math.floor((playerMoves[0] + playerMoves[1]) / 2) + 1} • Next return: Player {currentPlayer} in {4 - (playerMoves[currentPlayer - 1] % 4)} moves
-              </p>
-            </>
-          )}
-          
-          {gameStatus === "finished" && winner && (
-            <h2 className="text-3xl font-bold">
-              <span className={`${getPlayerGradient(winner)} bg-clip-text text-transparent`}>
-                {winner === 1 ? "Player 1" : gameState.mode === "ai" ? "You" : "Player 2"} Wins! 🎉
-              </span>
-            </h2>
-          )}
-          
-          {gameStatus === "finished" && !winner && (
-            <h2 className="text-3xl font-bold text-muted-foreground">
-              It's a Draw! 🤝
-            </h2>
-          )}
-        </div>
+            </div>
+            <div className="flex justify-center gap-4 text-sm">
+              <Badge className="bg-gradient-glass border border-primary/30 backdrop-blur-sm">
+                Move #{Math.floor((playerMoves[0] + playerMoves[1]) / 2) + 1}
+              </Badge>
+              <Badge className="bg-gradient-glass border border-secondary/30 backdrop-blur-sm">
+                Next return: {4 - (playerMoves[currentPlayer - 1] % 4)} moves
+              </Badge>
+            </div>
+          </div>
+        )}
 
         <div className="grid lg:grid-cols-3 gap-6 items-start">
           {/* Player 1 Inventory */}
-          <Card className="p-4 bg-card border-card-border">
+          <Card className="p-4 bg-gradient-glass border border-card-border backdrop-blur-xl">
             <PlayerInventory
               player={1}
               inventory={playerInventories[0]}
@@ -149,9 +137,9 @@ export const GameBoard = () => {
           </Card>
 
           {/* Game Board */}
-          <Card className="p-6 bg-card border-card-border shadow-board">
+          <Card className="p-6 bg-gradient-glass border border-card-border backdrop-blur-xl shadow-board hover:shadow-neon transition-all duration-500">
             <div className="aspect-square max-w-sm mx-auto">
-              <div className="grid grid-cols-3 gap-2 h-full">
+              <div className="grid grid-cols-3 gap-3 h-full p-2">
                 {board.map((cell, index) => (
                   <ConeCell
                     key={index}
@@ -168,7 +156,7 @@ export const GameBoard = () => {
           </Card>
 
           {/* Player 2/AI Inventory */}
-          <Card className="p-4 bg-card border-card-border">
+          <Card className="p-4 bg-gradient-glass border border-card-border backdrop-blur-xl">
             <PlayerInventory
               player={2}
               inventory={playerInventories[1]}
@@ -179,6 +167,18 @@ export const GameBoard = () => {
             />
           </Card>
         </div>
+
+        {/* Winning Modal */}
+        <WinningModal
+          winner={winner}
+          isVisible={showWinModal}
+          onNewGame={() => {
+            resetGame();
+            setShowWinModal(false);
+          }}
+          gameMode={gameState.mode}
+          difficulty={gameState.difficulty}
+        />
       </div>
     </div>
   );

@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Play, BookOpen, Settings, Trophy, Zap, Brain } from "lucide-react";
+import { Play, BookOpen, Settings, Trophy, Zap, Brain, Crown } from "lucide-react";
+import { AnimatedBackground } from "@/components/ui/animated-background";
 
 const MainMenu = () => {
   const navigate = useNavigate();
@@ -14,28 +15,28 @@ const MainMenu = () => {
       id: "easy" as const, 
       name: "Easy", 
       icon: Zap, 
-      description: "Random moves, perfect for learning",
+      description: "Learns as it plays",
       color: "bg-gradient-player-1" 
     },
     { 
       id: "normal" as const, 
       name: "Normal", 
       icon: Brain, 
-      description: "Basic strategy and blocks",
+      description: "Strategic thinking",
       color: "bg-gradient-secondary" 
     },
     { 
       id: "hard" as const, 
       name: "Hard", 
-      icon: Trophy, 
-      description: "Strategic planning and foresight",
+      icon: Crown, 
+      description: "Unbeatable tactics",
       color: "bg-gradient-player-2" 
     },
     { 
       id: "master" as const, 
       name: "Master", 
-      icon: Trophy, 
-      description: "Near-perfect AI with advanced tactics",
+      icon: Crown, 
+      description: "Perfect calculation",
       color: "bg-gradient-primary" 
     },
   ];
@@ -49,33 +50,45 @@ const MainMenu = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex flex-col items-center justify-center p-4">
-      <div className="max-w-4xl w-full space-y-8">
+    <div className="min-h-screen bg-gradient-hero flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      <AnimatedBackground />
+      <div className="max-w-4xl w-full space-y-8 relative z-10">
         {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-6xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            Cone Tactics
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Strategic Tic Tac Toe with stackable cone pieces. Outsmart your opponent with size, timing, and tactical returns.
+        <div className="text-center space-y-6 animate-fade-in">
+          <div className="relative">
+            <h1 className="text-7xl font-bold bg-gradient-neon bg-clip-text text-transparent animate-glow-pulse">
+              Cone Tactics
+            </h1>
+            <div className="absolute -inset-4 bg-gradient-primary opacity-20 blur-xl rounded-full animate-float" />
+          </div>
+          <p className="text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed">
+            Strategic Tic Tac Toe evolved. Master stackable cone mechanics, tactical timing, and intelligent returns.
           </p>
-          <Badge variant="secondary" className="px-4 py-2 text-sm">
-            🎯 Win with 3 in a row • 🔄 Replace smaller cones • ⏰ Strategic returns
-          </Badge>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Badge className="px-4 py-2 bg-gradient-glass border border-primary/30 backdrop-blur-sm">
+              🎯 3-in-a-row victory
+            </Badge>
+            <Badge className="px-4 py-2 bg-gradient-glass border border-secondary/30 backdrop-blur-sm">
+              🔄 Size-based replacement
+            </Badge>
+            <Badge className="px-4 py-2 bg-gradient-glass border border-accent/30 backdrop-blur-sm">
+              ⏰ 4-move returns
+            </Badge>
+          </div>
         </div>
 
         {/* Main Menu Cards */}
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-6 animate-scale-in" style={{ animationDelay: '0.2s' }}>
           {/* AI Game */}
-          <Card className="p-6 bg-card border-card-border hover:shadow-glow transition-all duration-300">
+          <Card className="p-6 bg-gradient-glass border border-card-border backdrop-blur-xl hover:shadow-neon hover:scale-105 transition-all duration-500 group">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-primary rounded-lg">
-                  <Play className="w-6 h-6 text-primary-foreground" />
+                <div className="p-3 bg-gradient-primary rounded-xl shadow-neon group-hover:animate-neon-pulse">
+                  <Play className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold">Play vs AI</h3>
-                  <p className="text-sm text-muted-foreground">Challenge the computer</p>
+                  <h3 className="text-xl font-semibold text-foreground">Play vs AI</h3>
+                  <p className="text-sm text-muted-foreground">Challenge intelligent opponents</p>
                 </div>
               </div>
 
@@ -111,54 +124,55 @@ const MainMenu = () => {
 
               <Button 
                 onClick={startGame} 
-                className="w-full bg-gradient-primary hover:scale-105 transition-transform"
+                className="w-full bg-gradient-primary hover:shadow-neon hover:scale-105 transition-all duration-300 border-0"
               >
-                Start AI Game
+                <Play className="w-4 h-4 mr-2" />
+                Launch AI Battle
               </Button>
             </div>
           </Card>
 
           {/* Local Multiplayer */}
-          <Card className="p-6 bg-card border-card-border hover:shadow-glow transition-all duration-300">
+          <Card className="p-6 bg-gradient-glass border border-card-border backdrop-blur-xl hover:shadow-neon hover:scale-105 transition-all duration-500 group">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-gradient-secondary rounded-lg">
-                  <Trophy className="w-6 h-6 text-secondary-foreground" />
+                <div className="p-3 bg-gradient-secondary rounded-xl shadow-neon group-hover:animate-neon-pulse">
+                  <Trophy className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold">Two Players</h3>
-                  <p className="text-sm text-muted-foreground">Play with a friend locally</p>
+                  <h3 className="text-xl font-semibold text-foreground">Two Players</h3>
+                  <p className="text-sm text-muted-foreground">Local tactical warfare</p>
                 </div>
               </div>
 
               <div className="space-y-3 py-4">
-                <div className="flex items-center justify-between p-3 bg-surface rounded-lg">
-                  <span className="text-sm">Player 1</span>
-                  <div className="w-4 h-4 bg-gradient-player-1 rounded-full shadow-cone"></div>
+                <div className="flex items-center justify-between p-3 bg-surface-glass rounded-xl border border-border/30">
+                  <span className="text-sm font-medium">Player 1</span>
+                  <div className="w-5 h-5 bg-gradient-player-1 rounded-full shadow-neon animate-glow-pulse"></div>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-surface rounded-lg">
-                  <span className="text-sm">Player 2</span>
-                  <div className="w-4 h-4 bg-gradient-player-2 rounded-full shadow-cone"></div>
+                <div className="flex items-center justify-between p-3 bg-surface-glass rounded-xl border border-border/30">
+                  <span className="text-sm font-medium">Player 2</span>
+                  <div className="w-5 h-5 bg-gradient-player-2 rounded-full shadow-neon animate-glow-pulse"></div>
                 </div>
               </div>
 
               <Button 
                 onClick={startTwoPlayer} 
-                variant="secondary"
-                className="w-full bg-gradient-secondary hover:scale-105 transition-transform"
+                className="w-full bg-gradient-secondary hover:shadow-neon hover:scale-105 transition-all duration-300 border-0"
               >
-                Start Local Game
+                <Trophy className="w-4 h-4 mr-2" />
+                Begin Duel
               </Button>
             </div>
           </Card>
         </div>
 
         {/* Navigation */}
-        <div className="flex flex-wrap justify-center gap-4">
+        <div className="flex flex-wrap justify-center gap-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
           <Button 
             variant="outline" 
             onClick={() => navigate("/rules")}
-            className="flex items-center gap-2 border-border hover:border-primary/50"
+            className="flex items-center gap-2 border-border/50 bg-gradient-glass backdrop-blur-sm hover:border-primary/50 hover:shadow-glow transition-all duration-300"
           >
             <BookOpen className="w-4 h-4" />
             How to Play
@@ -166,7 +180,7 @@ const MainMenu = () => {
           <Button 
             variant="outline" 
             onClick={() => navigate("/settings")}
-            className="flex items-center gap-2 border-border hover:border-primary/50"
+            className="flex items-center gap-2 border-border/50 bg-gradient-glass backdrop-blur-sm hover:border-secondary/50 hover:shadow-glow transition-all duration-300"
           >
             <Settings className="w-4 h-4" />
             Settings
