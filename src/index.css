@@ -2,41 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Strategic Cone Game Design System */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Background & Surface */
+    --background: 225 25% 12%;
+    --foreground: 210 40% 98%;
+    --surface: 225 20% 15%;
+    --surface-elevated: 225 15% 18%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
+    /* Game Colors */
+    --primary: 260 85% 65%;
     --primary-foreground: 210 40% 98%;
+    --primary-glow: 260 85% 75%;
+    
+    --secondary: 195 85% 55%;
+    --secondary-foreground: 210 40% 98%;
+    --secondary-glow: 195 85% 65%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Player Colors */
+    --player-1: 15 85% 60%;
+    --player-1-glow: 15 85% 70%;
+    --player-2: 220 85% 65%;
+    --player-2-glow: 220 85% 75%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* UI Elements */
+    --card: 225 20% 15%;
+    --card-foreground: 210 40% 98%;
+    --card-border: 225 15% 25%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --popover: 225 20% 15%;
+    --popover-foreground: 210 40% 98%;
 
-    --destructive: 0 84.2% 60.2%;
+    --muted: 225 15% 25%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 260 85% 65%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 225 15% 25%;
+    --input: 225 15% 20%;
+    --ring: 260 85% 65%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Game Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--secondary-glow)));
+    --gradient-player-1: linear-gradient(135deg, hsl(var(--player-1)), hsl(var(--player-1-glow)));
+    --gradient-player-2: linear-gradient(135deg, hsl(var(--player-2)), hsl(var(--player-2-glow)));
+    --gradient-board: linear-gradient(145deg, hsl(var(--surface)), hsl(var(--surface-elevated)));
+    --gradient-hero: linear-gradient(135deg, hsl(225 25% 8%), hsl(225 35% 15%));
+
+    /* Shadows & Effects */
+    --shadow-cone: 0 8px 32px -8px hsl(0 0% 0% / 0.4);
+    --shadow-glow: 0 0 40px hsl(var(--primary) / 0.3);
+    --shadow-board: 0 20px 60px -10px hsl(0 0% 0% / 0.5);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
     --sidebar-background: 0 0% 98%;
 
