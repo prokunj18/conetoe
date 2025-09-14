@@ -1,12 +1,16 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+export type BoardTheme = 'futuristic' | 'wooden';
+
 interface SettingsContextType {
   soundEnabled: boolean;
   animationsEnabled: boolean;
   showMoveHints: boolean;
+  boardTheme: BoardTheme;
   setSoundEnabled: (enabled: boolean) => void;
   setAnimationsEnabled: (enabled: boolean) => void;
   setShowMoveHints: (enabled: boolean) => void;
+  setBoardTheme: (theme: BoardTheme) => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -39,6 +43,11 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
     return saved !== null ? JSON.parse(saved) : true;
   });
 
+  const [boardTheme, setBoardTheme] = useState<BoardTheme>(() => {
+    const saved = localStorage.getItem('boardTheme');
+    return saved !== null ? JSON.parse(saved) : 'futuristic';
+  });
+
   useEffect(() => {
     localStorage.setItem('soundEnabled', JSON.stringify(soundEnabled));
   }, [soundEnabled]);
@@ -50,6 +59,10 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
   useEffect(() => {
     localStorage.setItem('showMoveHints', JSON.stringify(showMoveHints));
   }, [showMoveHints]);
+
+  useEffect(() => {
+    localStorage.setItem('boardTheme', JSON.stringify(boardTheme));
+  }, [boardTheme]);
 
   // Apply animation setting to document
   useEffect(() => {
@@ -64,9 +77,11 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
     soundEnabled,
     animationsEnabled,
     showMoveHints,
+    boardTheme,
     setSoundEnabled,
     setAnimationsEnabled,
     setShowMoveHints,
+    setBoardTheme,
   };
 
   return (

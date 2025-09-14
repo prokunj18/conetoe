@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useSettings } from "@/contexts/SettingsContext";
 
 interface PlayerInventoryProps {
   player: number;
@@ -18,6 +19,8 @@ export const PlayerInventory = ({
   onConeSelect, 
   label 
 }: PlayerInventoryProps) => {
+  const { boardTheme } = useSettings();
+
   const getConeGradient = (player: number) => {
     return player === 1 ? "bg-gradient-player-1" : "bg-gradient-player-2";
   };
@@ -75,13 +78,17 @@ export const PlayerInventory = ({
                   className={`
                     ${getConeSize(size)} 
                     ${getConeGradient(player)} 
-                    rounded-full shadow-cone
+                    rounded-full shadow-cone border-2 border-white/20
                     flex items-center justify-center text-white font-bold text-sm
-                    ${isSelected ? "scale-110" : ""}
-                    transition-transform duration-200
+                    ${isSelected ? "scale-110 shadow-vibrant" : ""}
+                    ${boardTheme === 'wooden' ? 'shadow-wooden' : 'shadow-glow'}
+                    transition-all duration-300 relative overflow-hidden
                   `}
                 >
-                  {size}
+                  <div className="absolute inset-0 bg-gradient-radial from-white/20 to-transparent rounded-full"></div>
+                  <span className="relative z-10 drop-shadow-lg">{size}</span>
+                  {/* Cone rim effect */}
+                  <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent rounded-full"></div>
                 </div>
                 <div className="text-left">
                   <div className="font-medium">Size {size}</div>

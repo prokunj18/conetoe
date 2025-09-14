@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Settings as SettingsIcon, Volume2, VolumeX, Palette } from "lucide-react";
+import { ArrowLeft, Settings as SettingsIcon, Volume2, VolumeX, Palette, Gamepad2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Switch } from "@/components/ui/switch";
-import { useSettings } from "@/contexts/SettingsContext";
+import { useSettings, BoardTheme } from "@/contexts/SettingsContext";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -12,9 +12,11 @@ const Settings = () => {
     soundEnabled, 
     animationsEnabled, 
     showMoveHints,
+    boardTheme,
     setSoundEnabled,
     setAnimationsEnabled,
-    setShowMoveHints
+    setShowMoveHints,
+    setBoardTheme
   } = useSettings();
 
   return (
@@ -114,6 +116,56 @@ const Settings = () => {
                     checked={showMoveHints}
                     onCheckedChange={setShowMoveHints}
                   />
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Game Board Theme */}
+          <Card className="p-6 bg-card border-card-border">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-gradient-accent rounded-lg">
+                  <Gamepad2 className="w-6 h-6 text-accent-foreground" />
+                </div>
+                <h2 className="text-xl font-semibold">Game Board Theme</h2>
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div 
+                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                      boardTheme === 'futuristic' 
+                        ? 'border-primary bg-primary/10' 
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                    onClick={() => setBoardTheme('futuristic')}
+                  >
+                    <div className="space-y-2">
+                      <div className="w-full h-20 bg-gradient-board rounded-lg border border-primary/30 shadow-neon"></div>
+                      <h3 className="font-medium text-center">Futuristic</h3>
+                      <p className="text-xs text-muted-foreground text-center">
+                        Neon glow & cyber aesthetic
+                      </p>
+                    </div>
+                  </div>
+
+                  <div 
+                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                      boardTheme === 'wooden' 
+                        ? 'border-primary bg-primary/10' 
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                    onClick={() => setBoardTheme('wooden')}
+                  >
+                    <div className="space-y-2">
+                      <div className="w-full h-20 bg-gradient-wooden rounded-lg border border-amber-400/30 shadow-wooden"></div>
+                      <h3 className="font-medium text-center">Classic Wood</h3>
+                      <p className="text-xs text-muted-foreground text-center">
+                        Traditional & warm design
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

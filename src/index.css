@@ -54,6 +54,13 @@
     --input: 240 15% 12%;
     --ring: 280 100% 70%;
 
+    /* Wooden Theme Colors */
+    --wooden-primary: 30 60% 45%;
+    --wooden-secondary: 25 70% 55%;
+    --wooden-accent: 35 80% 60%;
+    --wooden-surface: 25 25% 20%;
+    --wooden-border: 30 30% 30%;
+
     --radius: 1rem;
 
     /* Futuristic Gradients */
@@ -65,6 +72,8 @@
     --gradient-hero: linear-gradient(135deg, hsl(240 20% 4%), hsl(240 15% 8%), hsl(280 30% 15%));
     --gradient-glass: linear-gradient(145deg, hsl(var(--surface-glass) / 0.8), hsl(var(--surface-elevated) / 0.6));
     --gradient-neon: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--secondary)), hsl(var(--accent)));
+    --gradient-wooden: linear-gradient(145deg, hsl(var(--wooden-surface)), hsl(var(--wooden-primary)));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--accent) / 0.8));
 
     /* Advanced Shadows & Effects */
     --shadow-cone: 0 8px 32px -8px hsl(0 0% 0% / 0.6);
@@ -72,6 +81,8 @@
     --shadow-neon: 0 0 20px hsl(var(--primary) / 0.8);
     --shadow-board: 0 25px 80px -15px hsl(0 0% 0% / 0.7);
     --shadow-glass: 0 8px 32px hsl(0 0% 0% / 0.3);
+    --shadow-wooden: 0 8px 24px hsl(var(--wooden-primary) / 0.3);
+    --shadow-vibrant: 0 0 60px hsl(var(--primary) / 0.6);
     
     /* Smooth Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

@@ -15,7 +15,7 @@ export const GameBoard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { showMoveHints, animationsEnabled } = useSettings();
+  const { showMoveHints, animationsEnabled, boardTheme } = useSettings();
   
   const gameState = location.state || { mode: "ai", difficulty: "normal" };
   const { 
@@ -71,6 +71,23 @@ export const GameBoard = () => {
     return player === 1 ? "bg-gradient-player-1" : "bg-gradient-player-2";
   };
 
+  const getBoardThemeClasses = () => {
+    if (boardTheme === 'wooden') {
+      return {
+        container: "bg-gradient-wooden shadow-wooden border-wooden-border",
+        card: "bg-gradient-wooden border-wooden-border backdrop-blur-xl",
+        glow: "hover:shadow-wooden"
+      };
+    }
+    return {
+      container: "bg-gradient-glass shadow-vibrant border-primary/30",
+      card: "bg-gradient-glass border-card-border backdrop-blur-xl shadow-vibrant",
+      glow: "hover:shadow-vibrant hover:border-primary/50"
+    };
+  };
+
+  const themeClasses = getBoardThemeClasses();
+
   return (
     <div className="min-h-screen bg-gradient-hero p-4">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -79,7 +96,7 @@ export const GameBoard = () => {
           <Button 
             variant="outline" 
             onClick={() => navigate("/")}
-            className="flex items-center gap-2 border-border hover:border-primary/50"
+            className={`flex items-center gap-2 border-border ${themeClasses.glow}`}
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Menu
@@ -96,7 +113,7 @@ export const GameBoard = () => {
             <Button 
               variant="outline" 
               onClick={resetGame}
-              className="flex items-center gap-2 border-border hover:border-primary/50"
+              className={`flex items-center gap-2 border-border ${themeClasses.glow}`}
             >
               <RotateCcw className="w-4 h-4" />
               New Game
@@ -127,7 +144,7 @@ export const GameBoard = () => {
 
         <div className="grid lg:grid-cols-3 gap-6 items-start">
           {/* Player 1 Inventory */}
-          <Card className="p-4 bg-gradient-glass border border-card-border backdrop-blur-xl">
+          <Card className={`p-4 ${themeClasses.card}`}>
             <PlayerInventory
               player={1}
               inventory={playerInventories[0]}
@@ -139,7 +156,7 @@ export const GameBoard = () => {
           </Card>
 
           {/* Game Board */}
-          <Card className="p-6 bg-gradient-glass border border-card-border backdrop-blur-xl shadow-board hover:shadow-neon transition-all duration-500">
+          <Card className={`p-6 ${themeClasses.container} transition-all duration-500`}>
             <div className="aspect-square max-w-sm mx-auto">
               <div className="grid grid-cols-3 gap-3 h-full p-2">
                 {board.map((cell, index) => (
@@ -158,7 +175,7 @@ export const GameBoard = () => {
           </Card>
 
           {/* Player 2/AI Inventory */}
-          <Card className="p-4 bg-gradient-glass border border-card-border backdrop-blur-xl">
+          <Card className={`p-4 ${themeClasses.card}`}>
             <PlayerInventory
               player={2}
               inventory={playerInventories[1]}

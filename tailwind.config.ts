@@ -63,15 +63,12 @@ export default {
           foreground: "hsl(var(--card-foreground))",
           border: "hsl(var(--card-border))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
+        "wooden": {
+          primary: "hsl(var(--wooden-primary))",
+          secondary: "hsl(var(--wooden-secondary))", 
+          accent: "hsl(var(--wooden-accent))",
+          surface: "hsl(var(--wooden-surface))",
+          border: "hsl(var(--wooden-border))",
         },
       },
       backgroundImage: {
@@ -83,6 +80,8 @@ export default {
         "gradient-hero": "var(--gradient-hero)",
         "gradient-glass": "var(--gradient-glass)",
         "gradient-neon": "var(--gradient-neon)",
+        "gradient-wooden": "var(--gradient-wooden)",
+        "gradient-accent": "var(--gradient-accent)",
       },
       boxShadow: {
         "cone": "var(--shadow-cone)",
@@ -90,6 +89,8 @@ export default {
         "neon": "var(--shadow-neon)",
         "board": "var(--shadow-board)",
         "glass": "var(--shadow-glass)",
+        "wooden": "var(--shadow-wooden)",
+        "vibrant": "var(--shadow-vibrant)",
       },
       transitionTimingFunction: {
         "smooth": "var(--transition-smooth)",
