@@ -3,14 +3,19 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Settings as SettingsIcon, Volume2, VolumeX, Palette } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { Switch } from "@/components/ui/switch";
+import { useSettings } from "@/contexts/SettingsContext";
 
 const Settings = () => {
   const navigate = useNavigate();
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [animationsEnabled, setAnimationsEnabled] = useState(true);
-  const [showMoveHints, setShowMoveHints] = useState(true);
+  const { 
+    soundEnabled, 
+    animationsEnabled, 
+    showMoveHints,
+    setSoundEnabled,
+    setAnimationsEnabled,
+    setShowMoveHints
+  } = useSettings();
 
   return (
     <div className="min-h-screen bg-gradient-hero p-4">

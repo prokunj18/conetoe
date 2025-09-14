@@ -8,12 +8,14 @@ import { ConeCell } from "./ConeCell";
 import { PlayerInventory } from "./PlayerInventory";
 import { WinningModal } from "./WinningModal";
 import { useGameLogic } from "@/hooks/useGameLogic";
+import { useSettings } from "@/contexts/SettingsContext";
 import { useToast } from "@/hooks/use-toast";
 
 export const GameBoard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { showMoveHints, animationsEnabled } = useSettings();
   
   const gameState = location.state || { mode: "ai", difficulty: "normal" };
   const { 
@@ -145,7 +147,7 @@ export const GameBoard = () => {
                     key={index}
                     cell={cell}
                     isHovered={hoveredCell === index}
-                    isValidMove={selectedCone ? isValidMove(index, selectedCone) : false}
+                    isValidMove={showMoveHints && selectedCone ? isValidMove(index, selectedCone) : false}
                     onClick={() => handleCellClick(index)}
                     onMouseEnter={() => setHoveredCell(index)}
                     onMouseLeave={() => setHoveredCell(null)}

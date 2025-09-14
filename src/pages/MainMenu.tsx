@@ -5,9 +5,11 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Play, BookOpen, Settings, Trophy, Zap, Brain, Crown } from "lucide-react";
 import { AnimatedBackground } from "@/components/ui/animated-background";
+import { useSettings } from "@/contexts/SettingsContext";
 
 const MainMenu = () => {
   const navigate = useNavigate();
+  const { animationsEnabled } = useSettings();
   const [selectedDifficulty, setSelectedDifficulty] = useState<"easy" | "normal" | "hard" | "master">("normal");
 
   const difficulties = [
@@ -54,12 +56,12 @@ const MainMenu = () => {
       <AnimatedBackground />
       <div className="max-w-4xl w-full space-y-8 relative z-10">
         {/* Header */}
-        <div className="text-center space-y-6 animate-fade-in">
+        <div className={`text-center space-y-6 ${animationsEnabled ? 'animate-fade-in' : ''}`}>
           <div className="relative">
-            <h1 className="text-7xl font-bold bg-gradient-neon bg-clip-text text-transparent animate-glow-pulse">
+            <h1 className={`text-7xl font-bold bg-gradient-neon bg-clip-text text-transparent ${animationsEnabled ? 'animate-glow-pulse' : ''}`}>
               Cone Tactics
             </h1>
-            <div className="absolute -inset-4 bg-gradient-primary opacity-20 blur-xl rounded-full animate-float" />
+            <div className={`absolute -inset-4 bg-gradient-primary opacity-20 blur-xl rounded-full ${animationsEnabled ? 'animate-float' : ''}`} />
           </div>
           <p className="text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed">
             Strategic Tic Tac Toe evolved. Master stackable cone mechanics, tactical timing, and intelligent returns.
@@ -78,7 +80,7 @@ const MainMenu = () => {
         </div>
 
         {/* Main Menu Cards */}
-        <div className="grid md:grid-cols-2 gap-6 animate-scale-in" style={{ animationDelay: '0.2s' }}>
+        <div className={`grid md:grid-cols-2 gap-6 ${animationsEnabled ? 'animate-scale-in' : ''}`} style={animationsEnabled ? { animationDelay: '0.2s' } : {}}>
           {/* AI Game */}
           <Card className="p-6 bg-gradient-glass border border-card-border backdrop-blur-xl hover:shadow-neon hover:scale-105 transition-all duration-500 group">
             <div className="space-y-4">
@@ -168,7 +170,7 @@ const MainMenu = () => {
         </div>
 
         {/* Navigation */}
-        <div className="flex flex-wrap justify-center gap-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+        <div className={`flex flex-wrap justify-center gap-4 ${animationsEnabled ? 'animate-fade-in' : ''}`} style={animationsEnabled ? { animationDelay: '0.4s' } : {}}>
           <Button 
             variant="outline" 
             onClick={() => navigate("/rules")}

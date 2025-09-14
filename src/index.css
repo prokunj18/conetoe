@@ -13,24 +13,24 @@
     --surface-elevated: 240 10% 12%;
     --surface-glass: 240 8% 15%;
 
-    /* Neon Accent Colors */
-    --primary: 280 100% 70%;
-    --primary-foreground: 280 20% 10%;
-    --primary-glow: 280 100% 80%;
-    --primary-dark: 280 80% 45%;
+    /* Subtle Neon Accent Colors */
+    --primary: 280 60% 55%;
+    --primary-foreground: 280 15% 95%;
+    --primary-glow: 280 70% 65%;
+    --primary-dark: 280 50% 35%;
     
-    --secondary: 180 100% 50%;
-    --secondary-foreground: 180 20% 10%;
-    --secondary-glow: 180 100% 60%;
-    --secondary-dark: 180 80% 35%;
+    --secondary: 180 65% 45%;
+    --secondary-foreground: 180 15% 95%;
+    --secondary-glow: 180 70% 55%;
+    --secondary-dark: 180 55% 30%;
 
-    /* Futuristic Player Colors */
-    --player-1: 45 100% 60%;
-    --player-1-glow: 45 100% 70%;
-    --player-1-dark: 45 80% 40%;
-    --player-2: 200 100% 60%;
-    --player-2-glow: 200 100% 70%;
-    --player-2-dark: 200 80% 40%;
+    /* Refined Player Colors */
+    --player-1: 45 70% 50%;
+    --player-1-glow: 45 80% 60%;
+    --player-1-dark: 45 60% 35%;
+    --player-2: 200 70% 55%;
+    --player-2-glow: 200 80% 65%;
+    --player-2-dark: 200 60% 40%;
 
     /* UI Elements */
     --card: 240 12% 8%;
@@ -44,8 +44,8 @@
     --muted: 240 15% 20%;
     --muted-foreground: 240 10% 60%;
 
-    --accent: 320 100% 65%;
-    --accent-foreground: 320 20% 10%;
+    --accent: 320 55% 50%;
+    --accent-foreground: 320 15% 95%;
 
     --destructive: 0 100% 60%;
     --destructive-foreground: 0 20% 95%;
@@ -141,5 +141,12 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Disable animations when settings turned off */
+  .animations-disabled * {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    transition-duration: 0s !important;
   }
 }
