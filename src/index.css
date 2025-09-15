@@ -63,17 +63,38 @@
 
     --radius: 1rem;
 
+    /* Space/Nebula Background Colors */
+    --space-dark: 220 70% 4%;
+    --space-deep: 240 60% 8%;
+    --nebula-purple: 280 85% 45%;
+    --nebula-pink: 320 85% 55%;
+    --nebula-blue: 240 85% 50%;
+    --nebula-teal: 180 85% 45%;
+
+    /* Neon Glow Colors - More vibrant and electric */
+    --neon-cyan: 180 100% 60%;
+    --neon-magenta: 300 100% 65%;
+    --neon-electric: 195 100% 70%;
+    --neon-violet: 270 100% 70%;
+    --neon-pink: 320 100% 75%;
+
+    /* Glass Effect */
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.15);
+
     /* Futuristic Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-    --gradient-secondary: linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--secondary-glow)));
-    --gradient-player-1: linear-gradient(135deg, hsl(var(--player-1)), hsl(var(--player-1-glow)));
-    --gradient-player-2: linear-gradient(135deg, hsl(var(--player-2)), hsl(var(--player-2-glow)));
-    --gradient-board: linear-gradient(145deg, hsl(var(--surface)), hsl(var(--surface-elevated)));
-    --gradient-hero: linear-gradient(135deg, hsl(240 20% 4%), hsl(240 15% 8%), hsl(280 30% 15%));
-    --gradient-glass: linear-gradient(145deg, hsl(var(--surface-glass) / 0.8), hsl(var(--surface-elevated) / 0.6));
-    --gradient-neon: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--secondary)), hsl(var(--accent)));
-    --gradient-wooden: linear-gradient(145deg, hsl(var(--wooden-surface)), hsl(var(--wooden-primary)));
-    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--accent) / 0.8));
+    --gradient-primary: linear-gradient(135deg, hsl(var(--neon-electric)), hsl(var(--primary)));
+    --gradient-secondary: linear-gradient(135deg, hsl(var(--neon-violet)), hsl(var(--secondary)));
+    --gradient-hero: radial-gradient(ellipse at center, hsl(var(--space-deep)), hsl(var(--space-dark)));
+    --gradient-nebula: linear-gradient(135deg, hsl(var(--nebula-purple)), hsl(var(--nebula-pink)), hsl(var(--nebula-teal)));
+    --gradient-neon: linear-gradient(90deg, hsl(var(--neon-cyan)), hsl(var(--neon-pink)), hsl(var(--neon-electric)));
+    --gradient-glass: linear-gradient(135deg, var(--glass-bg), rgba(255, 255, 255, 0.03));
+    --gradient-player-1: linear-gradient(135deg, hsl(var(--neon-cyan)), hsl(var(--neon-electric)));
+    --gradient-player-2: linear-gradient(135deg, hsl(var(--neon-magenta)), hsl(var(--neon-pink)));
+    --gradient-board: linear-gradient(135deg, hsl(var(--muted)), hsl(var(--surface)));
+    --gradient-wooden: linear-gradient(135deg, hsl(var(--wooden-light)), hsl(var(--wooden-dark)));
+    --gradient-radial: radial-gradient(circle, rgba(255, 255, 255, 0.15), transparent);
+    --gradient-circular: conic-gradient(from 0deg, hsl(var(--neon-cyan)), hsl(var(--neon-magenta)), hsl(var(--neon-electric)), hsl(var(--neon-cyan)));
 
     /* Advanced Shadows & Effects */
     --shadow-cone: 0 8px 32px -8px hsl(0 0% 0% / 0.6);

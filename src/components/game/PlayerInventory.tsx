@@ -78,17 +78,30 @@ export const PlayerInventory = ({
                   className={`
                     ${getConeSize(size)} 
                     ${getConeGradient(player)} 
-                    rounded-full shadow-cone border-2 border-white/20
-                    flex items-center justify-center text-white font-bold text-sm
+                    relative flex items-center justify-center text-white font-bold text-sm
                     ${isSelected ? "scale-110 shadow-vibrant" : ""}
-                    ${boardTheme === 'wooden' ? 'shadow-wooden' : 'shadow-glow'}
-                    transition-all duration-300 relative overflow-hidden
+                    ${boardTheme === 'wooden' ? 'shadow-wooden' : 'shadow-neon'}
+                    transition-all duration-300
                   `}
+                  style={{
+                    clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+                    filter: `drop-shadow(0 0 ${isSelected ? '12px' : '8px'} currentColor)`
+                  }}
                 >
-                  <div className="absolute inset-0 bg-gradient-radial from-white/20 to-transparent rounded-full"></div>
-                  <span className="relative z-10 drop-shadow-lg">{size}</span>
-                  {/* Cone rim effect */}
-                  <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent rounded-full"></div>
+                  {/* Triangle gradient overlay */}
+                  <div 
+                    className="absolute inset-0 bg-gradient-radial from-white/30 to-transparent"
+                    style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}
+                  />
+                  
+                  {/* Number display */}
+                  <span className="relative z-10 drop-shadow-lg translate-y-1">{size}</span>
+                  
+                  {/* Neon glow effect */}
+                  <div 
+                    className={`absolute inset-0 opacity-50 ${getConeGradient(player)} blur-sm`}
+                    style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}
+                  />
                 </div>
                 <div className="text-left">
                   <div className="font-medium">Size {size}</div>
