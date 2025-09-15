@@ -236,6 +236,14 @@ const Settings = () => {
           </Button>
           
           <Button 
+            onClick={() => navigate("/stats")}
+            variant="outline"
+            className="border-border hover:border-secondary/50"
+          >
+            📊 View Stats
+          </Button>
+          
+          <Button 
             onClick={() => navigate("/")}
             className="bg-gradient-primary hover:scale-105 transition-transform"
           >

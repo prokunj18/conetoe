@@ -43,7 +43,7 @@ const Stats = () => {
             className="absolute left-4 top-4 text-foreground hover:text-primary"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
+            Back to Home
           </Button>
           
           <h1 className="text-5xl font-bold bg-gradient-neon bg-clip-text text-transparent">

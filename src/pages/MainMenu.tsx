@@ -55,6 +55,17 @@ const MainMenu = () => {
     <div className="min-h-screen bg-gradient-hero flex flex-col items-center justify-center p-4 relative overflow-hidden">
       <AnimatedBackground />
       <div className="max-w-4xl w-full space-y-8 relative z-10">
+        
+        {/* Back to Home Button */}
+        <div className="absolute left-4 top-4">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/")}
+            className="text-foreground hover:text-primary"
+          >
+            ← Back to Home
+          </Button>
+        </div>
         {/* Header */}
         <div className={`text-center space-y-6 ${animationsEnabled ? 'animate-fade-in' : ''}`}>
           <div className="relative">
