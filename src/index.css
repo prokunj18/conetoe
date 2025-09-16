@@ -2,16 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Futuristic Cone Tactics Design System */
+/* Futuristic Conetoe Design System */
 
 @layer base {
   :root {
-    /* Background & Surface - Deep Space Theme */
-    --background: 240 15% 6%;
-    --foreground: 200 20% 95%;
-    --surface: 240 12% 8%;
-    --surface-elevated: 240 10% 12%;
-    --surface-glass: 240 8% 15%;
+    /* Background & Surface - Deep Space Theme - Darker */
+    --background: 240 20% 3%;
+    --foreground: 200 25% 98%;
+    --surface: 240 18% 4%;
+    --surface-elevated: 240 15% 6%;
+    --surface-glass: 240 12% 8%;
 
     /* Subtle Neon Accent Colors */
     --primary: 280 60% 55%;
@@ -54,12 +54,19 @@
     --input: 240 15% 12%;
     --ring: 280 100% 70%;
 
-    /* Wooden Theme Colors */
+    /* Wooden Theme Colors - Enhanced */
     --wooden-primary: 30 60% 45%;
     --wooden-secondary: 25 70% 55%;
     --wooden-accent: 35 80% 60%;
-    --wooden-surface: 25 25% 20%;
-    --wooden-border: 30 30% 30%;
+    --wooden-surface: 25 25% 15%;
+    --wooden-surface-elevated: 25 30% 18%;
+    --wooden-border: 30 35% 25%;
+    --wooden-light: 35 50% 65%;
+    --wooden-dark: 25 40% 25%;
+    --wooden-background: 25 20% 10%;
+    --wooden-foreground: 35 15% 85%;
+    --wooden-card: 25 25% 15%;
+    --wooden-muted: 30 20% 30%;
 
     --radius: 1rem;
 
@@ -93,6 +100,18 @@
     --gradient-player-2: linear-gradient(135deg, hsl(var(--neon-magenta)), hsl(var(--neon-pink)));
     --gradient-board: linear-gradient(135deg, hsl(var(--muted)), hsl(var(--surface)));
     --gradient-wooden: linear-gradient(135deg, hsl(var(--wooden-light)), hsl(var(--wooden-dark)));
+    --gradient-wooden-surface: linear-gradient(135deg, hsl(var(--wooden-surface-elevated)), hsl(var(--wooden-surface)));
+    --gradient-wooden-board: linear-gradient(45deg, hsl(var(--wooden-primary) / 0.1), hsl(var(--wooden-secondary) / 0.1));
+    
+    /* Wooden Texture Effects */
+    --wooden-texture: linear-gradient(45deg, hsl(var(--wooden-dark) / 0.2) 25%, transparent 25%), 
+                      linear-gradient(-45deg, hsl(var(--wooden-dark) / 0.2) 25%, transparent 25%), 
+                      linear-gradient(45deg, transparent 75%, hsl(var(--wooden-dark) / 0.2) 75%), 
+                      linear-gradient(-45deg, transparent 75%, hsl(var(--wooden-dark) / 0.2) 75%);
+    --wooden-grain: repeating-linear-gradient(90deg, 
+                      hsl(var(--wooden-primary) / 0.1) 0px, 
+                      hsl(var(--wooden-secondary) / 0.05) 2px, 
+                      hsl(var(--wooden-primary) / 0.1) 4px);
     --gradient-radial: radial-gradient(circle, rgba(255, 255, 255, 0.15), transparent);
     --gradient-circular: conic-gradient(from 0deg, hsl(var(--neon-cyan)), hsl(var(--neon-magenta)), hsl(var(--neon-electric)), hsl(var(--neon-cyan)));
 

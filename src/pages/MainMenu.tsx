@@ -70,12 +70,12 @@ const MainMenu = () => {
         <div className={`text-center space-y-6 ${animationsEnabled ? 'animate-fade-in' : ''}`}>
           <div className="relative">
             <h1 className={`text-7xl font-bold bg-gradient-neon bg-clip-text text-transparent ${animationsEnabled ? 'animate-glow-pulse' : ''}`}>
-              Cone Tactics
+              Conetoe
             </h1>
             <div className={`absolute -inset-4 bg-gradient-primary opacity-20 blur-xl rounded-full ${animationsEnabled ? 'animate-float' : ''}`} />
           </div>
           <p className="text-xl text-foreground/80 max-w-2xl mx-auto leading-relaxed">
-            Strategic Tic Tac Toe evolved. Master stackable cone mechanics, tactical timing, and intelligent returns.
+            Strategic Tic Tac Toe evolved. Master stackable triangle mechanics, tactical timing, and intelligent returns.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Badge className="px-4 py-2 bg-gradient-glass border border-primary/30 backdrop-blur-sm">

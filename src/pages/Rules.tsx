@@ -29,10 +29,10 @@ const Rules = () => {
         {/* Title */}
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            How to Play Cone Tactics
+            How to Play Conetoe
           </h1>
           <p className="text-xl text-muted-foreground">
-            Master the art of strategic cone placement and tactical returns
+            Master the art of strategic triangle placement and tactical returns
           </p>
         </div>
 

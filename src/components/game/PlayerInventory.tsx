@@ -125,7 +125,7 @@ export const PlayerInventory = ({
       {/* Instructions */}
       {isCurrentPlayer && (
         <div className="text-xs text-muted-foreground p-3 bg-surface rounded-lg">
-          💡 Select a cone size, then click a board position. Larger cones can replace smaller ones!
+          💡 Select a triangle size, then click a board position. Larger triangles can replace smaller ones!
         </div>
       )}
     </div>

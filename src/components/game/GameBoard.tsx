@@ -74,9 +74,9 @@ export const GameBoard = () => {
   const getBoardThemeClasses = () => {
     if (boardTheme === 'wooden') {
       return {
-        container: "bg-gradient-wooden shadow-wooden border-wooden-border",
-        card: "bg-gradient-wooden border-wooden-border backdrop-blur-xl",
-        glow: "hover:shadow-wooden"
+        container: "bg-gradient-wooden-surface shadow-wooden border-wooden-border",
+        card: "bg-wooden-card border-wooden-border backdrop-blur-xl",
+        glow: "hover:shadow-wooden hover:border-wooden-accent/50"
       };
     }
     return {
@@ -89,7 +89,7 @@ export const GameBoard = () => {
   const themeClasses = getBoardThemeClasses();
 
   return (
-    <div className="min-h-screen bg-gradient-hero p-4">
+    <div className={`min-h-screen ${boardTheme === 'wooden' ? 'bg-wooden-background' : 'bg-gradient-hero'} p-4`}>
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -151,7 +151,7 @@ export const GameBoard = () => {
               isCurrentPlayer={currentPlayer === 1 && gameStatus === "playing"}
               selectedCone={selectedCone}
               onConeSelect={handleConeSelect}
-              label={gameState.mode === "ai" ? "Your Cones" : "Player 1"}
+              label={gameState.mode === "ai" ? "Your Triangles" : "Player 1"}
             />
           </Card>
 
@@ -182,7 +182,7 @@ export const GameBoard = () => {
               isCurrentPlayer={currentPlayer === 2 && gameStatus === "playing"}
               selectedCone={selectedCone}
               onConeSelect={handleConeSelect}
-              label={gameState.mode === "ai" ? "AI Cones" : "Player 2"}
+              label={gameState.mode === "ai" ? "AI Triangles" : "Player 2"}
             />
           </Card>
         </div>

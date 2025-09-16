@@ -44,7 +44,7 @@ const Settings = () => {
             Settings
           </h1>
           <p className="text-xl text-muted-foreground">
-            Customize your Cone Tactics experience
+            Customize your Conetoe experience
           </p>
         </div>
 
@@ -159,7 +159,7 @@ const Settings = () => {
                     onClick={() => setBoardTheme('wooden')}
                   >
                     <div className="space-y-2">
-                      <div className="w-full h-20 bg-gradient-wooden rounded-lg border border-amber-400/30 shadow-wooden"></div>
+                      <div className="w-full h-20 bg-gradient-wooden-board rounded-lg border border-wooden-border/50 shadow-wooden"></div>
                       <h3 className="font-medium text-center">Classic Wood</h3>
                       <p className="text-xs text-muted-foreground text-center">
                         Traditional & warm design
@@ -203,11 +203,11 @@ const Settings = () => {
           {/* About */}
           <Card className="p-6 bg-card border-card-border">
             <div className="space-y-4">
-              <h2 className="text-xl font-semibold">About Cone Tactics</h2>
+              <h2 className="text-xl font-semibold">About Conetoe</h2>
               <div className="text-sm text-muted-foreground space-y-2">
                 <p>
-                  Cone Tactics is an evolved version of classic Tic-Tac-Toe, featuring strategic 
-                  cone pieces of different sizes, replacement mechanics, and dynamic return rules.
+                  Conetoe is an evolved version of classic Tic-Tac-Toe, featuring strategic 
+                  triangular pieces of different sizes, replacement mechanics, and dynamic return rules.
                 </p>
                 <p>
                   The game combines the simplicity of the 3×3 grid with deep strategic gameplay, 

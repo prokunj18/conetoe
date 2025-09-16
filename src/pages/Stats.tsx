@@ -49,7 +49,7 @@ const Stats = () => {
           <h1 className="text-5xl font-bold bg-gradient-neon bg-clip-text text-transparent">
             Player Statistics
           </h1>
-          <p className="text-lg text-foreground/80">Your tactical journey through Cone Tactics</p>
+          <p className="text-lg text-foreground/80">Your tactical journey through Conetoe</p>
         </div>
 
         {/* Main Stats Grid */}

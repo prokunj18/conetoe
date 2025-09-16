@@ -85,7 +85,7 @@ const Index = () => {
           <div className={`text-center space-y-4 ${animationsEnabled ? 'animate-fade-in' : ''}`}>
             <div className="relative">
               <h1 className="text-6xl md:text-7xl font-bold bg-gradient-neon bg-clip-text text-transparent tracking-wider">
-                CONE
+                CONETOE
               </h1>
               <div className="absolute -inset-4 bg-gradient-circular opacity-20 blur-2xl rounded-full animate-spin-slow" />
             </div>
