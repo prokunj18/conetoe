@@ -31,7 +31,17 @@ export const ConeCell = ({
   };
 
   const getConeGradient = (player: number) => {
+    if (boardTheme === 'wooden') {
+      return player === 1 ? "bg-wooden-cone-1" : "bg-wooden-cone-2";
+    }
     return player === 1 ? "bg-gradient-player-1" : "bg-gradient-player-2";
+  };
+
+  const getConeGlow = (player: number) => {
+    if (boardTheme === 'wooden') {
+      return player === 1 ? "shadow-[0_0_20px_hsl(var(--wooden-cone-1-glow))]" : "shadow-[0_0_20px_hsl(var(--wooden-cone-2-glow))]";
+    }
+    return "shadow-neon";
   };
 
   const getThemeClasses = () => {
@@ -73,28 +83,57 @@ export const ConeCell = ({
             ${getConeSize(cell.size)} 
             ${getConeGradient(cell.player)} 
             relative flex items-center justify-center text-white font-bold text-xs
-            transition-all duration-300 
-            ${isHovered ? "scale-110 shadow-vibrant" : ""}
-            ${boardTheme === 'wooden' ? 'shadow-wooden' : 'shadow-neon'}
+            transition-all duration-500 animate-float
+            ${isHovered ? "scale-110 animate-neon-pulse" : ""}
+            ${getConeGlow(cell.player)}
           `}
           style={{
             clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
-            filter: `drop-shadow(0 0 ${isHovered ? '12px' : '8px'} currentColor)`
+            filter: `drop-shadow(0 0 ${isHovered ? '16px' : '10px'} currentColor)`,
+            animationDelay: `${cell.size * 0.1}s`
           }}
         >
           {/* Triangle gradient overlay */}
           <div 
-            className="absolute inset-0 bg-gradient-radial from-white/30 to-transparent"
+            className={`absolute inset-0 ${boardTheme === 'wooden' 
+              ? 'bg-gradient-to-b from-white/40 via-transparent to-black/20' 
+              : 'bg-gradient-radial from-white/30 to-transparent'
+            } animate-pulse`}
             style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}
           />
           
-          {/* Number display - positioned in center of triangle */}
-          <span className="relative z-10 drop-shadow-lg translate-y-2">{cell.size}</span>
+          {/* Wood texture for wooden theme */}
+          {boardTheme === 'wooden' && (
+            <div 
+              className="absolute inset-0 opacity-30"
+              style={{ 
+                clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+                backgroundImage: `repeating-linear-gradient(
+                  45deg,
+                  transparent,
+                  transparent 2px,
+                  rgba(0,0,0,0.1) 2px,
+                  rgba(0,0,0,0.1) 4px
+                )`
+              }}
+            />
+          )}
           
-          {/* Neon glow effect */}
+          {/* Number display - positioned in center of triangle */}
+          <span className={`relative z-10 drop-shadow-lg translate-y-2 ${
+            boardTheme === 'wooden' ? 'text-wooden-background font-bold' : 'text-white'
+          }`}>{cell.size}</span>
+          
+          {/* Enhanced glow effect */}
           <div 
-            className={`absolute inset-0 opacity-50 ${getConeGradient(cell.player)} blur-sm`}
+            className={`absolute inset-0 opacity-60 ${getConeGradient(cell.player)} blur-md animate-glow-pulse`}
             style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}
+          />
+          
+          {/* Outer glow ring */}
+          <div 
+            className={`absolute -inset-1 opacity-40 ${getConeGradient(cell.player)} blur-lg`}
+            style={{ clipPath: 'polygon(50% 10%, 10% 90%, 90% 90%)' }}
           />
         </div>
       ) : (

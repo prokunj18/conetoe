@@ -108,24 +108,24 @@ const MainMenu = () => {
               {/* Difficulty Selection */}
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-foreground">Select Difficulty:</h4>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex gap-2 overflow-x-auto">
                   {difficulties.map((diff) => (
                     <button
                       key={diff.id}
                       onClick={() => setSelectedDifficulty(diff.id)}
-                      className={`p-3 rounded-lg border transition-all ${
+                      className={`p-3 rounded-lg border transition-all min-w-0 flex-1 hover:scale-105 ${
                         selectedDifficulty === diff.id
-                          ? "border-primary bg-primary/10 shadow-glow"
-                          : "border-border hover:border-primary/50"
+                          ? "border-primary bg-primary/10 shadow-glow animate-glow-pulse"
+                          : "border-border hover:border-primary/50 hover:shadow-neon"
                       }`}
                     >
-                      <div className="flex items-center gap-2">
-                        <div className={`p-1.5 rounded ${diff.color}`}>
-                          <diff.icon className="w-3 h-3 text-white" />
+                      <div className="flex flex-col items-center gap-2 text-center">
+                        <div className={`p-2 rounded-full ${diff.color} animate-float`}>
+                          <diff.icon className="w-4 h-4 text-white" />
                         </div>
-                        <div className="text-left">
+                        <div>
                           <div className="text-sm font-medium">{diff.name}</div>
-                          <div className="text-xs text-muted-foreground line-clamp-2">
+                          <div className="text-xs text-muted-foreground">
                             {diff.description}
                           </div>
                         </div>

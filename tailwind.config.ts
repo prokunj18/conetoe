@@ -77,6 +77,8 @@ export default {
           card: "hsl(var(--wooden-card))",
           muted: "hsl(var(--wooden-muted))",
         },
+        "wooden-cone-1": "hsl(var(--wooden-cone-1))",
+        "wooden-cone-2": "hsl(var(--wooden-cone-2))",
       },
       backgroundImage: {
         "gradient-primary": "var(--gradient-primary)",
@@ -161,6 +163,21 @@ export default {
             filter: "blur(0px)"
           }
         },
+        "shimmer": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" }
+        },
+        "bounce-in": {
+          "0%": { transform: "scale(0.3)", opacity: "0" },
+          "50%": { transform: "scale(1.05)", opacity: "0.8" },
+          "70%": { transform: "scale(0.9)", opacity: "1" },
+          "100%": { transform: "scale(1)", opacity: "1" }
+        },
+        "rotate-glow": {
+          "0%": { transform: "rotate(0deg)", boxShadow: "0 0 20px hsl(var(--primary) / 0.5)" },
+          "50%": { transform: "rotate(180deg)", boxShadow: "0 0 40px hsl(var(--primary) / 0.8)" },
+          "100%": { transform: "rotate(360deg)", boxShadow: "0 0 20px hsl(var(--primary) / 0.5)" }
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -172,6 +189,9 @@ export default {
         "float": "float 3s ease-in-out infinite",
         "spin-slow": "spin 8s linear infinite",
         "victory-burst": "victory-burst 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+        "shimmer": "shimmer 2s ease-in-out infinite",
+        "bounce-in": "bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+        "rotate-glow": "rotate-glow 4s ease-in-out infinite",
       },
     },
   },
