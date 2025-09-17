@@ -140,12 +140,14 @@
     --shadow-board: 0 25px 80px -15px hsl(0 0% 0% / 0.7);
     --shadow-glass: 0 8px 32px hsl(0 0% 0% / 0.3);
     --shadow-wooden: 0 8px 24px hsl(var(--wooden-primary) / 0.3);
+    --shadow-wooden-glow: 0 0 30px hsl(var(--wooden-accent) / 0.4);
     --shadow-vibrant: 0 0 60px hsl(var(--primary) / 0.6);
     
-    /* Smooth Animations */
+    /* Smooth Animations - Optimized for performance */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     --transition-glow: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --transition-fast: all 0.15s ease-out;
 
     --sidebar-background: 0 0% 98%;
 

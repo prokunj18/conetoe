@@ -76,65 +76,78 @@ export const ConeCell = ({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {/* Cell content - Triangle Cone */}
+      {/* Cell content - Modern Triangle Cone */}
       {cell ? (
         <div 
           className={`
             ${getConeSize(cell.size)} 
             ${getConeGradient(cell.player, boardTheme === 'wooden')}
             relative flex items-center justify-center text-white font-bold text-xs
-            transition-all duration-500 animate-float
-            ${isHovered ? "scale-110 animate-neon-pulse" : ""}
-            ${getConeGlow(cell.player)}
+            transition-all duration-300 transform-gpu
+            ${isHovered ? "scale-110" : ""}
           `}
           style={{
-            clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
-            filter: `drop-shadow(0 0 ${isHovered ? '16px' : '10px'} currentColor)`,
-            animationDelay: `${cell.size * 0.1}s`
+            clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)',
+            filter: `drop-shadow(0 ${isHovered ? '8px' : '4px'} ${isHovered ? '20px' : '12px'} rgba(0,0,0,0.4))`,
+            willChange: 'transform'
           }}
         >
-          {/* Triangle gradient overlay */}
+          {/* Modern gradient overlay */}
           <div 
             className={`absolute inset-0 ${boardTheme === 'wooden' 
-              ? 'bg-gradient-to-b from-white/40 via-transparent to-black/20' 
-              : 'bg-gradient-radial from-white/30 to-transparent'
-            } animate-pulse`}
-            style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}
+              ? 'bg-gradient-to-b from-wooden-light/60 via-wooden-primary/40 to-wooden-dark/60' 
+              : 'bg-gradient-to-br from-white/40 via-transparent to-black/20'
+            }`}
+            style={{ clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)' }}
           />
           
-          {/* Wood texture for wooden theme */}
+          {/* Enhanced wood texture */}
           {boardTheme === 'wooden' && (
-            <div 
-              className="absolute inset-0 opacity-30"
-              style={{ 
-                clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
-                backgroundImage: `repeating-linear-gradient(
-                  45deg,
-                  transparent,
-                  transparent 2px,
-                  rgba(0,0,0,0.1) 2px,
-                  rgba(0,0,0,0.1) 4px
-                )`
-              }}
-            />
+            <>
+              <div 
+                className="absolute inset-0 opacity-25"
+                style={{ 
+                  clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)',
+                  backgroundImage: `
+                    repeating-linear-gradient(
+                      45deg,
+                      transparent 0px,
+                      rgba(0,0,0,0.15) 1px,
+                      transparent 2px,
+                      transparent 6px
+                    ),
+                    repeating-linear-gradient(
+                      -45deg,
+                      transparent 0px,
+                      rgba(255,255,255,0.05) 1px,
+                      transparent 2px,
+                      transparent 8px
+                    )
+                  `
+                }}
+              />
+              <div 
+                className="absolute inset-0 opacity-20"
+                style={{ 
+                  clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)',
+                  backgroundImage: 'radial-gradient(ellipse at center, rgba(0,0,0,0.1) 0%, transparent 70%)'
+                }}
+              />
+            </>
           )}
           
-          {/* Number display - positioned in center of triangle */}
-          <span className={`relative z-10 drop-shadow-lg translate-y-2 ${
-            boardTheme === 'wooden' ? 'text-wooden-background font-bold' : 'text-white'
+          {/* Sleek number display */}
+          <span className={`relative z-20 drop-shadow-xl translate-y-1 font-black text-sm ${
+            boardTheme === 'wooden' ? 'text-wooden-background' : 'text-white'
           }`}>{cell.size}</span>
           
-          {/* Enhanced glow effect */}
-          <div 
-            className={`absolute inset-0 opacity-60 ${getConeGradient(cell.player, boardTheme === 'wooden')} blur-md animate-glow-pulse`}
-            style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}
-          />
-          
-          {/* Outer glow ring */}
-          <div 
-            className={`absolute -inset-1 opacity-40 ${getConeGradient(cell.player, boardTheme === 'wooden')} blur-lg`}
-            style={{ clipPath: 'polygon(50% 10%, 10% 90%, 90% 90%)' }}
-          />
+          {/* Subtle inner glow */}
+          {isHovered && (
+            <div 
+              className={`absolute inset-1 opacity-30 ${getConeGradient(cell.player, boardTheme === 'wooden')} blur-sm`}
+              style={{ clipPath: 'polygon(50% 10%, 10% 90%, 90% 90%)' }}
+            />
+          )}
         </div>
       ) : (
         /* Empty cell indicator */

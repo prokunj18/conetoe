@@ -82,29 +82,47 @@ export const PlayerInventory = ({
                     ${getConeSize(size)} 
                     ${getConeGradient(player, boardTheme === 'wooden')}
                     relative flex items-center justify-center text-white font-bold text-sm
-                    ${isSelected ? "scale-110 shadow-vibrant" : ""}
-                    ${boardTheme === 'wooden' ? 'shadow-wooden' : 'shadow-neon'}
-                    transition-all duration-300
+                    ${isSelected ? "scale-110" : ""}
+                    transition-all duration-300 transform-gpu
                   `}
                   style={{
-                    clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
-                    filter: `drop-shadow(0 0 ${isSelected ? '12px' : '8px'} currentColor)`
+                    clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)',
+                    filter: `drop-shadow(0 4px ${isSelected ? '16px' : '10px'} rgba(0,0,0,0.4))`,
+                    willChange: 'transform'
                   }}
                 >
-                  {/* Triangle gradient overlay */}
+                  {/* Enhanced gradient overlay */}
                   <div 
-                    className="absolute inset-0 bg-gradient-radial from-white/30 to-transparent"
-                    style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}
+                    className={`absolute inset-0 ${boardTheme === 'wooden' 
+                      ? 'bg-gradient-to-b from-wooden-light/50 to-wooden-dark/50' 
+                      : 'bg-gradient-to-br from-white/40 via-transparent to-black/20'
+                    }`}
+                    style={{ clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)' }}
                   />
+                  
+                  {/* Wood texture for wooden theme */}
+                  {boardTheme === 'wooden' && (
+                    <div 
+                      className="absolute inset-0 opacity-30"
+                      style={{ 
+                        clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)',
+                        backgroundImage: `
+                          repeating-linear-gradient(
+                            30deg,
+                            transparent 0px,
+                            rgba(0,0,0,0.1) 1px,
+                            transparent 2px,
+                            transparent 5px
+                          )
+                        `
+                      }}
+                    />
+                  )}
                   
                   {/* Number display */}
-                  <span className="relative z-10 drop-shadow-lg translate-y-1">{size}</span>
-                  
-                  {/* Neon glow effect */}
-                  <div 
-                    className={`absolute inset-0 opacity-50 ${getConeGradient(player, boardTheme === 'wooden')} blur-sm`}
-                    style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}
-                  />
+                  <span className={`relative z-10 drop-shadow-xl translate-y-1 font-black ${
+                    boardTheme === 'wooden' ? 'text-wooden-background' : 'text-white'
+                  }`}>{size}</span>
                 </div>
                 <div className="text-left">
                   <div className="font-medium">Size {size}</div>
