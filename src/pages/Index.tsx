@@ -2,10 +2,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Play, Settings, X, Brain, Users, Zap, Crown, BookOpen } from "lucide-react";
+import { Play, Settings, Trophy, Brain, Users, Zap, Crown, BookOpen } from "lucide-react";
 import { AnimatedBackground } from "@/components/ui/animated-background";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -121,11 +122,15 @@ const Index = () => {
             </Button>
 
             <Button
-              onClick={() => window.close()}
-              className="w-full h-16 text-xl font-semibold bg-gradient-glass hover:shadow-glow hover:scale-105 transition-all duration-300 rounded-full border border-destructive/30 hover:border-destructive/50"
+              onClick={() => {
+                toast.info("Multiplayer mode coming soon!", {
+                  description: "Online battles are being developed!"
+                });
+              }}
+              className="w-full h-16 text-xl font-semibold bg-gradient-glass hover:shadow-glow hover:scale-105 transition-all duration-300 rounded-full border border-accent/30 hover:border-accent/50"
             >
-              <X className="w-6 h-6 mr-3" />
-              Quit
+              <Trophy className="w-6 h-6 mr-3" />
+              Multiplayer
             </Button>
           </div>
 
@@ -145,89 +150,82 @@ const Index = () => {
             </DialogTitle>
           </DialogHeader>
           
-          <div className="space-y-6 p-4">
-            {/* VS AI Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-primary rounded-lg">
-                  <Brain className="w-5 h-5 text-white" />
+          <div className="p-4">
+            {/* Horizontal Game Mode Selection */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* VS AI Section */}
+              <div className="space-y-4 p-4 bg-card-glass rounded-xl border border-card-border">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gradient-primary rounded-lg">
+                    <Brain className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold">VS AI</h3>
                 </div>
-                <h3 className="text-lg font-semibold">VS AI</h3>
-              </div>
 
-              {/* Difficulty Selection */}
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Choose difficulty:</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {difficulties.map((diff) => (
-                    <button
-                      key={diff.id}
-                      onClick={() => setSelectedDifficulty(diff.id)}
-                      className={`p-3 rounded-lg border transition-all text-left ${
-                        selectedDifficulty === diff.id
-                          ? "border-primary bg-primary/10 shadow-glow"
-                          : "border-border hover:border-primary/50"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className={`p-1 rounded ${diff.color}`}>
-                          <diff.icon className="w-3 h-3 text-white" />
+                {/* Difficulty Selection */}
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Choose difficulty:</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {difficulties.map((diff) => (
+                      <button
+                        key={diff.id}
+                        onClick={() => setSelectedDifficulty(diff.id)}
+                        className={`p-3 rounded-lg border transition-all text-left ${
+                          selectedDifficulty === diff.id
+                            ? "border-primary bg-primary/10 shadow-glow"
+                            : "border-border hover:border-primary/50"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className={`p-1 rounded ${diff.color}`}>
+                            <diff.icon className="w-3 h-3 text-white" />
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium">{diff.name}</div>
+                            <div className="text-xs text-muted-foreground">{diff.description}</div>
+                          </div>
                         </div>
-                        <div>
-                          <div className="text-sm font-medium">{diff.name}</div>
-                          <div className="text-xs text-muted-foreground">{diff.description}</div>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+
+                <Button 
+                  onClick={startAIGame}
+                  className="w-full bg-gradient-primary hover:shadow-neon transition-all duration-300"
+                >
+                  <Brain className="w-4 h-4 mr-2" />
+                  Battle AI
+                </Button>
               </div>
 
-              <Button 
-                onClick={startAIGame}
-                className="w-full bg-gradient-primary hover:shadow-neon transition-all duration-300"
-              >
-                <Brain className="w-4 h-4 mr-2" />
-                Battle AI
-              </Button>
-            </div>
-
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border/30"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">OR</span>
-              </div>
-            </div>
-
-            {/* Local Duel Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-secondary rounded-lg">
-                  <Users className="w-5 h-5 text-white" />
+              {/* Local Duel Section */}
+              <div className="space-y-4 p-4 bg-card-glass rounded-xl border border-card-border">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gradient-secondary rounded-lg">
+                    <Users className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold">Local Duel</h3>
                 </div>
-                <h3 className="text-lg font-semibold">Local Duel</h3>
-              </div>
-              
-              <p className="text-sm text-muted-foreground">
-                Face-off against a friend on the same device
-              </p>
+                
+                <p className="text-sm text-muted-foreground">
+                  Face-off against a friend on the same device
+                </p>
 
-              <div className="flex gap-2 justify-center">
-                <Badge className="bg-gradient-player-1">Player 1</Badge>
-                <span className="text-muted-foreground">vs</span>
-                <Badge className="bg-gradient-player-2">Player 2</Badge>
-              </div>
+                <div className="flex gap-2 justify-center">
+                  <Badge className="bg-gradient-player-1">Player 1</Badge>
+                  <span className="text-muted-foreground">vs</span>
+                  <Badge className="bg-gradient-player-2">Player 2</Badge>
+                </div>
 
-              <Button 
-                onClick={startDuelGame}
-                className="w-full bg-gradient-secondary hover:shadow-neon transition-all duration-300"
-              >
-                <Users className="w-4 h-4 mr-2" />
-                Start Duel
-              </Button>
+                <Button 
+                  onClick={startDuelGame}
+                  className="w-full bg-gradient-secondary hover:shadow-neon transition-all duration-300"
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  Start Duel
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>

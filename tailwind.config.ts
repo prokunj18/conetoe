@@ -79,6 +79,8 @@ export default {
         },
         "wooden-cone-1": "hsl(var(--wooden-cone-1))",
         "wooden-cone-2": "hsl(var(--wooden-cone-2))",
+        "wooden-cone-1-glow": "hsl(var(--wooden-cone-1-glow))",
+        "wooden-cone-2-glow": "hsl(var(--wooden-cone-2-glow))",
       },
       backgroundImage: {
         "gradient-primary": "var(--gradient-primary)",
@@ -101,7 +103,7 @@ export default {
         "neon": "var(--shadow-neon)",
         "board": "var(--shadow-board)",
         "glass": "var(--shadow-glass)",
-        "wooden": "var(--shadow-wooden)",
+        "wooden-glow": "0 0 20px hsl(var(--wooden-cone-1-glow))",
         "vibrant": "var(--shadow-vibrant)",
       },
       transitionTimingFunction: {

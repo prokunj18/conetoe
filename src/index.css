@@ -98,16 +98,28 @@
     /* Futuristic Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(var(--neon-electric)), hsl(var(--primary)));
     --gradient-secondary: linear-gradient(135deg, hsl(var(--neon-violet)), hsl(var(--secondary)));
-    --gradient-hero: radial-gradient(ellipse at center, hsl(var(--space-deep)), hsl(var(--space-dark)));
+    --gradient-hero: radial-gradient(ellipse 80% 80% at 50% -20%, 
+      hsl(var(--primary) / 0.08), 
+      hsl(var(--background) / 0.99) 40%, 
+      hsl(var(--background)) 70%);
     --gradient-nebula: linear-gradient(135deg, hsl(var(--nebula-purple)), hsl(var(--nebula-pink)), hsl(var(--nebula-teal)));
     --gradient-neon: linear-gradient(90deg, hsl(var(--neon-cyan)), hsl(var(--neon-pink)), hsl(var(--neon-electric)));
-    --gradient-glass: linear-gradient(135deg, var(--glass-bg), rgba(255, 255, 255, 0.03));
+    --gradient-glass: linear-gradient(135deg, var(--glass-bg), rgba(255, 255, 255, 0.01));
+    --gradient-dark: linear-gradient(135deg, 
+      hsl(var(--background) / 0.99) 0%, 
+      hsl(var(--muted) / 0.97) 100%);
     --gradient-player-1: linear-gradient(135deg, hsl(var(--neon-cyan)), hsl(var(--neon-electric)));
     --gradient-player-2: linear-gradient(135deg, hsl(var(--neon-magenta)), hsl(var(--neon-pink)));
     --gradient-board: linear-gradient(135deg, hsl(var(--muted)), hsl(var(--surface)));
     --gradient-wooden: linear-gradient(135deg, hsl(var(--wooden-light)), hsl(var(--wooden-dark)));
     --gradient-wooden-surface: linear-gradient(135deg, hsl(var(--wooden-surface-elevated)), hsl(var(--wooden-surface)));
     --gradient-wooden-board: linear-gradient(45deg, hsl(var(--wooden-primary) / 0.1), hsl(var(--wooden-secondary) / 0.1));
+    --surface-wood: linear-gradient(45deg, 
+      hsl(25, 45%, 6%) 0%, 
+      hsl(30, 40%, 9%) 25%, 
+      hsl(25, 35%, 4%) 50%, 
+      hsl(30, 45%, 7%) 75%, 
+      hsl(25, 40%, 5%) 100%);
     
     /* Wooden Texture Effects */
     --wooden-texture: linear-gradient(45deg, hsl(var(--wooden-dark) / 0.2) 25%, transparent 25%), 

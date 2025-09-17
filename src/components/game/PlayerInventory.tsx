@@ -21,8 +21,11 @@ export const PlayerInventory = ({
 }: PlayerInventoryProps) => {
   const { boardTheme } = useSettings();
 
-  const getConeGradient = (player: number) => {
-    return player === 1 ? "bg-gradient-player-1" : "bg-gradient-player-2";
+  const getConeGradient = (player: number, isWooden = false) => {
+    if (isWooden) {
+      return player === 1 ? "bg-wooden-cone-1 shadow-wooden-glow" : "bg-wooden-cone-2 shadow-wooden-glow";
+    }
+    return player === 1 ? "bg-gradient-player-1 shadow-glow" : "bg-gradient-player-2 shadow-glow";
   };
 
   const getConeSize = (size: number) => {
@@ -43,7 +46,7 @@ export const PlayerInventory = ({
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className={`font-semibold ${getConeGradient(player)} bg-clip-text text-transparent`}>
+        <h3 className={`font-semibold ${getConeGradient(player, boardTheme === 'wooden')} bg-clip-text text-transparent`}>
           {label}
         </h3>
         {isCurrentPlayer && (
@@ -77,7 +80,7 @@ export const PlayerInventory = ({
                 <div 
                   className={`
                     ${getConeSize(size)} 
-                    ${getConeGradient(player)} 
+                    ${getConeGradient(player, boardTheme === 'wooden')}
                     relative flex items-center justify-center text-white font-bold text-sm
                     ${isSelected ? "scale-110 shadow-vibrant" : ""}
                     ${boardTheme === 'wooden' ? 'shadow-wooden' : 'shadow-neon'}
@@ -99,7 +102,7 @@ export const PlayerInventory = ({
                   
                   {/* Neon glow effect */}
                   <div 
-                    className={`absolute inset-0 opacity-50 ${getConeGradient(player)} blur-sm`}
+                    className={`absolute inset-0 opacity-50 ${getConeGradient(player, boardTheme === 'wooden')} blur-sm`}
                     style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}
                   />
                 </div>

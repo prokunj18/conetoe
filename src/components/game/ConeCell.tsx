@@ -30,11 +30,11 @@ export const ConeCell = ({
     }
   };
 
-  const getConeGradient = (player: number) => {
-    if (boardTheme === 'wooden') {
-      return player === 1 ? "bg-wooden-cone-1" : "bg-wooden-cone-2";
+  const getConeGradient = (player: number, isWooden = false) => {
+    if (isWooden) {
+      return player === 1 ? "bg-wooden-cone-1 shadow-wooden-glow" : "bg-wooden-cone-2 shadow-wooden-glow";
     }
-    return player === 1 ? "bg-gradient-player-1" : "bg-gradient-player-2";
+    return player === 1 ? "bg-gradient-player-1 shadow-glow animate-glow-pulse" : "bg-gradient-player-2 shadow-glow animate-glow-pulse";
   };
 
   const getConeGlow = (player: number) => {
@@ -81,7 +81,7 @@ export const ConeCell = ({
         <div 
           className={`
             ${getConeSize(cell.size)} 
-            ${getConeGradient(cell.player)} 
+            ${getConeGradient(cell.player, boardTheme === 'wooden')}
             relative flex items-center justify-center text-white font-bold text-xs
             transition-all duration-500 animate-float
             ${isHovered ? "scale-110 animate-neon-pulse" : ""}
@@ -126,13 +126,13 @@ export const ConeCell = ({
           
           {/* Enhanced glow effect */}
           <div 
-            className={`absolute inset-0 opacity-60 ${getConeGradient(cell.player)} blur-md animate-glow-pulse`}
+            className={`absolute inset-0 opacity-60 ${getConeGradient(cell.player, boardTheme === 'wooden')} blur-md animate-glow-pulse`}
             style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}
           />
           
           {/* Outer glow ring */}
           <div 
-            className={`absolute -inset-1 opacity-40 ${getConeGradient(cell.player)} blur-lg`}
+            className={`absolute -inset-1 opacity-40 ${getConeGradient(cell.player, boardTheme === 'wooden')} blur-lg`}
             style={{ clipPath: 'polygon(50% 10%, 10% 90%, 90% 90%)' }}
           />
         </div>
