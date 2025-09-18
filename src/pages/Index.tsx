@@ -7,6 +7,8 @@ import { AnimatedBackground } from "@/components/ui/animated-background";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { ConeCustomizationButton } from "@/components/game/ConeCustomizationButton";
+import { ConePreview } from "@/components/game/ConePreview";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -139,6 +141,9 @@ const Index = () => {
             v1.2.4
           </div>
         </div>
+
+        {/* Cone Customization Button */}
+        <ConeCustomizationButton />
       </div>
 
       {/* Play Mode Selection Dialog */}
@@ -165,24 +170,24 @@ const Index = () => {
                 {/* Difficulty Selection */}
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">Choose difficulty:</p>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {difficulties.map((diff) => (
                       <button
                         key={diff.id}
                         onClick={() => setSelectedDifficulty(diff.id)}
-                        className={`p-3 rounded-lg border transition-all text-left ${
+                        className={`flex-1 min-w-0 p-2 rounded-lg border transition-all text-center ${
                           selectedDifficulty === diff.id
                             ? "border-primary bg-primary/10 shadow-glow"
                             : "border-border hover:border-primary/50"
                         }`}
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-col items-center gap-1">
                           <div className={`p-1 rounded ${diff.color}`}>
                             <diff.icon className="w-3 h-3 text-white" />
                           </div>
                           <div>
-                            <div className="text-sm font-medium">{diff.name}</div>
-                            <div className="text-xs text-muted-foreground">{diff.description}</div>
+                            <div className="text-xs font-medium">{diff.name}</div>
+                            <div className="text-[10px] text-muted-foreground leading-tight">{diff.description}</div>
                           </div>
                         </div>
                       </button>
@@ -212,10 +217,16 @@ const Index = () => {
                   Face-off against a friend on the same device
                 </p>
 
-                <div className="flex gap-2 justify-center">
-                  <Badge className="bg-gradient-player-1">Player 1</Badge>
+                <div className="flex gap-2 justify-center items-center">
+                  <Badge className="bg-gradient-player-1 flex items-center gap-1">
+                    <ConePreview player={1} size={1} />
+                    Player 1
+                  </Badge>
                   <span className="text-muted-foreground">vs</span>
-                  <Badge className="bg-gradient-player-2">Player 2</Badge>
+                  <Badge className="bg-gradient-player-2 flex items-center gap-1">
+                    <ConePreview player={2} size={1} />
+                    Player 2
+                  </Badge>
                 </div>
 
                 <Button 
