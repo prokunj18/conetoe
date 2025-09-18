@@ -1,16 +1,19 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export type BoardTheme = 'futuristic' | 'wooden';
+export type ConeStyle = 'classic' | 'fire' | 'emerald' | 'galaxy' | 'golden' | 'arctic' | 'shadow' | 'rainbow' | 'chrome' | 'plasma';
 
 interface SettingsContextType {
   soundEnabled: boolean;
   animationsEnabled: boolean;
   showMoveHints: boolean;
   boardTheme: BoardTheme;
+  coneStyle: ConeStyle;
   setSoundEnabled: (enabled: boolean) => void;
   setAnimationsEnabled: (enabled: boolean) => void;
   setShowMoveHints: (enabled: boolean) => void;
   setBoardTheme: (theme: BoardTheme) => void;
+  setConeStyle: (style: ConeStyle) => void;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -48,6 +51,11 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
     return saved !== null ? JSON.parse(saved) : 'futuristic';
   });
 
+  const [coneStyle, setConeStyle] = useState<ConeStyle>(() => {
+    const saved = localStorage.getItem('coneStyle');
+    return saved !== null ? JSON.parse(saved) : 'classic';
+  });
+
   useEffect(() => {
     localStorage.setItem('soundEnabled', JSON.stringify(soundEnabled));
   }, [soundEnabled]);
@@ -64,6 +72,10 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
     localStorage.setItem('boardTheme', JSON.stringify(boardTheme));
   }, [boardTheme]);
 
+  useEffect(() => {
+    localStorage.setItem('coneStyle', JSON.stringify(coneStyle));
+  }, [coneStyle]);
+
   // Apply animation setting to document
   useEffect(() => {
     if (animationsEnabled) {
@@ -78,10 +90,12 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
     animationsEnabled,
     showMoveHints,
     boardTheme,
+    coneStyle,
     setSoundEnabled,
     setAnimationsEnabled,
     setShowMoveHints,
     setBoardTheme,
+    setConeStyle,
   };
 
   return (

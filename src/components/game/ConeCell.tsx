@@ -18,7 +18,7 @@ export const ConeCell = ({
   onMouseEnter, 
   onMouseLeave 
 }: ConeCellProps) => {
-  const { boardTheme } = useSettings();
+  const { boardTheme, coneStyle } = useSettings();
 
   const getConeSize = (size: number) => {
     switch (size) {
@@ -30,11 +30,27 @@ export const ConeCell = ({
     }
   };
 
+  const getConeStyleGradient = (player: number) => {
+    const styleMap = {
+      classic: player === 1 ? "bg-gradient-to-br from-cyan-400 to-blue-600" : "bg-gradient-to-br from-pink-400 to-purple-600",
+      fire: player === 1 ? "bg-gradient-to-br from-red-500 to-orange-600" : "bg-gradient-to-br from-yellow-500 to-red-600",
+      emerald: player === 1 ? "bg-gradient-to-br from-emerald-400 to-green-600" : "bg-gradient-to-br from-teal-400 to-emerald-600",
+      galaxy: player === 1 ? "bg-gradient-to-br from-purple-500 to-pink-600" : "bg-gradient-to-br from-indigo-500 to-purple-600",
+      golden: player === 1 ? "bg-gradient-to-br from-yellow-400 to-orange-500" : "bg-gradient-to-br from-amber-400 to-yellow-600",
+      arctic: player === 1 ? "bg-gradient-to-br from-blue-200 to-cyan-400" : "bg-gradient-to-br from-slate-300 to-blue-400",
+      shadow: player === 1 ? "bg-gradient-to-br from-gray-600 to-black" : "bg-gradient-to-br from-slate-700 to-gray-900",
+      rainbow: "bg-gradient-to-br from-red-500 via-yellow-500 via-green-500 to-blue-500",
+      chrome: player === 1 ? "bg-gradient-to-br from-gray-300 to-gray-500" : "bg-gradient-to-br from-slate-400 to-gray-600",
+      plasma: player === 1 ? "bg-gradient-to-br from-pink-400 to-purple-600" : "bg-gradient-to-br from-violet-400 to-pink-600"
+    };
+    return styleMap[coneStyle] || styleMap.classic;
+  };
+
   const getConeGradient = (player: number, isWooden = false) => {
     if (isWooden) {
       return player === 1 ? "bg-wooden-cone-1 shadow-wooden-glow" : "bg-wooden-cone-2 shadow-wooden-glow";
     }
-    return player === 1 ? "bg-gradient-player-1 shadow-glow animate-glow-pulse" : "bg-gradient-player-2 shadow-glow animate-glow-pulse";
+    return `${getConeStyleGradient(player)} shadow-glow animate-glow-pulse`;
   };
 
   const getConeGlow = (player: number) => {
@@ -100,6 +116,81 @@ export const ConeCell = ({
             }`}
             style={{ clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)' }}
           />
+          
+          {/* Enhanced textures based on cone style */}
+          {!boardTheme.includes('wooden') && (
+            <>
+              {/* Metallic shine for chrome */}
+              {coneStyle === 'chrome' && (
+                <div 
+                  className="absolute inset-0 opacity-60"
+                  style={{ 
+                    clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)',
+                    backgroundImage: `
+                      linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.8) 50%, transparent 70%),
+                      repeating-linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%)
+                    `
+                  }}
+                />
+              )}
+              
+              {/* Fire animation texture */}
+              {coneStyle === 'fire' && (
+                <div 
+                  className="absolute inset-0 opacity-40 animate-pulse"
+                  style={{ 
+                    clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)',
+                    backgroundImage: `
+                      radial-gradient(circle at 50% 80%, rgba(255,100,0,0.4) 0%, transparent 60%),
+                      radial-gradient(circle at 30% 70%, rgba(255,200,0,0.3) 0%, transparent 50%)
+                    `
+                  }}
+                />
+              )}
+
+              {/* Crystalline texture for arctic/emerald */}
+              {(coneStyle === 'arctic' || coneStyle === 'emerald') && (
+                <div 
+                  className="absolute inset-0 opacity-30"
+                  style={{ 
+                    clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)',
+                    backgroundImage: `
+                      repeating-linear-gradient(30deg, transparent 0%, rgba(255,255,255,0.2) 2px, transparent 4px),
+                      repeating-linear-gradient(-30deg, transparent 0%, rgba(255,255,255,0.1) 2px, transparent 6px)
+                    `
+                  }}
+                />
+              )}
+
+              {/* Plasma energy effect */}
+              {coneStyle === 'plasma' && (
+                <div 
+                  className="absolute inset-0 opacity-50 animate-pulse"
+                  style={{ 
+                    clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)',
+                    backgroundImage: `
+                      radial-gradient(ellipse at center, rgba(255,255,255,0.3) 0%, transparent 70%),
+                      conic-gradient(from 0deg, rgba(255,0,255,0.2), rgba(0,255,255,0.2), rgba(255,0,255,0.2))
+                    `
+                  }}
+                />
+              )}
+
+              {/* Galaxy swirl effect */}
+              {coneStyle === 'galaxy' && (
+                <div 
+                  className="absolute inset-0 opacity-40"
+                  style={{ 
+                    clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)',
+                    backgroundImage: `
+                      radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3) 0%, transparent 40%),
+                      conic-gradient(from 45deg, transparent, rgba(255,255,255,0.1), transparent)
+                    `
+                  }}
+                />
+              )}
+            </>
+          )}
           
           {/* Enhanced wood texture */}
           {boardTheme === 'wooden' && (

@@ -1,7 +1,13 @@
 import { GameBoard } from "@/components/game/GameBoard";
+import { ConeCustomizationButton } from "@/components/game/ConeCustomizationButton";
 
 const Game = () => {
-  return <GameBoard />;
+  return (
+    <div className="relative">
+      <GameBoard />
+      <ConeCustomizationButton />
+    </div>
+  );
 };
 
 export default Game;

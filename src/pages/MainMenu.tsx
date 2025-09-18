@@ -108,24 +108,24 @@ const MainMenu = () => {
               {/* Difficulty Selection */}
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-foreground">Select Difficulty:</h4>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-wrap gap-2">
                   {difficulties.map((diff) => (
                     <button
                       key={diff.id}
                       onClick={() => setSelectedDifficulty(diff.id)}
-                      className={`p-4 rounded-xl border transition-all hover:scale-[1.02] ${
+                      className={`flex-1 min-w-0 p-3 rounded-xl border transition-all hover:scale-[1.02] ${
                         selectedDifficulty === diff.id
                           ? "border-primary bg-primary/15 shadow-glow"
                           : "border-border/50 hover:border-primary/60 hover:shadow-neon"
                       }`}
                     >
-                      <div className="flex items-center gap-3 text-left">
+                      <div className="flex flex-col items-center gap-2 text-center">
                         <div className={`p-2 rounded-lg ${diff.color} shadow-neon`}>
-                          <diff.icon className="w-5 h-5 text-white" />
+                          <diff.icon className="w-4 h-4 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-semibold truncate">{diff.name}</div>
-                          <div className="text-xs text-muted-foreground truncate">
+                          <div className="text-xs font-semibold truncate">{diff.name}</div>
+                          <div className="text-[10px] text-muted-foreground truncate leading-tight">
                             {diff.description}
                           </div>
                         </div>

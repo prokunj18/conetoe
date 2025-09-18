@@ -6,12 +6,12 @@
 
 @layer base {
   :root {
-    /* Background & Surface - Deep Space Theme - Darker */
-    --background: 240 25% 1%;
+    /* Background & Surface - Deep Space Theme - Much Darker */
+    --background: 240 30% 0.5%;
     --foreground: 200 20% 95%;
-    --surface: 240 22% 2%;
-    --surface-elevated: 240 20% 3%;
-    --surface-glass: 240 15% 4%;
+    --surface: 240 25% 1%;
+    --surface-elevated: 240 22% 1.5%;
+    --surface-glass: 240 18% 2%;
 
     /* Subtle Neon Accent Colors */
     --primary: 280 60% 55%;
@@ -54,19 +54,19 @@
     --input: 240 18% 6%;
     --ring: 280 100% 70%;
 
-    /* Wooden Theme Colors - Enhanced & Darker */
-    --wooden-primary: 30 70% 35%;
-    --wooden-secondary: 25 80% 45%;
-    --wooden-accent: 35 90% 50%;
-    --wooden-surface: 25 30% 8%;
-    --wooden-surface-elevated: 25 35% 12%;
-    --wooden-border: 30 40% 18%;
-    --wooden-light: 35 60% 55%;
-    --wooden-dark: 25 50% 15%;
-    --wooden-background: 25 25% 4%;
-    --wooden-foreground: 35 20% 80%;
-    --wooden-card: 25 30% 8%;
-    --wooden-muted: 30 25% 20%;
+    /* Wooden Theme Colors - Enhanced & Much Darker */
+    --wooden-primary: 30 65% 25%;
+    --wooden-secondary: 25 75% 35%;
+    --wooden-accent: 35 85% 40%;
+    --wooden-surface: 25 35% 4%;
+    --wooden-surface-elevated: 25 40% 6%;
+    --wooden-border: 30 45% 12%;
+    --wooden-light: 35 55% 45%;
+    --wooden-dark: 25 55% 8%;
+    --wooden-background: 25 30% 2%;
+    --wooden-foreground: 35 25% 75%;
+    --wooden-card: 25 35% 4%;
+    --wooden-muted: 30 30% 15%;
     
     /* Wooden Cone Colors */
     --wooden-cone-1: 45 85% 55%;
