@@ -24,14 +24,14 @@ export const PlayerInventory = ({
   };
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 className={`font-semibold ${player === 1 ? 'bg-gradient-player-1' : 'bg-gradient-player-2'} bg-clip-text text-transparent`}>
+    <div className="space-y-2">
+      {/* Header in one line */}
+      <div className="flex items-center gap-2">
+        <h3 className={`font-semibold text-sm ${player === 1 ? 'bg-gradient-player-1' : 'bg-gradient-player-2'} bg-clip-text text-transparent`}>
           {label}
         </h3>
         {isCurrentPlayer && (
-          <Badge variant="secondary" className="animate-pulse">
+          <Badge variant="secondary" className="animate-pulse text-xs">
             Active
           </Badge>
         )}
@@ -51,7 +51,7 @@ export const PlayerInventory = ({
               disabled={!isAvailable}
               onClick={() => isAvailable ? onConeSelect(size) : undefined}
               className={`
-                relative p-3 h-auto flex flex-col items-center gap-2
+                relative p-2 h-auto
                 ${isSelected ? "bg-primary/20 border-2 border-primary scale-110" : "border border-transparent"}
                 ${isAvailable ? "hover:bg-surface-elevated hover:scale-105" : "opacity-40"}
                 transition-all duration-200
@@ -62,13 +62,6 @@ export const PlayerInventory = ({
                 size={size}
                 className={isSelected ? "scale-110" : ""}
               />
-              
-              <Badge 
-                variant={count > 0 ? "secondary" : "outline"}
-                className="text-xs min-w-[24px]"
-              >
-                {count}
-              </Badge>
             </Button>
           );
         })}

@@ -150,48 +150,45 @@ const Index = () => {
 
       {/* Play Mode Selection Dialog */}
       <Dialog open={showPlayDialog} onOpenChange={setShowPlayDialog}>
-        <DialogContent className="sm:max-w-md bg-gradient-glass border border-card-border backdrop-blur-xl">
+        <DialogContent className="max-w-2xl bg-gradient-glass border border-card-border backdrop-blur-xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-center bg-gradient-neon bg-clip-text text-transparent">
               Select Game Mode
             </DialogTitle>
           </DialogHeader>
           
-          <div className="p-4">
+          <div className="p-2">
             {/* Horizontal Game Mode Selection */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-4">
               {/* VS AI Section */}
-              <div className="space-y-4 p-4 bg-card-glass rounded-xl border border-card-border">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-primary rounded-lg">
-                    <Brain className="w-5 h-5 text-white" />
+              <div className="space-y-3 p-3 bg-card-glass rounded-xl border border-card-border">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-gradient-primary rounded-lg">
+                    <Brain className="w-4 h-4 text-white" />
                   </div>
-                  <h3 className="text-lg font-semibold">VS AI</h3>
+                  <h3 className="text-base font-semibold">VS AI</h3>
                 </div>
 
                 {/* Difficulty Selection */}
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground mb-3">Choose difficulty:</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {difficulties.map((diff) => (
-                      <button
-                        key={diff.id}
-                        onClick={() => setSelectedDifficulty(diff.id)}
-                        className={`p-3 rounded-lg border transition-all ${
-                          selectedDifficulty === diff.id
-                            ? "border-primary bg-primary/10 shadow-glow"
-                            : "border-border hover:border-primary/50"
-                        }`}
-                      >
-                        <div className="flex items-center justify-center gap-2">
-                          <div className={`p-1.5 rounded ${diff.color}`}>
-                            <diff.icon className="w-4 h-4 text-white" />
-                          </div>
-                          <div className="text-sm font-medium">{diff.name}</div>
+                <div className="grid grid-cols-2 gap-2">
+                  {difficulties.map((diff) => (
+                    <button
+                      key={diff.id}
+                      onClick={() => setSelectedDifficulty(diff.id)}
+                      className={`p-2 rounded-lg border transition-all ${
+                        selectedDifficulty === diff.id
+                          ? "border-primary bg-primary/10 shadow-glow"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <div className="flex items-center justify-center gap-1.5">
+                        <div className={`p-1 rounded ${diff.color}`}>
+                          <diff.icon className="w-3 h-3 text-white" />
                         </div>
-                      </button>
-                    ))}
-                  </div>
+                        <div className="text-xs font-medium">{diff.name}</div>
+                      </div>
+                    </button>
+                  ))}
                 </div>
 
                 <Button 
@@ -204,27 +201,27 @@ const Index = () => {
               </div>
 
               {/* Local Duel Section */}
-              <div className="space-y-4 p-4 bg-card-glass rounded-xl border border-card-border">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-secondary rounded-lg">
-                    <Users className="w-5 h-5 text-white" />
+              <div className="space-y-3 p-3 bg-card-glass rounded-xl border border-card-border">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-gradient-secondary rounded-lg">
+                    <Users className="w-4 h-4 text-white" />
                   </div>
-                  <h3 className="text-lg font-semibold">Local Duel</h3>
+                  <h3 className="text-base font-semibold">Local Duel</h3>
                 </div>
                 
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground py-2">
                   Face-off against a friend on the same device
                 </p>
 
-                <div className="flex gap-2 justify-center items-center">
-                  <Badge className="bg-gradient-player-1 flex items-center gap-1">
+                <div className="flex gap-2 justify-center items-center py-2">
+                  <Badge className="bg-gradient-player-1 flex items-center gap-1 text-xs">
                     <ConePreview player={1} size={1} />
-                    Player 1
+                    P1
                   </Badge>
-                  <span className="text-muted-foreground">vs</span>
-                  <Badge className="bg-gradient-player-2 flex items-center gap-1">
+                  <span className="text-xs text-muted-foreground">vs</span>
+                  <Badge className="bg-gradient-player-2 flex items-center gap-1 text-xs">
                     <ConePreview player={2} size={1} />
-                    Player 2
+                    P2
                   </Badge>
                 </div>
 
