@@ -69,9 +69,6 @@ export const ConePreview = ({ player, size, className = "" }: ConePreviewProps) 
         className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-black/20"
         style={{ clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)' }}
       />
-      <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-xs translate-y-0.5">
-        {size}
-      </span>
     </div>
   );
 };

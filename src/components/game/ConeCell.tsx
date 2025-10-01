@@ -247,10 +247,6 @@ export const ConeCell = ({
             </>
           )}
           
-          {/* Sleek number display */}
-          <span className={`relative z-20 drop-shadow-xl translate-y-1 font-black text-sm ${
-            boardTheme === 'wooden' ? 'text-wooden-background' : 'text-white'
-          }`}>{cell.size}</span>
           
           {/* Subtle inner glow */}
           {isHovered && (

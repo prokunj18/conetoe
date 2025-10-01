@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useSettings, BoardTheme } from "@/contexts/SettingsContext";
 import { Sparkles, Grid3X3, Layers, Box, Zap, Crown, Diamond, Flame, Snowflake, Mountain } from "lucide-react";
@@ -101,7 +101,9 @@ export const BoardCustomization = ({ isOpen, onClose }: BoardCustomizationProps)
           <DialogTitle className="text-3xl font-bold text-center bg-gradient-secondary bg-clip-text text-transparent">
             Board Themes
           </DialogTitle>
-          <p className="text-center text-muted-foreground">Choose your battlefield style</p>
+          <DialogDescription className="text-center text-muted-foreground">
+            Choose your battlefield style
+          </DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 p-4">

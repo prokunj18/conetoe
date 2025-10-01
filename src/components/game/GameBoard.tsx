@@ -7,6 +7,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { ConeCell } from "./ConeCell";
 import { PlayerInventory } from "./PlayerInventory";
 import { WinningModal } from "./WinningModal";
+import { HintsPopup } from "./HintsPopup";
 import { useGameLogic } from "@/hooks/useGameLogic";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useToast } from "@/hooks/use-toast";
@@ -255,6 +256,9 @@ export const GameBoard = () => {
           gameMode={gameState.mode}
           difficulty={gameState.difficulty}
         />
+
+        {/* Hints Popup */}
+        <HintsPopup />
       </div>
     </div>
   );
