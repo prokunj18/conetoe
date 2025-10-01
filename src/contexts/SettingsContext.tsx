@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-export type BoardTheme = 'futuristic' | 'wooden';
+export type BoardTheme = 'neon' | 'wooden' | 'crystal' | 'lava' | 'space' | 'matrix' | 'royal' | 'ocean' | 'midnight' | 'sunset';
 export type ConeStyle = 'classic' | 'fire' | 'emerald' | 'galaxy' | 'golden' | 'arctic' | 'shadow' | 'rainbow' | 'chrome' | 'plasma';
 
 interface SettingsContextType {
@@ -48,7 +48,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
 
   const [boardTheme, setBoardTheme] = useState<BoardTheme>(() => {
     const saved = localStorage.getItem('boardTheme');
-    return saved !== null ? JSON.parse(saved) : 'futuristic';
+    return saved !== null ? JSON.parse(saved) : 'neon';
   });
 
   const [coneStyle, setConeStyle] = useState<ConeStyle>(() => {

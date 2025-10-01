@@ -8,6 +8,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { ConeCustomizationButton } from "@/components/game/ConeCustomizationButton";
+import { BoardCustomizationButton } from "@/components/game/BoardCustomizationButton";
 import { ConePreview } from "@/components/game/ConePreview";
 
 const Index = () => {
@@ -142,8 +143,9 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Cone Customization Button */}
+        {/* Customization Buttons */}
         <ConeCustomizationButton />
+        <BoardCustomizationButton />
       </div>
 
       {/* Play Mode Selection Dialog */}

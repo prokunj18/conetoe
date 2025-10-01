@@ -32,16 +32,36 @@ export const ConeCell = ({
 
   const getConeStyleGradient = (player: number) => {
     const styleMap = {
-      classic: player === 1 ? "bg-gradient-to-br from-cyan-400 to-blue-600" : "bg-gradient-to-br from-pink-400 to-purple-600",
-      fire: player === 1 ? "bg-gradient-to-br from-red-500 to-orange-600" : "bg-gradient-to-br from-yellow-500 to-red-600",
-      emerald: player === 1 ? "bg-gradient-to-br from-emerald-400 to-green-600" : "bg-gradient-to-br from-teal-400 to-emerald-600",
-      galaxy: player === 1 ? "bg-gradient-to-br from-purple-500 to-pink-600" : "bg-gradient-to-br from-indigo-500 to-purple-600",
-      golden: player === 1 ? "bg-gradient-to-br from-yellow-400 to-orange-500" : "bg-gradient-to-br from-amber-400 to-yellow-600",
-      arctic: player === 1 ? "bg-gradient-to-br from-blue-200 to-cyan-400" : "bg-gradient-to-br from-slate-300 to-blue-400",
-      shadow: player === 1 ? "bg-gradient-to-br from-gray-600 to-black" : "bg-gradient-to-br from-slate-700 to-gray-900",
-      rainbow: "bg-gradient-to-br from-red-500 via-yellow-500 via-green-500 to-blue-500",
-      chrome: player === 1 ? "bg-gradient-to-br from-gray-300 to-gray-500" : "bg-gradient-to-br from-slate-400 to-gray-600",
-      plasma: player === 1 ? "bg-gradient-to-br from-pink-400 to-purple-600" : "bg-gradient-to-br from-violet-400 to-pink-600"
+      classic: player === 1 
+        ? "bg-gradient-to-br from-cyan-400 to-blue-600" 
+        : "bg-gradient-to-br from-pink-500 to-purple-600",
+      fire: player === 1 
+        ? "bg-gradient-to-br from-red-500 to-orange-600" 
+        : "bg-gradient-to-br from-yellow-400 to-amber-600",
+      emerald: player === 1 
+        ? "bg-gradient-to-br from-green-500 to-emerald-700" 
+        : "bg-gradient-to-br from-teal-400 to-cyan-600",
+      galaxy: player === 1 
+        ? "bg-gradient-to-br from-purple-500 to-violet-700" 
+        : "bg-gradient-to-br from-pink-500 to-rose-600",
+      golden: player === 1 
+        ? "bg-gradient-to-br from-yellow-400 to-amber-600" 
+        : "bg-gradient-to-br from-amber-500 to-orange-700",
+      arctic: player === 1 
+        ? "bg-gradient-to-br from-blue-400 to-blue-600" 
+        : "bg-gradient-to-br from-sky-200 to-cyan-400",
+      shadow: player === 1 
+        ? "bg-gradient-to-br from-gray-700 to-gray-900" 
+        : "bg-gradient-to-br from-slate-600 to-gray-700",
+      rainbow: player === 1 
+        ? "bg-gradient-to-br from-red-500 via-yellow-500 via-green-500 to-blue-500" 
+        : "bg-gradient-to-br from-pink-500 via-purple-500 via-blue-500 to-cyan-500",
+      chrome: player === 1 
+        ? "bg-gradient-to-br from-gray-300 to-gray-500" 
+        : "bg-gradient-to-br from-slate-400 to-gray-600",
+      plasma: player === 1 
+        ? "bg-gradient-to-br from-pink-500 to-purple-600" 
+        : "bg-gradient-to-br from-violet-500 to-indigo-600"
     };
     return styleMap[coneStyle] || styleMap.classic;
   };
