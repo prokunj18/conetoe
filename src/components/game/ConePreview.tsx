@@ -13,35 +13,35 @@ export const ConePreview = ({ player, size, className = "" }: ConePreviewProps) 
   const getConeStyleGradient = (player: number) => {
     const styleMap = {
       classic: player === 1 
-        ? "linear-gradient(135deg, #22d3ee, #2563eb)" 
-        : "linear-gradient(135deg, #ec4899, #a855f7)",
+        ? "linear-gradient(135deg, #06b6d4, #0284c7, #0369a1)" 
+        : "linear-gradient(135deg, #f97316, #ea580c, #c2410c)",
       fire: player === 1 
-        ? "linear-gradient(135deg, #ef4444, #ea580c)" 
-        : "linear-gradient(135deg, #fbbf24, #f59e0b)",
+        ? "linear-gradient(135deg, #dc2626, #b91c1c, #991b1b)" 
+        : "linear-gradient(135deg, #facc15, #eab308, #ca8a04)",
       emerald: player === 1 
-        ? "linear-gradient(135deg, #10b981, #047857)" 
-        : "linear-gradient(135deg, #06b6d4, #0891b2)",
+        ? "linear-gradient(135deg, #059669, #047857, #065f46)" 
+        : "linear-gradient(135deg, #14b8a6, #0d9488, #0f766e)",
       galaxy: player === 1 
-        ? "linear-gradient(135deg, #a855f7, #7c3aed)" 
-        : "linear-gradient(135deg, #ec4899, #db2777)",
+        ? "linear-gradient(135deg, #9333ea, #7e22ce, #6b21a8)" 
+        : "linear-gradient(135deg, #f43f5e, #e11d48, #be123c)",
       golden: player === 1 
-        ? "linear-gradient(135deg, #fbbf24, #d97706)" 
-        : "linear-gradient(135deg, #f59e0b, #b45309)",
+        ? "linear-gradient(135deg, #f59e0b, #d97706, #b45309)" 
+        : "linear-gradient(135deg, #fb923c, #f97316, #ea580c)",
       arctic: player === 1 
-        ? "linear-gradient(135deg, #93c5fd, #3b82f6)" 
-        : "linear-gradient(135deg, #e0f2fe, #7dd3fc)",
+        ? "linear-gradient(135deg, #3b82f6, #2563eb, #1d4ed8)" 
+        : "linear-gradient(135deg, #38bdf8, #0ea5e9, #0284c7)",
       shadow: player === 1 
-        ? "linear-gradient(135deg, #374151, #111827)" 
-        : "linear-gradient(135deg, #6b7280, #4b5563)",
+        ? "linear-gradient(135deg, #18181b, #09090b, #000000)" 
+        : "linear-gradient(135deg, #52525b, #3f3f46, #27272a)",
       rainbow: player === 1 
-        ? "linear-gradient(135deg, #ef4444, #eab308, #22c55e, #3b82f6)" 
-        : "linear-gradient(135deg, #ec4899, #a855f7, #3b82f6, #06b6d4)",
+        ? "linear-gradient(135deg, #dc2626, #f59e0b, #10b981, #3b82f6)" 
+        : "linear-gradient(135deg, #f472b6, #c084fc, #60a5fa, #22d3ee)",
       chrome: player === 1 
-        ? "linear-gradient(135deg, #e5e7eb, #9ca3af)" 
-        : "linear-gradient(135deg, #d1d5db, #6b7280)",
+        ? "linear-gradient(135deg, #d1d5db, #9ca3af, #6b7280)" 
+        : "linear-gradient(135deg, #f9fafb, #e5e7eb, #d1d5db)",
       plasma: player === 1 
-        ? "linear-gradient(135deg, #ec4899, #a855f7)" 
-        : "linear-gradient(135deg, #8b5cf6, #6366f1)"
+        ? "linear-gradient(135deg, #db2777, #be185d, #9f1239)" 
+        : "linear-gradient(135deg, #7c3aed, #6d28d9, #5b21b6)"
     };
     return styleMap[coneStyle] || styleMap.classic;
   };

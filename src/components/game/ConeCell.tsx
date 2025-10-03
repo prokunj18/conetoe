@@ -33,35 +33,35 @@ export const ConeCell = ({
   const getConeStyleGradient = (player: number) => {
     const styleMap = {
       classic: player === 1 
-        ? "bg-gradient-to-br from-cyan-400 to-blue-600" 
-        : "bg-gradient-to-br from-pink-500 to-purple-600",
+        ? "bg-gradient-to-br from-cyan-500 via-cyan-600 to-blue-700" 
+        : "bg-gradient-to-br from-orange-500 via-orange-600 to-red-600",
       fire: player === 1 
-        ? "bg-gradient-to-br from-red-500 to-orange-600" 
-        : "bg-gradient-to-br from-yellow-400 to-amber-600",
+        ? "bg-gradient-to-br from-red-600 via-red-700 to-red-800" 
+        : "bg-gradient-to-br from-yellow-400 via-yellow-500 to-amber-500",
       emerald: player === 1 
-        ? "bg-gradient-to-br from-green-500 to-emerald-700" 
-        : "bg-gradient-to-br from-teal-400 to-cyan-600",
+        ? "bg-gradient-to-br from-emerald-600 via-green-700 to-green-800" 
+        : "bg-gradient-to-br from-teal-500 via-teal-600 to-cyan-600",
       galaxy: player === 1 
-        ? "bg-gradient-to-br from-purple-500 to-violet-700" 
-        : "bg-gradient-to-br from-pink-500 to-rose-600",
+        ? "bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800" 
+        : "bg-gradient-to-br from-rose-500 via-pink-600 to-pink-700",
       golden: player === 1 
-        ? "bg-gradient-to-br from-yellow-400 to-amber-600" 
-        : "bg-gradient-to-br from-amber-500 to-orange-700",
+        ? "bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-700" 
+        : "bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600",
       arctic: player === 1 
-        ? "bg-gradient-to-br from-blue-400 to-blue-600" 
-        : "bg-gradient-to-br from-sky-200 to-cyan-400",
+        ? "bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700" 
+        : "bg-gradient-to-br from-sky-300 via-sky-400 to-cyan-500",
       shadow: player === 1 
-        ? "bg-gradient-to-br from-gray-700 to-gray-900" 
-        : "bg-gradient-to-br from-slate-600 to-gray-700",
+        ? "bg-gradient-to-br from-zinc-900 via-zinc-950 to-black" 
+        : "bg-gradient-to-br from-zinc-600 via-slate-700 to-slate-800",
       rainbow: player === 1 
-        ? "bg-gradient-to-br from-red-500 via-yellow-500 via-green-500 to-blue-500" 
-        : "bg-gradient-to-br from-pink-500 via-purple-500 via-blue-500 to-cyan-500",
+        ? "bg-gradient-to-br from-red-600 via-orange-500 via-green-600 to-blue-600" 
+        : "bg-gradient-to-br from-pink-500 via-purple-500 via-blue-500 to-cyan-400",
       chrome: player === 1 
-        ? "bg-gradient-to-br from-gray-300 to-gray-500" 
-        : "bg-gradient-to-br from-slate-400 to-gray-600",
+        ? "bg-gradient-to-br from-gray-400 via-gray-500 to-gray-600" 
+        : "bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300",
       plasma: player === 1 
-        ? "bg-gradient-to-br from-pink-500 to-purple-600" 
-        : "bg-gradient-to-br from-violet-500 to-indigo-600"
+        ? "bg-gradient-to-br from-pink-700 via-rose-800 to-rose-900" 
+        : "bg-gradient-to-br from-violet-600 via-purple-700 to-indigo-800"
     };
     return styleMap[coneStyle] || styleMap.classic;
   };
@@ -101,7 +101,7 @@ export const ConeCell = ({
     <div 
       className={`
         aspect-square border-2 rounded-xl flex items-center justify-center cursor-pointer
-        transition-all duration-300 relative overflow-hidden backdrop-blur-sm
+        transition-all duration-200 ease-in-out relative overflow-hidden backdrop-blur-sm
         ${isValidMove 
           ? themeClasses.validMove
           : themeClasses.cell
@@ -119,7 +119,7 @@ export const ConeCell = ({
             ${getConeSize(cell.size)} 
             ${getConeGradient(cell.player, boardTheme === 'wooden')}
             relative flex items-center justify-center text-white font-bold text-xs
-            transition-all duration-300 transform-gpu
+            transition-all duration-200 ease-out transform-gpu
             ${isHovered ? "scale-110" : ""}
           `}
           style={{

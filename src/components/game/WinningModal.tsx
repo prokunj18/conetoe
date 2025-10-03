@@ -76,7 +76,7 @@ export const WinningModal = ({
   const winnerInfo = getWinnerInfo();
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-end md:items-center justify-center z-50 animate-fade-in pb-safe">{/* Mobile: bottom, Desktop: center */}
       {/* Confetti Effect */}
       {showConfetti && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -96,7 +96,7 @@ export const WinningModal = ({
       )}
 
       {/* Modal Content */}
-      <div className="bg-gradient-glass backdrop-blur-xl border border-card-border rounded-2xl p-8 max-w-md w-full mx-4 shadow-board animate-scale-in">
+      <div className="bg-gradient-glass backdrop-blur-xl border border-card-border rounded-2xl p-6 md:p-8 max-w-md w-full mx-4 mb-4 md:mb-0 shadow-board animate-scale-in">{/* Added bottom margin for mobile */}
         {/* Winner Icon */}
         <div className="text-center mb-6">
           <div className={`inline-flex p-6 ${winnerInfo.gradient} rounded-full shadow-neon animate-glow-pulse mb-4`}>

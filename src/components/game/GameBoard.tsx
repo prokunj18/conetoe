@@ -185,7 +185,10 @@ export const GameBoard = () => {
             <div className="relative">
               <h2 className="text-3xl font-bold">
                 <span className={`${getPlayerGradient(currentPlayer)} bg-clip-text text-transparent animate-glow-pulse`}>
-                  {currentPlayer === 1 ? "Player 1" : gameState.mode === "ai" ? "Your" : "Player 2"} Turn
+                  {gameState.mode === "ai" 
+                    ? (currentPlayer === 1 ? "Your Turn" : "AI Turn")
+                    : `Player ${currentPlayer} Turn`
+                  }
                 </span>
               </h2>
             </div>

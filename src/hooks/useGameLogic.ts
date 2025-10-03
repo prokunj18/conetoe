@@ -94,9 +94,9 @@ export const useGameLogic = (config: GameConfig) => {
       newPlayerHistory[currentPlayer - 1].push({ ...newCone, position } as any);
       newPlayerMoves[currentPlayer - 1]++;
 
-      // Handle 4th move return rule
+      // Handle 4th move return rule - returns oldest cone every 4 moves by this player
       let returnedCone: CellData | undefined;
-      if (newPlayerMoves[currentPlayer - 1] % 4 === 0) {
+      if (newPlayerMoves[currentPlayer - 1] >= 4 && newPlayerMoves[currentPlayer - 1] % 4 === 0) {
         const playerHistory = newPlayerHistory[currentPlayer - 1];
         if (playerHistory.length >= 4) {
           const oldestMove = playerHistory.shift();
