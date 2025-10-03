@@ -14,13 +14,181 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      game_history: {
+        Row: {
+          difficulty: string | null
+          exp_gained: number
+          game_mode: string
+          id: string
+          opponent_id: string | null
+          played_at: string | null
+          player_id: string
+          result: string
+          room_id: string | null
+        }
+        Insert: {
+          difficulty?: string | null
+          exp_gained?: number
+          game_mode: string
+          id?: string
+          opponent_id?: string | null
+          played_at?: string | null
+          player_id: string
+          result: string
+          room_id?: string | null
+        }
+        Update: {
+          difficulty?: string | null
+          exp_gained?: number
+          game_mode?: string
+          id?: string
+          opponent_id?: string | null
+          played_at?: string | null
+          player_id?: string
+          result?: string
+          room_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_history_opponent_id_fkey"
+            columns: ["opponent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_history_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_history_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "game_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      game_rooms: {
+        Row: {
+          created_at: string | null
+          finished_at: string | null
+          game_state: Json | null
+          guest_id: string | null
+          host_id: string
+          id: string
+          room_code: string
+          started_at: string | null
+          status: string
+          winner_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          finished_at?: string | null
+          game_state?: Json | null
+          guest_id?: string | null
+          host_id: string
+          id?: string
+          room_code: string
+          started_at?: string | null
+          status?: string
+          winner_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          finished_at?: string | null
+          game_state?: Json | null
+          guest_id?: string | null
+          host_id?: string
+          id?: string
+          room_code?: string
+          started_at?: string | null
+          status?: string
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_rooms_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_rooms_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_rooms_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar: string
+          created_at: string | null
+          exp: number
+          id: string
+          last_activity: string | null
+          level: number
+          total_games: number
+          total_wins: number
+          updated_at: string | null
+          username: string
+        }
+        Insert: {
+          avatar?: string
+          created_at?: string | null
+          exp?: number
+          id: string
+          last_activity?: string | null
+          level?: number
+          total_games?: number
+          total_wins?: number
+          updated_at?: string | null
+          username: string
+        }
+        Update: {
+          avatar?: string
+          created_at?: string | null
+          exp?: number
+          id?: string
+          last_activity?: string | null
+          level?: number
+          total_games?: number
+          total_wins?: number
+          updated_at?: string | null
+          username?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      add_exp_and_level_up: {
+        Args: { exp_amount: number; user_id: string }
+        Returns: Json
+      }
+      apply_exp_decay: {
+        Args: { user_id: string }
+        Returns: undefined
+      }
+      generate_room_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
