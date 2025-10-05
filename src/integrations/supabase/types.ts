@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      bot_profiles: {
+        Row: {
+          avatar: string
+          created_at: string | null
+          difficulty: string
+          id: string
+          max_level: number
+          min_level: number
+          username: string
+        }
+        Insert: {
+          avatar?: string
+          created_at?: string | null
+          difficulty: string
+          id?: string
+          max_level?: number
+          min_level?: number
+          username: string
+        }
+        Update: {
+          avatar?: string
+          created_at?: string | null
+          difficulty?: string
+          id?: string
+          max_level?: number
+          min_level?: number
+          username?: string
+        }
+        Relationships: []
+      }
       game_history: {
         Row: {
           difficulty: string | null
@@ -74,42 +104,58 @@ export type Database = {
       }
       game_rooms: {
         Row: {
+          bet_amount: number
+          bot_profile_id: string | null
           created_at: string | null
           finished_at: string | null
           game_state: Json | null
           guest_id: string | null
           host_id: string
           id: string
+          is_bot_game: boolean
           room_code: string
           started_at: string | null
           status: string
           winner_id: string | null
         }
         Insert: {
+          bet_amount?: number
+          bot_profile_id?: string | null
           created_at?: string | null
           finished_at?: string | null
           game_state?: Json | null
           guest_id?: string | null
           host_id: string
           id?: string
+          is_bot_game?: boolean
           room_code: string
           started_at?: string | null
           status?: string
           winner_id?: string | null
         }
         Update: {
+          bet_amount?: number
+          bot_profile_id?: string | null
           created_at?: string | null
           finished_at?: string | null
           game_state?: Json | null
           guest_id?: string | null
           host_id?: string
           id?: string
+          is_bot_game?: boolean
           room_code?: string
           started_at?: string | null
           status?: string
           winner_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "game_rooms_bot_profile_id_fkey"
+            columns: ["bot_profile_id"]
+            isOneToOne: false
+            referencedRelation: "bot_profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "game_rooms_guest_id_fkey"
             columns: ["guest_id"]
@@ -136,6 +182,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar: string
+          coins: number
           created_at: string | null
           exp: number
           id: string
@@ -148,6 +195,7 @@ export type Database = {
         }
         Insert: {
           avatar?: string
+          coins?: number
           created_at?: string | null
           exp?: number
           id: string
@@ -160,6 +208,7 @@ export type Database = {
         }
         Update: {
           avatar?: string
+          coins?: number
           created_at?: string | null
           exp?: number
           id?: string
@@ -183,6 +232,10 @@ export type Database = {
       }
       apply_exp_decay: {
         Args: { user_id: string }
+        Returns: undefined
+      }
+      complete_game: {
+        Args: { p_bet_amount: number; p_room_id: string; p_winner_id: string }
         Returns: undefined
       }
       generate_room_code: {
