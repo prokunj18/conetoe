@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Play, Settings, Trophy, Brain, Users, Zap, Crown, BookOpen, User, LogIn } from "lucide-react";
+import { Play, Settings, Trophy, Brain, Users, Zap, Crown, BookOpen, User, LogIn, Coins } from "lucide-react";
 import { AnimatedBackground } from "@/components/ui/animated-background";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Badge } from "@/components/ui/badge";
@@ -130,8 +130,14 @@ const Index = () => {
               <div className="absolute -inset-4 bg-gradient-circular opacity-20 blur-2xl rounded-full animate-spin-slow" />
             </div>
             {user && profile && (
-              <div className="text-sm text-foreground/80">
-                <span className="font-semibold">{profile.username}</span> • Level {profile.level}
+              <div className="flex items-center justify-center gap-3 text-sm text-foreground/80">
+                <span>
+                  <span className="font-semibold">{profile.username}</span> • Level {profile.level}
+                </span>
+                <Badge variant="secondary" className="flex items-center gap-1">
+                  <Coins className="h-3 w-3" />
+                  {profile.coins}
+                </Badge>
               </div>
             )}
             <div className="text-lg text-foreground/60 tracking-[0.3em] uppercase font-light">

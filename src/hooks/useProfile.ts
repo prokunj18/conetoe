@@ -10,6 +10,7 @@ export interface Profile {
   exp: number;
   total_wins: number;
   total_games: number;
+  coins: number;
 }
 
 export const useProfile = () => {

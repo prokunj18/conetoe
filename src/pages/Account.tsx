@@ -7,10 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, LogOut } from 'lucide-react';
+import { ArrowLeft, LogOut, Coins } from 'lucide-react';
 import { AnimatedBackground } from '@/components/ui/animated-background';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 
 const avatarOptions = [
   { id: 'avatar1', emoji: '🤖', name: 'Robot' },
@@ -98,6 +99,10 @@ const Account = () => {
           <CardDescription>
             Level {profile.level} • {profile.total_wins} Wins • {profile.total_games} Games
           </CardDescription>
+          <Badge className="flex items-center gap-1 w-fit mt-2" variant="secondary">
+            <Coins className="h-4 w-4" />
+            {profile.coins} Coins
+          </Badge>
         </CardHeader>
         
         <CardContent className="space-y-6">

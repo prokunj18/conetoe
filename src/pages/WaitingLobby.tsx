@@ -5,10 +5,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Copy, Check, Users } from 'lucide-react';
+import { ArrowLeft, Copy, Check, Users, Coins } from 'lucide-react';
 import { AnimatedBackground } from '@/components/ui/animated-background';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useProfile } from '@/hooks/useProfile';
+import { Badge } from '@/components/ui/badge';
 
 const avatarOptions = [
   { id: 'avatar1', emoji: '🤖' },
@@ -26,9 +27,15 @@ const WaitingLobby = () => {
   const { profile } = useProfile();
   const [searchParams] = useSearchParams();
   const roomCode = searchParams.get('room');
+  const isBot = searchParams.get('bot') === 'true';
+  const role = searchParams.get('role') || 'host';
   const [copied, setCopied] = useState(false);
   const [guestJoined, setGuestJoined] = useState(false);
   const [guestProfile, setGuestProfile] = useState<any>(null);
+  const [botProfile, setBotProfile] = useState<any>(null);
+  const [room, setRoom] = useState<any>(null);
+  const [betAmount, setBetAmount] = useState(25);
+  const [starting, setStarting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -37,6 +44,45 @@ const WaitingLobby = () => {
       navigate('/multiplayer');
       return;
     }
+
+    const loadRoom = async () => {
+      const { data: roomData } = await supabase
+        .from('game_rooms')
+        .select('*')
+        .eq('room_code', roomCode)
+        .single();
+
+      if (roomData) {
+        setRoom(roomData);
+        setBetAmount(roomData.bet_amount || 25);
+
+        if (roomData.is_bot_game && roomData.bot_profile_id) {
+          const { data: bot } = await supabase
+            .from('bot_profiles')
+            .select('*')
+            .eq('id', roomData.bot_profile_id)
+            .single();
+          
+          if (bot) {
+            setBotProfile(bot);
+            setGuestJoined(true);
+          }
+        } else if (roomData.guest_id) {
+          const { data: guest } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', roomData.guest_id)
+            .single();
+
+          if (guest) {
+            setGuestProfile(guest);
+            setGuestJoined(true);
+          }
+        }
+      }
+    };
+
+    loadRoom();
 
     // Subscribe to room changes
     const channel = supabase
@@ -50,25 +96,26 @@ const WaitingLobby = () => {
           filter: `room_code=eq.${roomCode}`
         },
         async (payload) => {
-          const room = payload.new as any;
+          const updatedRoom = payload.new as any;
+          setRoom(updatedRoom);
           
-          if (room.guest_id && room.status === 'playing') {
-            // Fetch guest profile
+          if (updatedRoom.guest_id && !updatedRoom.is_bot_game) {
             const { data: guest } = await supabase
               .from('profiles')
               .select('*')
-              .eq('id', room.guest_id)
+              .eq('id', updatedRoom.guest_id)
               .single();
 
             if (guest) {
               setGuestProfile(guest);
               setGuestJoined(true);
-              
-              // Wait a moment to show the guest joined, then navigate
-              setTimeout(() => {
-                navigate(`/game?room=${roomCode}&role=host`);
-              }, 1500);
             }
+          }
+
+          if (updatedRoom.status === 'playing') {
+            setTimeout(() => {
+              navigate(`/game?room=${roomCode}&role=${role}`);
+            }, 1500);
           }
         }
       )
@@ -77,7 +124,7 @@ const WaitingLobby = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, roomCode, navigate]);
+  }, [user, roomCode, navigate, role]);
 
   const copyRoomCode = () => {
     if (roomCode) {
@@ -99,7 +146,64 @@ const WaitingLobby = () => {
     navigate('/multiplayer');
   };
 
+  const startGame = async () => {
+    if (!roomCode || !guestJoined || !profile) return;
+
+    // Check if user has enough coins
+    if (profile.coins < betAmount) {
+      toast({
+        title: 'Not enough coins',
+        description: `You need ${betAmount} coins to play`,
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setStarting(true);
+    try {
+      // Deduct bet amount from host
+      await supabase
+        .from('profiles')
+        .update({ coins: profile.coins - betAmount })
+        .eq('id', user!.id);
+
+      // Deduct from guest if not bot
+      if (!isBot && guestProfile) {
+        await supabase
+          .from('profiles')
+          .update({ coins: guestProfile.coins - betAmount })
+          .eq('id', guestProfile.id);
+      }
+
+      // Update room to playing status
+      await supabase
+        .from('game_rooms')
+        .update({ 
+          status: 'playing', 
+          started_at: new Date().toISOString(),
+          bet_amount: betAmount
+        })
+        .eq('room_code', roomCode);
+
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive'
+      });
+      setStarting(false);
+    }
+  };
+
   const hostAvatar = avatarOptions.find(a => a.id === profile?.avatar)?.emoji || '🤖';
+  const guestAvatar = botProfile 
+    ? avatarOptions.find(a => a.id === botProfile.avatar)?.emoji || '🤖'
+    : guestProfile 
+    ? avatarOptions.find(a => a.id === guestProfile?.avatar)?.emoji || '👤'
+    : null;
+
+  const maxBet = Math.min(profile?.coins || 0, guestProfile?.coins || 999999) / 2;
+  const betOptions = [25, 50, 100, 200].filter(b => b <= maxBet);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative">
@@ -111,41 +215,67 @@ const WaitingLobby = () => {
             <Button variant="ghost" size="icon" onClick={cancelRoom}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <CardTitle>Waiting for Player</CardTitle>
+            <CardTitle>{isBot ? 'Bot Match' : 'Waiting for Player'}</CardTitle>
             <div className="w-10" />
           </div>
-          <CardDescription>
-            Share this code with your friend
+          <CardDescription className="flex items-center justify-center gap-2">
+            <Coins className="h-4 w-4" />
+            Your coins: {profile?.coins || 0}
           </CardDescription>
         </CardHeader>
         
         <CardContent className="space-y-6">
-          {/* Room Code Display */}
-          <div className="flex flex-col items-center space-y-3">
-            <div className="text-sm text-muted-foreground">Room Code</div>
-            <div 
-              onClick={copyRoomCode}
-              className="relative flex items-center justify-center gap-3 bg-gradient-primary p-6 rounded-xl cursor-pointer hover:shadow-neon transition-all group"
-            >
-              <span className="text-4xl font-bold tracking-[0.3em] text-white">
-                {roomCode}
-              </span>
-              <Button 
-                size="icon"
-                variant="ghost"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:bg-white/20"
+          {/* Room Code Display - Only show if not bot match */}
+          {!isBot && (
+            <div className="flex flex-col items-center space-y-3">
+              <div className="text-sm text-muted-foreground">Room Code</div>
+              <div 
+                onClick={copyRoomCode}
+                className="relative flex items-center justify-center gap-3 bg-gradient-primary p-6 rounded-xl cursor-pointer hover:shadow-neon transition-all group"
               >
-                {copied ? (
-                  <Check className="h-5 w-5" />
-                ) : (
-                  <Copy className="h-5 w-5" />
-                )}
-              </Button>
+                <span className="text-4xl font-bold tracking-[0.3em] text-white">
+                  {roomCode}
+                </span>
+                <Button 
+                  size="icon"
+                  variant="ghost"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-white hover:bg-white/20"
+                >
+                  {copied ? (
+                    <Check className="h-5 w-5" />
+                  ) : (
+                    <Copy className="h-5 w-5" />
+                  )}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground text-center">
+                Click to copy the code
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground text-center">
-              Click to copy the code
-            </p>
-          </div>
+          )}
+
+          {/* Bet Selection - Only for host */}
+          {role === 'host' && guestJoined && (
+            <div className="space-y-3">
+              <div className="text-sm font-medium text-center">Select Bet Amount</div>
+              <div className="grid grid-cols-4 gap-2">
+                {betOptions.map(amount => (
+                  <Button
+                    key={amount}
+                    variant={betAmount === amount ? 'default' : 'outline'}
+                    onClick={() => setBetAmount(amount)}
+                    className="h-12"
+                  >
+                    <Coins className="h-4 w-4 mr-1" />
+                    {amount}
+                  </Button>
+                ))}
+              </div>
+              <p className="text-xs text-center text-muted-foreground">
+                Win: +{betAmount} | Lose: -{betAmount}
+              </p>
+            </div>
+          )}
 
           {/* Players Display */}
           <div className="space-y-3">
@@ -165,22 +295,31 @@ const WaitingLobby = () => {
                 </div>
               </div>
 
-              {/* Guest */}
+              {/* Guest or Bot */}
               <div className={`flex flex-col items-center gap-2 p-4 rounded-lg transition-all ${
                 guestJoined 
                   ? 'bg-gradient-player-2/20 border border-secondary' 
                   : 'bg-muted/50 border border-dashed border-muted-foreground/30'
               }`}>
-                {guestJoined && guestProfile ? (
+                {guestJoined ? (
                   <>
                     <Avatar className="w-16 h-16 border-2 border-secondary animate-scale-in">
                       <AvatarFallback className="text-3xl bg-gradient-player-2">
-                        {avatarOptions.find(a => a.id === guestProfile.avatar)?.emoji || '👤'}
+                        {guestAvatar}
                       </AvatarFallback>
                     </Avatar>
                     <div className="text-center">
-                      <p className="text-sm font-semibold">{guestProfile.username}</p>
-                      <p className="text-xs text-green-500">Joined!</p>
+                      <p className="text-sm font-semibold">
+                        {botProfile?.username || guestProfile?.username}
+                      </p>
+                      {botProfile && (
+                        <Badge variant="secondary" className="text-xs mt-1">
+                          {botProfile.difficulty}
+                        </Badge>
+                      )}
+                      <p className="text-xs text-green-500">
+                        {botProfile ? 'Ready!' : 'Joined!'}
+                      </p>
                     </div>
                   </>
                 ) : (
@@ -198,21 +337,37 @@ const WaitingLobby = () => {
             </div>
           </div>
 
-          {guestJoined && (
+          {room?.status === 'playing' ? (
             <div className="text-center">
               <p className="text-sm text-green-500 animate-fade-in">
                 Starting game...
               </p>
             </div>
-          )}
+          ) : guestJoined && role === 'host' ? (
+            <Button 
+              onClick={startGame} 
+              disabled={starting || (profile?.coins || 0) < betAmount}
+              className="w-full h-14 text-lg bg-gradient-primary hover:shadow-neon"
+            >
+              {starting ? 'Starting...' : `Start Game (${betAmount} coins)`}
+            </Button>
+          ) : guestJoined && role === 'guest' ? (
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground animate-pulse">
+                Waiting for host to start...
+              </p>
+            </div>
+          ) : null}
 
-          <Button 
-            variant="destructive" 
-            onClick={cancelRoom}
-            className="w-full"
-          >
-            Cancel
-          </Button>
+          {!guestJoined && (
+            <Button 
+              variant="destructive" 
+              onClick={cancelRoom}
+              className="w-full"
+            >
+              Cancel
+            </Button>
+          )}
         </CardContent>
       </Card>
     </div>

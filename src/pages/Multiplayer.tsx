@@ -14,6 +14,7 @@ const Multiplayer = () => {
   const [roomCode, setRoomCode] = useState('');
   const [creating, setCreating] = useState(false);
   const [joining, setJoining] = useState(false);
+  const [quickMatching, setQuickMatching] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -81,13 +82,13 @@ const Multiplayer = () => {
 
       const { error: updateError } = await supabase
         .from('game_rooms')
-        .update({ guest_id: user.id, status: 'playing', started_at: new Date().toISOString() })
+        .update({ guest_id: user.id })
         .eq('id', room.id);
 
       if (updateError) throw updateError;
 
       toast({ title: 'Joined room!' });
-      navigate(`/game?room=${roomCode.toUpperCase()}&role=guest`);
+      navigate(`/waiting-lobby?room=${roomCode.toUpperCase()}&role=guest`);
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -105,6 +106,85 @@ const Multiplayer = () => {
       throw new Error('Failed to generate room code');
     }
     return data;
+  };
+
+  const quickMatch = async () => {
+    if (!user) return;
+    
+    setQuickMatching(true);
+    try {
+      // Try to find an available room first
+      const { data: availableRooms, error: findError } = await supabase
+        .from('game_rooms')
+        .select('*')
+        .eq('status', 'waiting')
+        .is('guest_id', null)
+        .eq('is_bot_game', false)
+        .neq('host_id', user.id)
+        .limit(1);
+
+      if (findError) throw findError;
+
+      if (availableRooms && availableRooms.length > 0) {
+        // Join existing room
+        const room = availableRooms[0];
+        const { error: updateError } = await supabase
+          .from('game_rooms')
+          .update({ guest_id: user.id })
+          .eq('id', room.id);
+
+        if (updateError) throw updateError;
+
+        toast({ title: 'Joined a match!' });
+        navigate(`/waiting-lobby?room=${room.room_code}&role=guest`);
+      } else {
+        // No rooms available, create bot match
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('level')
+          .eq('id', user.id)
+          .single();
+
+        const playerLevel = profile?.level || 1;
+
+        // Select bot based on player level
+        const { data: bots } = await supabase
+          .from('bot_profiles')
+          .select('*')
+          .lte('min_level', playerLevel)
+          .gte('max_level', playerLevel)
+          .limit(5);
+
+        const selectedBot = bots && bots.length > 0 
+          ? bots[Math.floor(Math.random() * bots.length)]
+          : null;
+
+        const code = await generateRoomCode();
+        
+        const { error: createError } = await supabase
+          .from('game_rooms')
+          .insert({
+            room_code: code,
+            host_id: user.id,
+            status: 'waiting',
+            is_bot_game: true,
+            bot_profile_id: selectedBot?.id
+          });
+
+        if (createError) throw createError;
+
+        toast({ title: 'Starting bot match!' });
+        navigate(`/waiting-lobby?room=${code}&bot=true`);
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } finally {
+      setQuickMatching(false);
+    }
   };
 
   return (
@@ -128,11 +208,35 @@ const Multiplayer = () => {
         <CardContent className="space-y-6">
           <div className="space-y-3">
             <Button 
+              onClick={quickMatch} 
+              disabled={quickMatching}
+              className="w-full h-16 text-lg bg-gradient-primary hover:shadow-neon"
+              size="lg"
+            >
+              {quickMatching ? 'Finding Match...' : '⚡ Quick Match'}
+            </Button>
+            <p className="text-xs text-center text-muted-foreground">
+              Play against a random opponent or bot
+            </p>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Or</span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Button 
               onClick={createRoom} 
               disabled={creating}
               className="w-full h-14 text-lg"
+              variant="secondary"
             >
-              {creating ? 'Creating...' : 'Create Room'}
+              {creating ? 'Creating...' : 'Create Private Room'}
             </Button>
             <p className="text-xs text-center text-muted-foreground">
               Share the room code with your friend
@@ -160,7 +264,7 @@ const Multiplayer = () => {
               onClick={joinRoom} 
               disabled={joining || !roomCode.trim()}
               className="w-full h-14 text-lg"
-              variant="secondary"
+              variant="outline"
             >
               {joining ? 'Joining...' : 'Join Room'}
             </Button>
