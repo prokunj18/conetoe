@@ -42,12 +42,8 @@ const Multiplayer = () => {
 
       if (error) throw error;
 
-      toast({ 
-        title: 'Room created!',
-        description: `Code: ${code}`
-      });
-
-      navigate(`/game?room=${code}&role=host`);
+      // Navigate to waiting lobby
+      navigate(`/waiting-lobby?room=${code}`);
     } catch (error: any) {
       toast({
         title: 'Error',

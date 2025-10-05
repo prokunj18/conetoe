@@ -14,6 +14,7 @@ import Stats from "./pages/Stats";
 import Auth from "./pages/Auth";
 import Account from "./pages/Account";
 import Multiplayer from "./pages/Multiplayer";
+import WaitingLobby from "./pages/WaitingLobby";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/account" element={<Account />} />
               <Route path="/multiplayer" element={<Multiplayer />} />
+              <Route path="/waiting-lobby" element={<WaitingLobby />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

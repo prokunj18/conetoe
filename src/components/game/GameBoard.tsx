@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -11,6 +11,12 @@ import { HintsPopup } from "./HintsPopup";
 import { useGameLogic } from "@/hooks/useGameLogic";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useToast } from "@/hooks/use-toast";
+
+const botNames = [
+  "CyberKnight", "NeonPhantom", "QuantumRogue", "ShadowCone", "PrismWarrior",
+  "VoidStriker", "NovaBlade", "EchoHunter", "ZenithBot", "OmegaTactician",
+  "TitanCore", "PhoenixMind", "VortexGuard", "CrystalSage", "ThunderCone"
+];
 
 export const GameBoard = () => {
   const navigate = useNavigate();
@@ -35,6 +41,12 @@ export const GameBoard = () => {
   const [selectedCone, setSelectedCone] = useState<number | null>(null);
   const [hoveredCell, setHoveredCell] = useState<number | null>(null);
   const [showWinModal, setShowWinModal] = useState(false);
+
+  // Random bot name for AI opponent
+  const botName = useMemo(() => {
+    const randomIndex = Math.floor(Math.random() * botNames.length);
+    return botNames[randomIndex];
+  }, []);
 
   useEffect(() => {
     if (gameStatus === "finished" && winner) {
@@ -186,7 +198,7 @@ export const GameBoard = () => {
               <h2 className="text-3xl font-bold">
                 <span className={`${getPlayerGradient(currentPlayer)} bg-clip-text text-transparent animate-glow-pulse`}>
                   {gameState.mode === "ai" 
-                    ? (currentPlayer === 1 ? "Your Turn" : "AI Turn")
+                    ? (currentPlayer === 1 ? "Your Turn" : `${botName}'s Turn`)
                     : `Player ${currentPlayer} Turn`
                   }
                 </span>
@@ -243,7 +255,7 @@ export const GameBoard = () => {
               isCurrentPlayer={currentPlayer === 2 && gameStatus === "playing"}
               selectedCone={selectedCone}
               onConeSelect={handleConeSelect}
-              label={gameState.mode === "ai" ? "AI Triangles" : "Player 2"}
+              label={gameState.mode === "ai" ? `${botName}'s Triangles` : "Player 2"}
             />
           </Card>
         </div>
