@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Play, BookOpen, Settings, Trophy, Zap, Brain, Crown } from "lucide-react";
 import { AnimatedBackground } from "@/components/ui/animated-background";
 import { useSettings } from "@/contexts/SettingsContext";
+import { BlingCurrency } from "@/components/ui/BlingCurrency";
 
 const MainMenu = () => {
   const navigate = useNavigate();
@@ -53,6 +54,7 @@ const MainMenu = () => {
 
   return (
     <div className="min-h-screen bg-gradient-hero flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      <BlingCurrency />
       <AnimatedBackground />
       <div className="max-w-4xl w-full space-y-8 relative z-10">
         

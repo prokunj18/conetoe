@@ -1,11 +1,13 @@
 import { GameBoard } from "@/components/game/GameBoard";
-import { ConeCustomizationButton } from "@/components/game/ConeCustomizationButton";
+import { CustomizationButton } from "@/components/customization/CustomizationButton";
+import { BlingCurrency } from "@/components/ui/BlingCurrency";
 
 const Game = () => {
   return (
     <div className="relative">
+      <BlingCurrency />
       <GameBoard />
-      <ConeCustomizationButton />
+      <CustomizationButton />
     </div>
   );
 };
