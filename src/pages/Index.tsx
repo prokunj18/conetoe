@@ -156,7 +156,7 @@ const Index = () => {
               className="w-full h-16 text-xl font-semibold bg-gradient-secondary hover:shadow-neon hover:scale-105 transition-all duration-300 rounded-full border-0"
             >
               <Sparkles className="w-6 h-6 mr-3" />
-              Customize
+              Boards & Cones
             </Button>
 
             <Button

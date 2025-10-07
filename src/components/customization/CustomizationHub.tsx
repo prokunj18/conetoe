@@ -31,14 +31,16 @@ export const CustomizationHub = ({ isOpen, onClose }: CustomizationHubProps) => 
     return saved ? JSON.parse(saved) : ['neon'];
   });
   const [selectedCrate, setSelectedCrate] = useState<CrateType | null>(null);
+  const [selectedCrateType, setSelectedCrateType] = useState<'cone' | 'board'>('cone');
   const [crateOpening, setCrateOpening] = useState(false);
 
-  const handleCratePurchase = (crate: CrateType) => {
+  const handleCratePurchase = (crate: CrateType, type: 'cone' | 'board') => {
     if (!profile || profile.coins < crate.cost) {
       toast.error("Not enough Bling!");
       return;
     }
     setSelectedCrate(crate);
+    setSelectedCrateType(type);
     setCrateOpening(true);
   };
 
@@ -207,28 +209,64 @@ export const CustomizationHub = ({ isOpen, onClose }: CustomizationHubProps) => 
               ))}
             </TabsContent>
 
-            <TabsContent value="crates" className="max-h-[65vh] overflow-y-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {CRATES.map(crate => (
-                  <Card key={crate.rarity} className={`p-6 bg-gradient-to-br ${crate.color} border-2 ${getRarityBorder(crate.rarity)}`}>
-                    <div className="flex flex-col items-center gap-4 text-white">
-                      <Package className="w-16 h-16" />
-                      <div className="text-center space-y-2">
-                        <h3 className="text-2xl font-bold">{crate.name}</h3>
-                        <Badge variant="secondary" className="text-lg">
-                          {crate.cost} Bling
-                        </Badge>
+            <TabsContent value="crates" className="max-h-[65vh] overflow-y-auto space-y-6">
+              <div>
+                <h3 className="text-xl font-bold mb-4 text-center bg-gradient-primary bg-clip-text text-transparent">Cone Crates</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {CRATES.map(crate => (
+                    <Card key={`cone-${crate.rarity}`} className={`p-6 bg-gradient-to-br ${crate.color} border-2 ${getRarityBorder(crate.rarity)}`}>
+                      <div className="flex flex-col items-center gap-4 text-white">
+                        <div 
+                          className="w-16 h-16 bg-white/20 flex items-center justify-center"
+                          style={{ clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)' }}
+                        >
+                          <Package className="w-10 h-10" />
+                        </div>
+                        <div className="text-center space-y-2">
+                          <h3 className="text-2xl font-bold">{crate.name} Cone</h3>
+                          <Badge variant="secondary" className="text-lg">
+                            {crate.cost} Bling
+                          </Badge>
+                        </div>
+                        <Button 
+                          onClick={() => handleCratePurchase(crate, 'cone')}
+                          disabled={!profile || profile.coins < crate.cost}
+                          className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/50"
+                        >
+                          Purchase
+                        </Button>
                       </div>
-                      <Button 
-                        onClick={() => handleCratePurchase(crate)}
-                        disabled={!profile || profile.coins < crate.cost}
-                        className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/50"
-                      >
-                        Purchase
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-bold mb-4 text-center bg-gradient-secondary bg-clip-text text-transparent">Board Crates</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {CRATES.map(crate => (
+                    <Card key={`board-${crate.rarity}`} className={`p-6 bg-gradient-to-br ${crate.color} border-2 ${getRarityBorder(crate.rarity)}`}>
+                      <div className="flex flex-col items-center gap-4 text-white">
+                        <div className="w-16 h-16 bg-white/20 rounded-lg flex items-center justify-center">
+                          <Package className="w-10 h-10" />
+                        </div>
+                        <div className="text-center space-y-2">
+                          <h3 className="text-2xl font-bold">{crate.name} Board</h3>
+                          <Badge variant="secondary" className="text-lg">
+                            {crate.cost} Bling
+                          </Badge>
+                        </div>
+                        <Button 
+                          onClick={() => handleCratePurchase(crate, 'board')}
+                          disabled={!profile || profile.coins < crate.cost}
+                          className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/50"
+                        >
+                          Purchase
+                        </Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
               </div>
             </TabsContent>
           </Tabs>
@@ -243,6 +281,7 @@ export const CustomizationHub = ({ isOpen, onClose }: CustomizationHubProps) => 
             setSelectedCrate(null);
           }}
           crate={selectedCrate}
+          crateType={selectedCrateType}
           onReward={handleReward}
         />
       )}

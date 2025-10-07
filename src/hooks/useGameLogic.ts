@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { GameState, GameConfig, CellData, MoveResult } from "@/types/game";
 import { useAI } from "./useAI";
+import { CONES } from "@/data/cones";
 
 const initialInventory = (): number[] => [1, 2, 3, 4];
 
@@ -17,6 +18,16 @@ const createInitialState = (): GameState => ({
 export const useGameLogic = (config: GameConfig) => {
   const [gameState, setGameState] = useState<GameState>(createInitialState);
   const { makeAIMove } = useAI();
+  
+  // Set random cone for bot at game start
+  useEffect(() => {
+    if (config.mode === 'ai') {
+      const allCones = CONES;
+      const randomCone = allCones[Math.floor(Math.random() * allCones.length)];
+      // Store the bot's cone style for this game session
+      sessionStorage.setItem('botConeStyle', randomCone.id);
+    }
+  }, [config.mode]);
 
   const checkWinner = useCallback((board: (CellData | null)[]): number | null => {
     const winPatterns = [

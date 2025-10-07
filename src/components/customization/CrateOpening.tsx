@@ -4,18 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, Package } from "lucide-react";
 import { CrateType, Rarity } from "@/types/customization";
 import { CONES } from "@/data/cones";
+import { BOARDS } from "@/data/boards";
 import confetti from "canvas-confetti";
 
 interface CrateOpeningProps {
   isOpen: boolean;
   onClose: () => void;
   crate: CrateType;
+  crateType: 'cone' | 'board';
   onReward: (itemId: string, rarity: Rarity, type: 'cone' | 'board') => void;
 }
 
-export const CrateOpening = ({ isOpen, onClose, crate, onReward }: CrateOpeningProps) => {
+export const CrateOpening = ({ isOpen, onClose, crate, crateType, onReward }: CrateOpeningProps) => {
   const [opening, setOpening] = useState(false);
-  const [reward, setReward] = useState<{ id: string; name: string; rarity: Rarity; preview: string } | null>(null);
+  const [reward, setReward] = useState<{ item: { id: string; name: string; rarity: Rarity; preview: string; gradient?: string }; type: 'cone' | 'board' } | null>(null);
 
   const getRarityWeights = (crateRarity: Rarity) => {
     const weights = {
@@ -37,10 +39,12 @@ export const CrateOpening = ({ isOpen, onClose, crate, onReward }: CrateOpeningP
     else if (roll < weights.epic) selectedRarity = 'epic';
     else selectedRarity = 'rare';
 
-    const availableCones = CONES.filter(c => c.rarity === selectedRarity);
-    const selectedCone = availableCones[Math.floor(Math.random() * availableCones.length)];
+    const availableItems = crateType === 'cone'
+      ? CONES.filter(c => c.rarity === selectedRarity)
+      : BOARDS.filter(b => b.rarity === selectedRarity);
+    const selectedItem = availableItems[Math.floor(Math.random() * availableItems.length)];
     
-    return { ...selectedCone };
+    return { item: selectedItem, type: crateType };
   };
 
   const handleOpen = () => {
@@ -52,7 +56,7 @@ export const CrateOpening = ({ isOpen, onClose, crate, onReward }: CrateOpeningP
       setOpening(false);
       
       // Confetti effect
-      if (selected.rarity === 'legendary' || selected.rarity === 'mythic') {
+      if (selected.item.rarity === 'legendary' || selected.item.rarity === 'mythic') {
         confetti({
           particleCount: 150,
           spread: 100,
@@ -60,7 +64,7 @@ export const CrateOpening = ({ isOpen, onClose, crate, onReward }: CrateOpeningP
         });
       }
       
-      onReward(selected.id, selected.rarity, 'cone');
+      onReward(selected.item.id, selected.item.rarity, selected.type);
     }, 3000);
   };
 
@@ -115,26 +119,32 @@ export const CrateOpening = ({ isOpen, onClose, crate, onReward }: CrateOpeningP
           {reward && (
             <>
               <div className="relative">
-                <div 
-                  className="w-32 h-32 relative shadow-glow animate-scale-in"
-                  style={{
-                    background: reward.preview,
-                    clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)',
-                    filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.6))'
-                  }}
-                >
+                {reward.type === 'cone' ? (
                   <div 
-                    className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-black/20"
-                    style={{ clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)' }}
+                    className="w-32 h-32 relative shadow-glow animate-scale-in"
+                    style={{
+                      background: reward.item.preview,
+                      clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)',
+                      filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.6))'
+                    }}
+                  >
+                    <div 
+                      className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-black/20"
+                      style={{ clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)' }}
+                    />
+                  </div>
+                ) : (
+                  <div 
+                    className={`w-32 h-32 ${reward.item.gradient} rounded-lg border-4 ${reward.item.preview} shadow-glow animate-scale-in`}
                   />
-                </div>
+                )}
                 <Sparkles className="w-8 h-8 text-yellow-400 absolute -top-2 -right-2 animate-pulse" />
               </div>
               <div className="text-center space-y-2">
-                <h2 className={`text-3xl font-bold bg-gradient-to-r ${getRarityColor(reward.rarity)} bg-clip-text text-transparent`}>
-                  {reward.name}
+                <h2 className={`text-3xl font-bold bg-gradient-to-r ${getRarityColor(reward.item.rarity)} bg-clip-text text-transparent`}>
+                  {reward.item.name}
                 </h2>
-                <p className="text-lg text-muted-foreground capitalize">{reward.rarity} Cone</p>
+                <p className="text-lg text-muted-foreground capitalize">{reward.item.rarity} {reward.type === 'cone' ? 'Cone' : 'Board'}</p>
               </div>
               <Button 
                 onClick={handleClose}

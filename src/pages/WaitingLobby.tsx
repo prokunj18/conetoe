@@ -37,7 +37,6 @@ const WaitingLobby = () => {
   const [room, setRoom] = useState<any>(null);
   const [betAmount, setBetAmount] = useState(25);
   const [starting, setStarting] = useState(false);
-  const [cheatCode, setCheatCode] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -137,25 +136,6 @@ const WaitingLobby = () => {
     }
   };
 
-  const handleCheatCode = async () => {
-    const code = cheatCode.toLowerCase().trim();
-    if (code === 'kunj' || code === 'devansh') {
-      await updateProfile({ coins: 999999 });
-      toast({ 
-        title: '🎉 Cheat Activated!',
-        description: 'Unlimited coins granted!'
-      });
-      setCheatCode('');
-    } else if (code) {
-      toast({ 
-        title: 'Invalid Code',
-        description: 'Try again!',
-        variant: 'destructive'
-      });
-      setCheatCode('');
-    }
-  };
-
   const cancelRoom = async () => {
     if (!roomCode) return;
 
@@ -239,28 +219,9 @@ const WaitingLobby = () => {
             <CardTitle>{isBot ? 'Bot Match' : 'Waiting for Player'}</CardTitle>
             <div className="w-10" />
           </div>
-          <CardDescription className="flex flex-col items-center gap-2">
-            <div className="flex items-center gap-2">
-              <Coins className="h-4 w-4" />
-              Your coins: {profile?.coins || 0}
-            </div>
-            <div className="flex gap-2 w-full max-w-xs">
-              <Input
-                placeholder="Enter code..."
-                value={cheatCode}
-                onChange={(e) => setCheatCode(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleCheatCode()}
-                className="h-8 text-xs"
-              />
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleCheatCode}
-                className="h-8 text-xs"
-              >
-                Apply
-              </Button>
-            </div>
+          <CardDescription className="flex items-center justify-center gap-2">
+            <Coins className="h-4 w-4" />
+            Your coins: {profile?.coins || 0}
           </CardDescription>
         </CardHeader>
         
