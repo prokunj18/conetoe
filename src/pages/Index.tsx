@@ -7,9 +7,9 @@ import { AnimatedBackground } from "@/components/ui/animated-background";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { ConeCustomizationButton } from "@/components/game/ConeCustomizationButton";
-import { BoardCustomizationButton } from "@/components/game/BoardCustomizationButton";
 import { ConePreview } from "@/components/game/ConePreview";
+import { CustomizationButton } from "@/components/customization/CustomizationButton";
+import { BlingCurrency } from "@/components/ui/BlingCurrency";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -192,9 +192,9 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Customization Buttons */}
-        <ConeCustomizationButton />
-        <BoardCustomizationButton />
+        {/* Bling Currency & Customization */}
+        <BlingCurrency />
+        <CustomizationButton />
       </div>
 
       {/* Play Mode Selection Dialog */}
