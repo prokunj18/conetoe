@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Play, Settings, Trophy, Brain, Users, Zap, Crown, BookOpen, User, LogIn, Coins } from "lucide-react";
+import { Play, Settings, Trophy, Brain, Users, Zap, Crown, BookOpen, User, LogIn, Sparkles } from "lucide-react";
 import { AnimatedBackground } from "@/components/ui/animated-background";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { ConePreview } from "@/components/game/ConePreview";
 import { CustomizationButton } from "@/components/customization/CustomizationButton";
+import { CustomizationHub } from "@/components/customization/CustomizationHub";
 import { BlingCurrency } from "@/components/ui/BlingCurrency";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
@@ -32,6 +33,7 @@ const Index = () => {
   const { profile } = useProfile();
   const [showPlayDialog, setShowPlayDialog] = useState(false);
   const [selectedDifficulty, setSelectedDifficulty] = useState<"easy" | "normal" | "hard" | "master">("normal");
+  const [showCustomization, setShowCustomization] = useState(false);
 
   const difficulties = [
     { 
@@ -131,13 +133,7 @@ const Index = () => {
             </div>
             {user && profile && (
               <div className="flex items-center justify-center gap-3 text-sm text-foreground/80">
-                <span>
-                  <span className="font-semibold">{profile.username}</span> • Level {profile.level}
-                </span>
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  <Coins className="h-3 w-3" />
-                  {profile.coins}
-                </Badge>
+                <span className="font-semibold">{profile.username}</span> • Level {profile.level}
               </div>
             )}
             <div className="text-lg text-foreground/60 tracking-[0.3em] uppercase font-light">
@@ -156,8 +152,16 @@ const Index = () => {
             </Button>
 
             <Button
-              onClick={() => navigate("/settings")}
+              onClick={() => setShowCustomization(true)}
               className="w-full h-16 text-xl font-semibold bg-gradient-secondary hover:shadow-neon hover:scale-105 transition-all duration-300 rounded-full border-0"
+            >
+              <Sparkles className="w-6 h-6 mr-3" />
+              Customize
+            </Button>
+
+            <Button
+              onClick={() => navigate("/settings")}
+              className="w-full h-16 text-xl font-semibold bg-gradient-glass hover:shadow-glow hover:scale-105 transition-all duration-300 rounded-full border border-border/30"
             >
               <Settings className="w-6 h-6 mr-3" />
               Settings
@@ -192,9 +196,8 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Bling Currency & Customization */}
+        {/* Bling Currency */}
         <BlingCurrency />
-        <CustomizationButton />
       </div>
 
       {/* Play Mode Selection Dialog */}
@@ -290,6 +293,12 @@ const Index = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Customization Hub */}
+      <CustomizationHub 
+        isOpen={showCustomization} 
+        onClose={() => setShowCustomization(false)} 
+      />
     </>
   );
 };

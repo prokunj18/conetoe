@@ -43,23 +43,26 @@ export const CustomizationHub = ({ isOpen, onClose }: CustomizationHubProps) => 
   };
 
   const handleReward = async (itemId: string, rarity: Rarity, type: 'cone' | 'board') => {
-    if (!selectedCrate) return;
+    if (!selectedCrate || !profile) return;
     
-    // Deduct coins
-    await updateProfile({ coins: (profile?.coins ?? 100) - selectedCrate.cost });
+    // Deduct coins and update profile
+    const newCoins = profile.coins - selectedCrate.cost;
+    await updateProfile({ coins: newCoins });
     
     // Add to inventory
     if (type === 'cone') {
       const newOwned = [...ownedCones, itemId];
       setOwnedCones(newOwned);
       localStorage.setItem('ownedCones', JSON.stringify(newOwned));
+      const item = CONES.find(c => c.id === itemId);
+      toast.success(`Unlocked ${item?.name}!`);
     } else {
       const newOwned = [...ownedBoards, itemId];
       setOwnedBoards(newOwned);
       localStorage.setItem('ownedBoards', JSON.stringify(newOwned));
+      const item = BOARDS.find(b => b.id === itemId);
+      toast.success(`Unlocked ${item?.name}!`);
     }
-    
-    toast.success(`Unlocked ${CONES.find(c => c.id === itemId)?.name}!`);
   };
 
   const getRarityColor = (rarity: Rarity) => {
