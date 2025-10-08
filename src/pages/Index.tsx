@@ -152,30 +152,6 @@ const Index = () => {
             </Button>
 
             <Button
-              onClick={() => setShowCustomization(true)}
-              className="w-full h-16 text-xl font-semibold bg-gradient-secondary hover:shadow-neon hover:scale-105 transition-all duration-300 rounded-full border-0"
-            >
-              <Sparkles className="w-6 h-6 mr-3" />
-              Boards & Cones
-            </Button>
-
-            <Button
-              onClick={() => navigate("/settings")}
-              className="w-full h-16 text-xl font-semibold bg-gradient-glass hover:shadow-glow hover:scale-105 transition-all duration-300 rounded-full border border-border/30"
-            >
-              <Settings className="w-6 h-6 mr-3" />
-              Settings
-            </Button>
-
-            <Button
-              onClick={() => navigate("/rules")}
-              className="w-full h-16 text-xl font-semibold bg-gradient-glass hover:shadow-glow hover:scale-105 transition-all duration-300 rounded-full border border-border/30"
-            >
-              <BookOpen className="w-6 h-6 mr-3" />
-              How to Play
-            </Button>
-
-            <Button
               onClick={() => {
                 if (!user) {
                   navigate("/auth");
@@ -187,6 +163,30 @@ const Index = () => {
             >
               <Trophy className="w-6 h-6 mr-3" />
               Multiplayer
+            </Button>
+
+            <Button
+              onClick={() => setShowCustomization(true)}
+              className="w-full h-16 text-xl font-semibold bg-gradient-secondary hover:shadow-neon hover:scale-105 transition-all duration-300 rounded-full border-0"
+            >
+              <Sparkles className="w-6 h-6 mr-3" />
+              Boards & Cones
+            </Button>
+
+            <Button
+              onClick={() => navigate("/rules")}
+              className="w-full h-16 text-xl font-semibold bg-gradient-glass hover:shadow-glow hover:scale-105 transition-all duration-300 rounded-full border border-border/30"
+            >
+              <BookOpen className="w-6 h-6 mr-3" />
+              How to Play
+            </Button>
+
+            <Button
+              onClick={() => navigate("/settings")}
+              className="w-full h-16 text-xl font-semibold bg-gradient-glass hover:shadow-glow hover:scale-105 transition-all duration-300 rounded-full border border-border/30"
+            >
+              <Settings className="w-6 h-6 mr-3" />
+              Settings
             </Button>
           </div>
 

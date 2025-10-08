@@ -34,16 +34,25 @@ export const CrateOpening = ({ isOpen, onClose, crate, crateType, onReward }: Cr
     const roll = Math.random() * 100;
     
     let selectedRarity: Rarity;
-    if (roll < weights.legendary) selectedRarity = 'legendary';
-    else if (roll < weights.mythic) selectedRarity = 'mythic';
-    else if (roll < weights.epic) selectedRarity = 'epic';
+    if (roll >= weights.legendary) selectedRarity = 'legendary';
+    else if (roll >= weights.mythic) selectedRarity = 'mythic';
+    else if (roll >= weights.epic) selectedRarity = 'epic';
     else selectedRarity = 'rare';
 
     const availableItems = crateType === 'cone'
       ? CONES.filter(c => c.rarity === selectedRarity)
       : BOARDS.filter(b => b.rarity === selectedRarity);
-    const selectedItem = availableItems[Math.floor(Math.random() * availableItems.length)];
     
+    // Fallback to rare if no items found
+    if (availableItems.length === 0) {
+      const fallbackItems = crateType === 'cone'
+        ? CONES.filter(c => c.rarity === 'rare')
+        : BOARDS.filter(b => b.rarity === 'rare');
+      const selectedItem = fallbackItems[Math.floor(Math.random() * fallbackItems.length)];
+      return { item: selectedItem, type: crateType };
+    }
+    
+    const selectedItem = availableItems[Math.floor(Math.random() * availableItems.length)];
     return { item: selectedItem, type: crateType };
   };
 

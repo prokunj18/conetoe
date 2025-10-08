@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Crown, Zap, RotateCcw, Home, Star } from "lucide-react";
+import { Trophy, Crown, Zap, RotateCcw, Home, Star, Coins } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useProfile } from "@/hooks/useProfile";
+import { toast } from "sonner";
 
 interface WinningModalProps {
   winner: number | null;
@@ -20,7 +22,9 @@ export const WinningModal = ({
   difficulty 
 }: WinningModalProps) => {
   const navigate = useNavigate();
+  const { profile, updateProfile } = useProfile();
   const [showConfetti, setShowConfetti] = useState(false);
+  const [coinsAwarded, setCoinsAwarded] = useState(false);
 
   useEffect(() => {
     if (isVisible && winner) {
@@ -28,7 +32,23 @@ export const WinningModal = ({
       const timer = setTimeout(() => setShowConfetti(false), 3000);
       return () => clearTimeout(timer);
     }
+    // Reset coinsAwarded when modal closes
+    if (!isVisible) {
+      setCoinsAwarded(false);
+    }
   }, [isVisible, winner]);
+
+  useEffect(() => {
+    // Award coins when player wins (only for AI mode, and only once)
+    if (isVisible && winner === 1 && gameMode === "ai" && !coinsAwarded && profile) {
+      const coinReward = difficulty === "master" ? 50 : difficulty === "hard" ? 30 : difficulty === "normal" ? 20 : 10;
+      updateProfile({ coins: profile.coins + coinReward });
+      setCoinsAwarded(true);
+      toast.success(`You earned ${coinReward} Bling!`, {
+        icon: <Coins className="w-4 h-4" />
+      });
+    }
+  }, [isVisible, winner, gameMode, difficulty, coinsAwarded, profile, updateProfile]);
 
   if (!isVisible || !winner) return null;
 
@@ -122,7 +142,7 @@ export const WinningModal = ({
 
         {/* Game Stats */}
         <div className="bg-surface-glass rounded-xl p-4 mb-6 border border-border/50">
-          <div className="grid grid-cols-2 gap-4 text-center">
+          <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <div className="text-2xl font-bold text-primary">
                 {gameMode === "ai" ? "1v1" : "2P"}
@@ -139,6 +159,16 @@ export const WinningModal = ({
                 Winner
               </div>
             </div>
+            {gameMode === "ai" && winner === 1 && (
+              <div>
+                <div className="text-2xl font-bold text-accent">
+                  +{difficulty === "master" ? 50 : difficulty === "hard" ? 30 : difficulty === "normal" ? 20 : 10}
+                </div>
+                <div className="text-xs text-muted-foreground uppercase tracking-wide">
+                  Bling
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
