@@ -162,18 +162,40 @@ const WaitingLobby = () => {
 
     setStarting(true);
     try {
-      // Deduct bet amount from host
-      await supabase
-        .from('profiles')
-        .update({ coins: profile.coins - betAmount })
-        .eq('id', user!.id);
+      // Deduct bet amount from host using secure function
+      const { data: hostDeducted, error: hostError } = await supabase
+        .rpc('deduct_bet', { p_user_id: user!.id, p_amount: betAmount });
+
+      if (hostError || !hostDeducted) {
+        toast({
+          title: 'Insufficient funds',
+          description: 'Unable to deduct bet amount from your account',
+          variant: 'destructive'
+        });
+        setStarting(false);
+        return;
+      }
 
       // Deduct from guest if not bot
       if (!isBot && guestProfile) {
-        await supabase
-          .from('profiles')
-          .update({ coins: guestProfile.coins - betAmount })
-          .eq('id', guestProfile.id);
+        const { data: guestDeducted, error: guestError } = await supabase
+          .rpc('deduct_bet', { p_user_id: guestProfile.id, p_amount: betAmount });
+
+        if (guestError || !guestDeducted) {
+          // Refund host if guest deduction fails
+          await supabase
+            .from('profiles')
+            .update({ coins: profile.coins })
+            .eq('id', user!.id);
+          
+          toast({
+            title: 'Error',
+            description: 'Guest has insufficient funds',
+            variant: 'destructive'
+          });
+          setStarting(false);
+          return;
+        }
       }
 
       // Update room to playing status

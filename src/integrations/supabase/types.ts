@@ -83,7 +83,21 @@ export type Database = {
             foreignKeyName: "game_history_opponent_id_fkey"
             columns: ["opponent_id"]
             isOneToOne: false
+            referencedRelation: "leaderboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_history_opponent_id_fkey"
+            columns: ["opponent_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_history_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard"
             referencedColumns: ["id"]
           },
           {
@@ -160,6 +174,13 @@ export type Database = {
             foreignKeyName: "game_rooms_guest_id_fkey"
             columns: ["guest_id"]
             isOneToOne: false
+            referencedRelation: "leaderboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_rooms_guest_id_fkey"
+            columns: ["guest_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -167,7 +188,21 @@ export type Database = {
             foreignKeyName: "game_rooms_host_id_fkey"
             columns: ["host_id"]
             isOneToOne: false
+            referencedRelation: "leaderboard"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_rooms_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "game_rooms_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard"
             referencedColumns: ["id"]
           },
           {
@@ -223,25 +258,33 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      leaderboard: {
+        Row: {
+          avatar: string | null
+          id: string | null
+          level: number | null
+          total_games: number | null
+          total_wins: number | null
+          username: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       add_exp_and_level_up: {
         Args: { exp_amount: number; user_id: string }
         Returns: Json
       }
-      apply_exp_decay: {
-        Args: { user_id: string }
-        Returns: undefined
-      }
+      apply_exp_decay: { Args: { user_id: string }; Returns: undefined }
       complete_game: {
         Args: { p_bet_amount: number; p_room_id: string; p_winner_id: string }
         Returns: undefined
       }
-      generate_room_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
+      deduct_bet: {
+        Args: { p_amount: number; p_user_id: string }
+        Returns: boolean
       }
+      generate_room_code: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
