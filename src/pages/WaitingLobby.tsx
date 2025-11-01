@@ -10,7 +10,6 @@ import { AnimatedBackground } from '@/components/ui/animated-background';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useProfile } from '@/hooks/useProfile';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 
 const avatarOptions = [
   { id: 'avatar1', emoji: '🤖' },
@@ -25,7 +24,7 @@ const avatarOptions = [
 
 const WaitingLobby = () => {
   const { user } = useAuth();
-  const { profile, updateProfile } = useProfile();
+  const { profile } = useProfile();
   const [searchParams] = useSearchParams();
   const roomCode = searchParams.get('room');
   const isBot = searchParams.get('bot') === 'true';
@@ -163,36 +162,41 @@ const WaitingLobby = () => {
     setStarting(true);
     try {
       // Deduct bet amount from host using secure function
-      const { data: hostDeducted, error: hostError } = await supabase
-        .rpc('deduct_bet', { p_user_id: user!.id, p_amount: betAmount });
+      const { data: hostDeducted, error: hostError } = await supabase.rpc('deduct_bet', {
+        p_user_id: user!.id,
+        p_amount: betAmount
+      });
 
       if (hostError || !hostDeducted) {
         toast({
-          title: 'Insufficient funds',
-          description: 'Unable to deduct bet amount from your account',
+          title: 'Insufficient coins',
+          description: `You need ${betAmount} coins to play`,
           variant: 'destructive'
         });
         setStarting(false);
         return;
       }
 
-      // Deduct from guest if not bot
+      // Deduct from guest if not bot using secure function
       if (!isBot && guestProfile) {
-        const { data: guestDeducted, error: guestError } = await supabase
-          .rpc('deduct_bet', { p_user_id: guestProfile.id, p_amount: betAmount });
+        const { data: guestDeducted, error: guestError } = await supabase.rpc('deduct_bet', {
+          p_user_id: guestProfile.id,
+          p_amount: betAmount
+        });
 
         if (guestError || !guestDeducted) {
-          // Refund host if guest deduction fails
+          toast({
+            title: 'Guest has insufficient coins',
+            description: 'The game cannot start. Bet has been refunded.',
+            variant: 'destructive'
+          });
+          
+          // Refund host by adding coins back
           await supabase
             .from('profiles')
             .update({ coins: profile.coins })
             .eq('id', user!.id);
           
-          toast({
-            title: 'Error',
-            description: 'Guest has insufficient funds',
-            variant: 'destructive'
-          });
           setStarting(false);
           return;
         }
