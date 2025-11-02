@@ -2,12 +2,13 @@ import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, RotateCcw, Zap, Crown, Trophy } from "lucide-react";
+import { ArrowLeft, RotateCcw, Zap, Crown, Trophy, Box } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ConeCell } from "./ConeCell";
 import { PlayerInventory } from "./PlayerInventory";
 import { WinningModal } from "./WinningModal";
 import { HintsPopup } from "./HintsPopup";
+import { Game3DBoard } from "./Game3DBoard";
 import { useGameLogic } from "@/hooks/useGameLogic";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useToast } from "@/hooks/use-toast";
@@ -41,6 +42,7 @@ export const GameBoard = () => {
   const [selectedCone, setSelectedCone] = useState<number | null>(null);
   const [hoveredCell, setHoveredCell] = useState<number | null>(null);
   const [showWinModal, setShowWinModal] = useState(false);
+  const [is3DMode, setIs3DMode] = useState(false);
 
   // Random bot name for AI opponent
   const botName = useMemo(() => {
@@ -181,6 +183,15 @@ export const GameBoard = () => {
             )}
             
             <Button 
+              variant={is3DMode ? "default" : "outline"}
+              onClick={() => setIs3DMode(!is3DMode)}
+              className={`flex items-center gap-2 border-border ${themeClasses.glow}`}
+            >
+              <Box className="w-4 h-4" />
+              {is3DMode ? "3D Mode" : "2D Mode"}
+            </Button>
+            
+            <Button 
               variant="outline" 
               onClick={resetGame}
               className={`flex items-center gap-2 border-border ${themeClasses.glow}`}
@@ -230,21 +241,30 @@ export const GameBoard = () => {
 
           {/* Game Board */}
           <Card className={`p-6 ${themeClasses.container} transition-all duration-500`}>
-            <div className="aspect-square max-w-sm mx-auto">
-              <div className="grid grid-cols-3 gap-3 h-full p-2">
-                {board.map((cell, index) => (
-                  <ConeCell
-                    key={index}
-                    cell={cell}
-                    isHovered={hoveredCell === index}
-                    isValidMove={showMoveHints && selectedCone ? isValidMove(index, selectedCone) : false}
-                    onClick={() => handleCellClick(index)}
-                    onMouseEnter={() => setHoveredCell(index)}
-                    onMouseLeave={() => setHoveredCell(null)}
-                  />
-                ))}
+            {is3DMode ? (
+              <Game3DBoard
+                board={board}
+                onCellClick={handleCellClick}
+                hoveredCell={hoveredCell}
+                onCellHover={setHoveredCell}
+              />
+            ) : (
+              <div className="aspect-square max-w-sm mx-auto">
+                <div className="grid grid-cols-3 gap-3 h-full p-2">
+                  {board.map((cell, index) => (
+                    <ConeCell
+                      key={index}
+                      cell={cell}
+                      isHovered={hoveredCell === index}
+                      isValidMove={showMoveHints && selectedCone ? isValidMove(index, selectedCone) : false}
+                      onClick={() => handleCellClick(index)}
+                      onMouseEnter={() => setHoveredCell(index)}
+                      onMouseLeave={() => setHoveredCell(null)}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </Card>
 
           {/* Player 2/AI Inventory */}
