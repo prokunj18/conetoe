@@ -13,10 +13,12 @@ const Settings = () => {
     animationsEnabled, 
     showMoveHints,
     boardTheme,
+    gameMode,
     setSoundEnabled,
     setAnimationsEnabled,
     setShowMoveHints,
-    setBoardTheme
+    setBoardTheme,
+    setGameMode
   } = useSettings();
 
   return (
@@ -115,6 +117,33 @@ const Settings = () => {
                   <Switch 
                     checked={showMoveHints}
                     onCheckedChange={setShowMoveHints}
+                  />
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Game Mode Settings */}
+          <Card className="p-6 bg-card border-card-border">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-gradient-primary rounded-lg">
+                  <Gamepad2 className="w-6 h-6 text-primary-foreground" />
+                </div>
+                <h2 className="text-xl font-semibold">Game Display</h2>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium">3D Game Mode</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Play in stunning 3D with realistic graphics
+                    </p>
+                  </div>
+                  <Switch 
+                    checked={gameMode === '3D'}
+                    onCheckedChange={(checked) => setGameMode(checked ? '3D' : '2D')}
                   />
                 </div>
               </div>

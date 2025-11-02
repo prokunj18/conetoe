@@ -23,7 +23,7 @@ export const GameBoard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { showMoveHints, animationsEnabled, boardTheme } = useSettings();
+  const { showMoveHints, animationsEnabled, boardTheme, gameMode } = useSettings();
   
   const gameState = location.state || { mode: "ai", difficulty: "normal" };
   const { 
@@ -42,7 +42,6 @@ export const GameBoard = () => {
   const [selectedCone, setSelectedCone] = useState<number | null>(null);
   const [hoveredCell, setHoveredCell] = useState<number | null>(null);
   const [showWinModal, setShowWinModal] = useState(false);
-  const [is3DMode, setIs3DMode] = useState(false);
 
   // Random bot name for AI opponent
   const botName = useMemo(() => {
@@ -183,15 +182,6 @@ export const GameBoard = () => {
             )}
             
             <Button 
-              variant={is3DMode ? "default" : "outline"}
-              onClick={() => setIs3DMode(!is3DMode)}
-              className={`flex items-center gap-2 border-border ${themeClasses.glow}`}
-            >
-              <Box className="w-4 h-4" />
-              {is3DMode ? "3D Mode" : "2D Mode"}
-            </Button>
-            
-            <Button 
               variant="outline" 
               onClick={resetGame}
               className={`flex items-center gap-2 border-border ${themeClasses.glow}`}
@@ -241,7 +231,7 @@ export const GameBoard = () => {
 
           {/* Game Board */}
           <Card className={`p-6 ${themeClasses.container} transition-all duration-500`}>
-            {is3DMode ? (
+            {gameMode === '3D' ? (
               <Game3DBoard
                 board={board}
                 onCellClick={handleCellClick}

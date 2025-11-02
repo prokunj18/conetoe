@@ -1,9 +1,18 @@
 import { Coins } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLocation } from "react-router-dom";
 
 export const BlingCurrency = () => {
   const { profile, loading } = useProfile();
+  const location = useLocation();
+
+  // Only show on home page and customization page
+  const shouldShow = location.pathname === '/' || location.pathname === '/customize';
+
+  if (!shouldShow) {
+    return null;
+  }
 
   if (loading) {
     return (
