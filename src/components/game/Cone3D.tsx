@@ -13,28 +13,6 @@ interface Cone3DProps {
 export const Cone3D = ({ position, player, size, isNew = false }: Cone3DProps) => {
   const groupRef = useRef<Group>(null);
 
-  // Smoother animations with reduced frequency
-  useFrame((state) => {
-    if (!groupRef.current) return;
-
-    if (isNew) {
-      // Spawn animation
-      const elapsed = state.clock.elapsedTime;
-      if (elapsed < 0.5) {
-        const progress = elapsed * 2;
-        groupRef.current.scale.setScalar(progress);
-        groupRef.current.position.y = (getScale()[1] * 0.5) + (1 - progress) * 2;
-      }
-    } else {
-      // Gentle floating - reduced amplitude
-      const float = Math.sin(state.clock.elapsedTime * 0.8 + position[0] + position[2]) * 0.03;
-      groupRef.current.position.y = (getScale()[1] * 0.5) + float;
-      
-      // Slow rotation
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.15;
-    }
-  });
-
   // Get holographic colors based on player
   const getHolographicColor = () => {
     return player === 1 ? '#00ffff' : '#ff00ff';
@@ -49,6 +27,30 @@ export const Cone3D = ({ position, player, size, isNew = false }: Cone3DProps) =
     const baseScale = size === 1 ? 0.7 : size === 2 ? 0.9 : 1.1;
     return [baseScale, baseScale * 1.8, baseScale];
   };
+
+  // Smoother animations with reduced frequency
+  useFrame((state) => {
+    if (!groupRef.current) return;
+
+    const scale = getScale();
+    
+    if (isNew) {
+      // Spawn animation
+      const elapsed = state.clock.elapsedTime;
+      if (elapsed < 0.5) {
+        const progress = elapsed * 2;
+        groupRef.current.scale.setScalar(progress);
+        groupRef.current.position.y = (scale[1] * 0.5) + (1 - progress) * 2;
+      }
+    } else {
+      // Gentle floating - reduced amplitude
+      const float = Math.sin(state.clock.elapsedTime * 0.8 + position[0] + position[2]) * 0.03;
+      groupRef.current.position.y = (scale[1] * 0.5) + float;
+      
+      // Slow rotation
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.15;
+    }
+  });
 
   const color = getHolographicColor();
   const rimColor = getRimColor();
