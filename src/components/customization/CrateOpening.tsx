@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Package } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { CrateType, Rarity } from "@/types/customization";
 import { CONES } from "@/data/cones";
 import { BOARDS } from "@/data/boards";
 import confetti from "canvas-confetti";
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Environment, PerspectiveCamera } from '@react-three/drei';
+import { Crate3D } from './Crate3D';
 
 interface CrateOpeningProps {
   isOpen: boolean;
@@ -94,12 +97,29 @@ export const CrateOpening = ({ isOpen, onClose, crate, crateType, onReward }: Cr
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md bg-gradient-glass border border-card-border backdrop-blur-xl">
+      <DialogContent className="max-w-2xl bg-gradient-glass border border-card-border backdrop-blur-xl">
         <div className="flex flex-col items-center gap-6 p-6">
           {!reward && !opening && (
             <>
-              <div className={`p-8 rounded-2xl bg-gradient-to-br ${crate.color} shadow-glow animate-float`}>
-                <Package className="w-24 h-24 text-white" />
+              <div className="w-full h-[400px] rounded-lg overflow-hidden">
+                <Canvas shadows className="bg-transparent">
+                  <color attach="background" args={['#0a0a0f']} />
+                  <PerspectiveCamera makeDefault position={[0, 1, 3]} fov={50} />
+                  <OrbitControls 
+                    enableZoom={false}
+                    enablePan={false}
+                    autoRotate
+                    autoRotateSpeed={2}
+                  />
+                  
+                  <ambientLight intensity={0.4} />
+                  <directionalLight position={[5, 5, 5]} intensity={1} castShadow />
+                  <pointLight position={[-5, 5, 0]} intensity={0.5} color="#4A90E2" />
+                  
+                  <Crate3D rarity={crate.rarity} position={[0, 0, 0]} />
+                  
+                  <Environment preset="night" />
+                </Canvas>
               </div>
               <div className="text-center space-y-2">
                 <h2 className="text-2xl font-bold">{crate.name}</h2>
@@ -117,12 +137,23 @@ export const CrateOpening = ({ isOpen, onClose, crate, crateType, onReward }: Cr
           )}
 
           {opening && (
-            <div className="flex flex-col items-center gap-4">
-              <div className={`p-8 rounded-2xl bg-gradient-to-br ${crate.color} shadow-glow animate-spin-slow`}>
-                <Package className="w-24 h-24 text-white" />
+            <>
+              <div className="w-full h-[400px] rounded-lg overflow-hidden">
+                <Canvas shadows className="bg-transparent">
+                  <color attach="background" args={['#0a0a0f']} />
+                  <PerspectiveCamera makeDefault position={[0, 1, 3]} fov={50} />
+                  
+                  <ambientLight intensity={0.4} />
+                  <directionalLight position={[5, 5, 5]} intensity={1.5} castShadow />
+                  <pointLight position={[-5, 5, 0]} intensity={1} color="#4A90E2" />
+                  
+                  <Crate3D rarity={crate.rarity} position={[0, 0, 0]} isOpening={true} />
+                  
+                  <Environment preset="night" />
+                </Canvas>
               </div>
               <h2 className="text-2xl font-bold animate-pulse">Opening...</h2>
-            </div>
+            </>
           )}
 
           {reward && (

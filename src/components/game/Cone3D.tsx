@@ -1,34 +1,37 @@
-import { useRef } from 'react';
-import { Mesh } from 'three';
+import { useRef, useMemo } from 'react';
+import { Group } from 'three';
 import { useFrame } from '@react-three/fiber';
 import { MeshTransmissionMaterial } from '@react-three/drei';
-import { useSettings } from '@/contexts/SettingsContext';
 
 interface Cone3DProps {
   position: [number, number, number];
   player: number;
   size: number;
+  isNew?: boolean;
 }
 
-export const Cone3D = ({ position, player, size }: Cone3DProps) => {
-  const meshRef = useRef<Mesh>(null);
-  const ringRef = useRef<Mesh>(null);
+export const Cone3D = ({ position, player, size, isNew = false }: Cone3DProps) => {
+  const groupRef = useRef<Group>(null);
 
-  // Holographic iridescent animation
+  // Smoother animations with reduced frequency
   useFrame((state) => {
-    if (meshRef.current) {
-      // Gentle floating animation
-      const float = Math.sin(state.clock.elapsedTime * 1.5 + position[0] + position[2]) * 0.05;
-      meshRef.current.position.y = (getScale()[1] * 0.5) + float;
-      
-      // Subtle rotation for holographic effect
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.3;
-    }
+    if (!groupRef.current) return;
 
-    if (ringRef.current) {
-      // Pulsing glow ring
-      const pulse = (Math.sin(state.clock.elapsedTime * 2) * 0.5 + 0.5) * 0.3 + 0.7;
-      ringRef.current.scale.setScalar(pulse);
+    if (isNew) {
+      // Spawn animation
+      const elapsed = state.clock.elapsedTime;
+      if (elapsed < 0.5) {
+        const progress = elapsed * 2;
+        groupRef.current.scale.setScalar(progress);
+        groupRef.current.position.y = (getScale()[1] * 0.5) + (1 - progress) * 2;
+      }
+    } else {
+      // Gentle floating - reduced amplitude
+      const float = Math.sin(state.clock.elapsedTime * 0.8 + position[0] + position[2]) * 0.03;
+      groupRef.current.position.y = (getScale()[1] * 0.5) + float;
+      
+      // Slow rotation
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.15;
     }
   });
 
@@ -53,10 +56,9 @@ export const Cone3D = ({ position, player, size }: Cone3DProps) => {
   const [scaleX, scaleY, scaleZ] = scale;
 
   return (
-    <group position={position}>
+    <group ref={groupRef} position={position}>
       {/* Main Holographic Cone */}
       <mesh
-        ref={meshRef}
         castShadow
         receiveShadow
         scale={[scaleX, scaleY, scaleZ]}
@@ -86,7 +88,7 @@ export const Cone3D = ({ position, player, size }: Cone3DProps) => {
         <meshStandardMaterial
           color={color}
           emissive={color}
-          emissiveIntensity={1.5}
+          emissiveIntensity={1.2}
           metalness={1}
           roughness={0.1}
           transparent
@@ -94,22 +96,13 @@ export const Cone3D = ({ position, player, size }: Cone3DProps) => {
         />
       </mesh>
 
-      {/* Pulsing Glow Ring */}
-      <mesh ref={ringRef} position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[scaleX * 0.85, scaleX * 0.95, 32]} />
-        <meshBasicMaterial
-          color={color}
-          transparent
-          opacity={0.6}
-        />
-      </mesh>
-
       {/* Center Light Point */}
       <pointLight
         position={[0, scaleY * 0.8, 0]}
         color={color}
-        intensity={2}
-        distance={3}
+        intensity={1.5}
+        distance={2.5}
+        decay={2}
       />
     </group>
   );

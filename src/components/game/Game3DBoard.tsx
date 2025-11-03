@@ -24,8 +24,18 @@ export const Game3DBoard = ({
 
   return (
     <div className="w-full h-[600px] rounded-lg overflow-hidden border-2 border-primary/40 shadow-2xl relative">
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-950/50 via-black to-cyan-950/50 pointer-events-none z-10" />
-      <Canvas shadows gl={{ antialias: true, alpha: true }}>
+      <Canvas 
+        shadows 
+        gl={{ 
+          antialias: true, 
+          alpha: false,
+          powerPreference: "high-performance"
+        }} 
+        className="bg-transparent"
+        dpr={[1, 2]}
+        performance={{ min: 0.5 }}
+      >
+        <color attach="background" args={['#000011']} />
         <PerspectiveCamera makeDefault position={[0, 16, 16]} fov={50} />
         <OrbitControls 
           enablePan={false}
@@ -34,10 +44,10 @@ export const Game3DBoard = ({
           maxPolarAngle={Math.PI / 2.1}
           minPolarAngle={Math.PI / 6}
           enableDamping
-          dampingFactor={0.05}
+          dampingFactor={0.08}
         />
 
-        {/* Advanced Lighting Setup */}
+        {/* Optimized Lighting Setup */}
         <ambientLight intensity={0.3} />
         
         {/* Key Light */}
@@ -45,7 +55,7 @@ export const Game3DBoard = ({
           position={[15, 20, 10]}
           intensity={1.5}
           castShadow
-          shadow-mapSize={[4096, 4096]}
+          shadow-mapSize={[2048, 2048]}
           shadow-camera-left={-15}
           shadow-camera-right={15}
           shadow-camera-top={15}
@@ -53,13 +63,13 @@ export const Game3DBoard = ({
         />
         
         {/* Fill Light */}
-        <directionalLight position={[-10, 10, -10]} intensity={0.6} color="#00ffff" />
+        <directionalLight position={[-10, 10, -10]} intensity={0.5} color="#00ffff" />
         
         {/* Rim Light */}
-        <directionalLight position={[0, 5, -15]} intensity={0.8} color="#ff00ff" />
+        <directionalLight position={[0, 5, -15]} intensity={0.6} color="#ff00ff" />
         
         {/* Hemisphere for realistic sky/ground lighting */}
-        <hemisphereLight args={['#4400ff', '#00ffff', 0.5]} />
+        <hemisphereLight args={['#4400ff', '#00ffff', 0.4]} />
 
         {/* Fog for depth */}
         <fog attach="fog" args={['#000011', 15, 40]} />
@@ -99,11 +109,11 @@ export const Game3DBoard = ({
           );
         })}
 
-        {/* Post-processing Effects */}
-        <EffectComposer>
+        {/* Optimized Post-processing */}
+        <EffectComposer multisampling={0}>
           <Bloom
-            intensity={1.5}
-            luminanceThreshold={0.3}
+            intensity={1.2}
+            luminanceThreshold={0.4}
             luminanceSmoothing={0.9}
             mipmapBlur
           />
