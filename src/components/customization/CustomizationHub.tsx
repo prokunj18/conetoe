@@ -13,6 +13,9 @@ import { CRATES } from "@/data/crates";
 import { CrateOpening } from "./CrateOpening";
 import { Rarity, CrateType } from "@/types/customization";
 import { toast } from "sonner";
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
+import { Crate3D } from './Crate3D';
 
 interface CustomizationHubProps {
   isOpen: boolean;
@@ -147,10 +150,12 @@ export const CustomizationHub = ({ isOpen, onClose }: CustomizationHubProps) => 
                             ${cone.effect && owned ? cone.effect : ''}
                           `}
                         >
-                          <div className="space-y-2">
-                            <div className="relative">
+                      <div className="space-y-2">
+                        <div className="relative">
+                          <div className="w-12 h-12 mx-auto rounded-lg overflow-hidden bg-black/50">
+                            <div className="w-full h-full relative flex items-center justify-center">
                               <div 
-                                className="w-12 h-12 mx-auto relative shadow-glow"
+                                className="w-8 h-8 relative shadow-glow"
                                 style={{
                                   background: cone.preview,
                                   clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)',
@@ -162,10 +167,12 @@ export const CustomizationHub = ({ isOpen, onClose }: CustomizationHubProps) => 
                                   style={{ clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)' }}
                                 />
                               </div>
-                              {!owned && <Lock className="w-4 h-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-foreground" />}
                             </div>
-                            <p className="text-xs font-medium text-center truncate">{cone.name}</p>
                           </div>
+                          {!owned && <Lock className="w-4 h-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-foreground" />}
+                        </div>
+                        <p className="text-xs font-medium text-center truncate">{cone.name}</p>
+                      </div>
                         </button>
                       );
                     })}
@@ -214,16 +221,29 @@ export const CustomizationHub = ({ isOpen, onClose }: CustomizationHubProps) => 
                 <h3 className="text-xl font-bold mb-4 text-center bg-gradient-primary bg-clip-text text-transparent">Cone Crates</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {CRATES.map(crate => (
-                    <Card key={`cone-${crate.rarity}`} className={`p-6 bg-gradient-to-br ${crate.color} border-2 ${getRarityBorder(crate.rarity)}`}>
-                      <div className="flex flex-col items-center gap-4 text-white">
-                        <div 
-                          className="w-16 h-16 bg-white/20 flex items-center justify-center"
-                          style={{ clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)' }}
-                        >
-                          <Package className="w-10 h-10" />
+                    <Card key={`cone-${crate.rarity}`} className={`p-6 bg-gradient-to-br from-black/80 to-black/60 border-2 ${getRarityBorder(crate.rarity)}`}>
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="w-full h-32 rounded-lg overflow-hidden">
+                          <Canvas className="bg-transparent">
+                            <color attach="background" args={['#0a0a0f']} />
+                            <PerspectiveCamera makeDefault position={[0, 1, 2.5]} fov={50} />
+                            <OrbitControls 
+                              enableZoom={false}
+                              enablePan={false}
+                              autoRotate
+                              autoRotateSpeed={3}
+                            />
+                            
+                            <ambientLight intensity={0.5} />
+                            <directionalLight position={[3, 3, 3]} intensity={1} />
+                            
+                            <Crate3D rarity={crate.rarity} position={[0, 0, 0]} />
+                          </Canvas>
                         </div>
                         <div className="text-center space-y-2">
-                          <h3 className="text-2xl font-bold">{crate.name} Cone</h3>
+                          <h3 className={`text-2xl font-bold bg-gradient-to-r ${getRarityColor(crate.rarity)} bg-clip-text text-transparent`}>
+                            {crate.name} Cone
+                          </h3>
                           <Badge variant="secondary" className="text-lg">
                             {crate.cost} Bling
                           </Badge>
@@ -231,7 +251,7 @@ export const CustomizationHub = ({ isOpen, onClose }: CustomizationHubProps) => 
                         <Button 
                           onClick={() => handleCratePurchase(crate, 'cone')}
                           disabled={!profile || profile.coins < crate.cost}
-                          className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/50"
+                          className="w-full bg-gradient-primary hover:shadow-neon transition-all"
                         >
                           Purchase
                         </Button>
@@ -245,13 +265,29 @@ export const CustomizationHub = ({ isOpen, onClose }: CustomizationHubProps) => 
                 <h3 className="text-xl font-bold mb-4 text-center bg-gradient-secondary bg-clip-text text-transparent">Board Crates</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {CRATES.map(crate => (
-                    <Card key={`board-${crate.rarity}`} className={`p-6 bg-gradient-to-br ${crate.color} border-2 ${getRarityBorder(crate.rarity)}`}>
-                      <div className="flex flex-col items-center gap-4 text-white">
-                        <div className="w-16 h-16 bg-white/20 rounded-lg flex items-center justify-center">
-                          <Package className="w-10 h-10" />
+                    <Card key={`board-${crate.rarity}`} className={`p-6 bg-gradient-to-br from-black/80 to-black/60 border-2 ${getRarityBorder(crate.rarity)}`}>
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="w-full h-32 rounded-lg overflow-hidden">
+                          <Canvas className="bg-transparent">
+                            <color attach="background" args={['#0a0a0f']} />
+                            <PerspectiveCamera makeDefault position={[0, 1, 2.5]} fov={50} />
+                            <OrbitControls 
+                              enableZoom={false}
+                              enablePan={false}
+                              autoRotate
+                              autoRotateSpeed={3}
+                            />
+                            
+                            <ambientLight intensity={0.5} />
+                            <directionalLight position={[3, 3, 3]} intensity={1} />
+                            
+                            <Crate3D rarity={crate.rarity} position={[0, 0, 0]} />
+                          </Canvas>
                         </div>
                         <div className="text-center space-y-2">
-                          <h3 className="text-2xl font-bold">{crate.name} Board</h3>
+                          <h3 className={`text-2xl font-bold bg-gradient-to-r ${getRarityColor(crate.rarity)} bg-clip-text text-transparent`}>
+                            {crate.name} Board
+                          </h3>
                           <Badge variant="secondary" className="text-lg">
                             {crate.cost} Bling
                           </Badge>
@@ -259,7 +295,7 @@ export const CustomizationHub = ({ isOpen, onClose }: CustomizationHubProps) => 
                         <Button 
                           onClick={() => handleCratePurchase(crate, 'board')}
                           disabled={!profile || profile.coins < crate.cost}
-                          className="w-full bg-white/20 hover:bg-white/30 text-white border border-white/50"
+                          className="w-full bg-gradient-secondary hover:shadow-neon transition-all"
                         >
                           Purchase
                         </Button>

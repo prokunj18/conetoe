@@ -6,7 +6,6 @@ import { Board3DGrid } from './Board3DGrid';
 import { PlayerBench3D } from './PlayerBench3D';
 import { CellData } from '@/types/game';
 import { useSettings } from '@/contexts/SettingsContext';
-import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { Game3DErrorBoundary } from './Game3DErrorBoundary';
 
 interface Game3DBoardProps {
@@ -92,16 +91,6 @@ const Scene = ({ board, onCellClick, hoveredCell, onCellHover, boardTheme }: any
           />
         );
       })}
-
-      {/* Optimized Post-processing */}
-      <EffectComposer multisampling={0}>
-        <Bloom
-          intensity={1.2}
-          luminanceThreshold={0.4}
-          luminanceSmoothing={0.9}
-          mipmapBlur
-        />
-      </EffectComposer>
     </>
   );
 };

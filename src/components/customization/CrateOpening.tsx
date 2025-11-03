@@ -159,25 +159,50 @@ export const CrateOpening = ({ isOpen, onClose, crate, crateType, onReward }: Cr
           {reward && (
             <>
               <div className="relative">
-                {reward.type === 'cone' ? (
-                  <div 
-                    className="w-32 h-32 relative shadow-glow animate-scale-in"
-                    style={{
-                      background: reward.item.preview,
-                      clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)',
-                      filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.6))'
-                    }}
-                  >
-                    <div 
-                      className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-black/20"
-                      style={{ clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)' }}
+                <div className="w-48 h-48 mx-auto rounded-lg overflow-hidden">
+                  <Canvas className="bg-transparent">
+                    <color attach="background" args={['#0a0a0f']} />
+                    <PerspectiveCamera makeDefault position={[0, 1.5, 3]} fov={50} />
+                    <OrbitControls 
+                      enableZoom={false}
+                      enablePan={false}
+                      autoRotate
+                      autoRotateSpeed={1}
                     />
-                  </div>
-                ) : (
-                  <div 
-                    className={`w-32 h-32 ${reward.item.gradient} rounded-lg border-4 ${reward.item.preview} shadow-glow animate-scale-in`}
-                  />
-                )}
+                    
+                    <ambientLight intensity={0.5} />
+                    <directionalLight position={[3, 3, 3]} intensity={1.5} />
+                    <pointLight position={[-2, 2, -2]} intensity={1} color={reward.item.rarity === 'legendary' ? '#FFD700' : '#00ffff'} />
+                    
+                    {reward.type === 'cone' ? (
+                      <group position={[0, 0, 0]}>
+                        <mesh position={[0, 0.5, 0]} rotation={[0, 0, 0]}>
+                          <coneGeometry args={[0.7, 1.5, 32]} />
+                          <meshStandardMaterial
+                            color={reward.item.preview}
+                            emissive={reward.item.preview}
+                            emissiveIntensity={0.5}
+                            metalness={0.8}
+                            roughness={0.2}
+                          />
+                        </mesh>
+                      </group>
+                    ) : (
+                      <group position={[0, 0, 0]}>
+                        <mesh>
+                          <boxGeometry args={[1.5, 0.2, 1.5]} />
+                          <meshStandardMaterial
+                            color={reward.item.preview}
+                            emissive={reward.item.preview}
+                            emissiveIntensity={0.3}
+                            metalness={0.7}
+                            roughness={0.3}
+                          />
+                        </mesh>
+                      </group>
+                    )}
+                  </Canvas>
+                </div>
                 <Sparkles className="w-8 h-8 text-yellow-400 absolute -top-2 -right-2 animate-pulse" />
               </div>
               <div className="text-center space-y-2">
