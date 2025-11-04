@@ -13,9 +13,10 @@ interface Game3DBoardProps {
   onCellClick: (position: number) => void;
   hoveredCell: number | null;
   onCellHover: (position: number | null) => void;
+  playerInventories: [number[], number[]];
 }
 
-const Scene = ({ board, onCellClick, hoveredCell, onCellHover, boardTheme }: any) => {
+const Scene = ({ board, onCellClick, hoveredCell, onCellHover, boardTheme, playerInventories }: any) => {
   return (
     <>
       <color attach="background" args={['#000011']} />
@@ -60,9 +61,9 @@ const Scene = ({ board, onCellClick, hoveredCell, onCellHover, boardTheme }: any
       {/* Environment for reflections */}
       <Environment preset="night" />
 
-      {/* Player Benches */}
-      <PlayerBench3D player={1} position={[-7, -0.4, 0]} />
-      <PlayerBench3D player={2} position={[7, -0.4, 0]} />
+      {/* Player Benches with Inventory */}
+      <PlayerBench3D player={1} position={[-7, -0.4, 0]} inventory={playerInventories[0]} />
+      <PlayerBench3D player={2} position={[7, -0.4, 0]} inventory={playerInventories[1]} />
 
       {/* 3D Game Board */}
       <Board3DGrid 
@@ -99,7 +100,8 @@ export const Game3DBoard = ({
   board, 
   onCellClick, 
   hoveredCell,
-  onCellHover 
+  onCellHover,
+  playerInventories
 }: Game3DBoardProps) => {
   const { boardTheme } = useSettings();
 
@@ -127,6 +129,7 @@ export const Game3DBoard = ({
               hoveredCell={hoveredCell}
               onCellHover={onCellHover}
               boardTheme={boardTheme}
+              playerInventories={playerInventories}
             />
           </Suspense>
         </Canvas>
