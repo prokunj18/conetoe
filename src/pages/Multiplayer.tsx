@@ -61,19 +61,31 @@ const Multiplayer = () => {
 
     setJoining(true);
     try {
+      // Cleanup old rooms first
+      await supabase.rpc('cleanup_old_game_rooms');
+
       const { data: room, error } = await supabase
         .from('game_rooms')
         .select('*')
         .eq('room_code', roomCode.toUpperCase())
-        .eq('status', 'waiting')
         .single();
 
       if (error || !room) {
-        throw new Error('Room not found or already started');
+        throw new Error('Room not found');
+      }
+
+      // Check if room is still valid
+      if (room.status !== 'waiting') {
+        throw new Error('Game already started');
+      }
+
+      const roomAge = Date.now() - new Date(room.created_at).getTime();
+      if (roomAge > 30 * 60 * 1000) { // 30 minutes
+        throw new Error('Room expired');
       }
 
       if (room.host_id === user.id) {
-        throw new Error('You cannot join your own room');
+        throw new Error('Cannot join your own room');
       }
 
       if (room.guest_id) {
@@ -113,7 +125,10 @@ const Multiplayer = () => {
     
     setQuickMatching(true);
     try {
-      // Try to find an available room first
+      // Cleanup old rooms first
+      await supabase.rpc('cleanup_old_game_rooms');
+
+      // Try to find an available room
       const { data: availableRooms, error: findError } = await supabase
         .from('game_rooms')
         .select('*')
@@ -121,6 +136,7 @@ const Multiplayer = () => {
         .is('guest_id', null)
         .eq('is_bot_game', false)
         .neq('host_id', user.id)
+        .gte('created_at', new Date(Date.now() - 30 * 60 * 1000).toISOString()) // Only rooms less than 30 min old
         .limit(1);
 
       if (findError) throw findError;

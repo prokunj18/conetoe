@@ -15,15 +15,15 @@ export const Crate3D = ({ rarity, position, isOpening = false }: Crate3DProps) =
 
   useFrame((state) => {
     if (groupRef.current && !isOpening) {
-      // Idle floating animation
-      groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 0.8) * 0.1;
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.2;
+      // Simplified idle animation
+      groupRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime) * 0.1;
     }
 
     if (lidRef.current && isOpening) {
-      // Lid opening animation
-      lidRef.current.rotation.x = Math.min(lidRef.current.rotation.x + 0.05, Math.PI / 2);
-      lidRef.current.position.y = Math.min(lidRef.current.position.y + 0.02, 0.8);
+      // Simplified opening animation
+      const progress = Math.min((state.clock.elapsedTime % 3) / 0.8, 1);
+      lidRef.current.position.y = 0.5 + progress * 0.5;
+      lidRef.current.rotation.x = progress * 0.5;
     }
   });
 
@@ -63,14 +63,12 @@ export const Crate3D = ({ rarity, position, isOpening = false }: Crate3DProps) =
         </mesh>
       ))}
 
-      {/* Metal Corner Reinforcements */}
+      {/* Simplified Metal Corners */}
       {[
         [-0.45, -0.45, 0.45],
         [0.45, -0.45, 0.45],
-        [-0.45, 0.45, 0.45],
-        [0.45, 0.45, 0.45],
       ].map((pos, i) => (
-        <mesh key={`corner-${i}`} position={pos as [number, number, number]} castShadow>
+        <mesh key={`corner-${i}`} position={pos as [number, number, number]}>
           <boxGeometry args={[0.1, 0.1, 0.1]} />
           <meshStandardMaterial
             color={colors.metal}
@@ -80,22 +78,20 @@ export const Crate3D = ({ rarity, position, isOpening = false }: Crate3DProps) =
         </mesh>
       ))}
 
-      {/* Metal Bands */}
-      {[-0.35, 0.35].map((yPos, i) => (
-        <mesh key={`band-${i}`} position={[0, yPos, 0]} castShadow>
-          <boxGeometry args={[1.05, 0.08, 1.05]} />
-          <meshStandardMaterial
-            color={colors.metal}
-            roughness={0.2}
-            metalness={0.95}
-            emissive={colors.glow}
-            emissiveIntensity={0.3}
-          />
-        </mesh>
-      ))}
+      {/* Simplified Metal Band */}
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[1.05, 0.08, 1.05]} />
+        <meshStandardMaterial
+          color={colors.metal}
+          roughness={0.2}
+          metalness={0.95}
+          emissive={colors.glow}
+          emissiveIntensity={0.3}
+        />
+      </mesh>
 
       {/* Lid */}
-      <mesh ref={lidRef} position={[0, 0.5, 0]} castShadow receiveShadow>
+      <mesh ref={lidRef} position={[0, 0.5, 0]}>
         <boxGeometry args={[1.1, 0.1, 1.1]} />
         <meshStandardMaterial
           color={colors.wood}
@@ -104,12 +100,12 @@ export const Crate3D = ({ rarity, position, isOpening = false }: Crate3DProps) =
         />
       </mesh>
 
-      {/* Glow Effect */}
+      {/* Simplified Glow */}
       <pointLight
         position={[0, 0, 0]}
         color={colors.glow}
-        intensity={1.5}
-        distance={3}
+        intensity={1}
+        distance={2}
       />
     </group>
   );

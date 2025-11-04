@@ -276,6 +276,8 @@ export type Database = {
         Returns: Json
       }
       apply_exp_decay: { Args: { user_id: string }; Returns: undefined }
+      cleanup_finished_game_rooms: { Args: never; Returns: undefined }
+      cleanup_old_game_rooms: { Args: never; Returns: undefined }
       complete_game: {
         Args: { p_bet_amount: number; p_room_id: string; p_winner_id: string }
         Returns: undefined

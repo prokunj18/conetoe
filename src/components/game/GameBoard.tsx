@@ -237,6 +237,7 @@ export const GameBoard = () => {
                 onCellClick={handleCellClick}
                 hoveredCell={hoveredCell}
                 onCellHover={setHoveredCell}
+                playerInventories={playerInventories}
               />
             ) : (
               <div className="aspect-square max-w-sm mx-auto">
