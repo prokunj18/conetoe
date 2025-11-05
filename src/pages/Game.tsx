@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, Suspense } from "react";
+import { useState, useEffect, useMemo, Suspense, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, RotateCcw, Zap, Crown, Trophy } from "lucide-react";
@@ -13,13 +13,29 @@ import { Game3DErrorBoundary } from "@/components/game/Game3DErrorBoundary";
 import { useGameLogic } from "@/hooks/useGameLogic";
 import { useSettings } from "@/contexts/SettingsContext";
 import { CellData } from "@/types/game";
+import { useSound } from "@/hooks/useSound";
+import { PointLight } from 'three';
 
 const botNames = [
   "CyberKnight", "NeonPhantom", "QuantumRogue", "ShadowCone", "PrismWarrior",
   "VoidStriker", "NovaBlade", "EchoHunter", "ZenithBot", "OmegaTactician",
 ];
 
-const Scene = ({ board, onCellClick, hoveredCell, onCellHover, boardTheme, playerInventories, selectedCone, setSelectedCone, currentPlayer }: any) => {
+const DynamicLights = () => {
+  const light1Ref = useRef<PointLight>(null);
+  const light2Ref = useRef<PointLight>(null);
+  const light3Ref = useRef<PointLight>(null);
+
+  return (
+    <>
+      <pointLight ref={light1Ref} position={[5, 8, 5]} color="#00ffff" intensity={2} distance={15} castShadow />
+      <pointLight ref={light2Ref} position={[-5, 8, -5]} color="#ff00ff" intensity={2} distance={15} castShadow />
+      <pointLight ref={light3Ref} position={[0, 10, 0]} color="#ffffff" intensity={1.5} distance={20} />
+    </>
+  );
+};
+
+const Scene = ({ board, onCellClick, hoveredCell, onCellHover, boardTheme, playerInventories, selectedCone, setSelectedCone, currentPlayer, onConeSelect }: any) => {
   return (
     <>
       <color attach="background" args={['#000011']} />
@@ -34,10 +50,10 @@ const Scene = ({ board, onCellClick, hoveredCell, onCellHover, boardTheme, playe
         dampingFactor={0.08}
       />
 
-      <ambientLight intensity={0.4} />
+      <ambientLight intensity={0.3} />
       <directionalLight
         position={[15, 20, 10]}
-        intensity={2}
+        intensity={1.5}
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-camera-left={-20}
@@ -45,9 +61,10 @@ const Scene = ({ board, onCellClick, hoveredCell, onCellHover, boardTheme, playe
         shadow-camera-top={20}
         shadow-camera-bottom={-20}
       />
-      <directionalLight position={[-10, 10, -10]} intensity={0.7} color="#00ffff" />
-      <directionalLight position={[0, 5, -15]} intensity={0.8} color="#ff00ff" />
-      <hemisphereLight args={['#4400ff', '#00ffff', 0.5]} />
+      <directionalLight position={[-10, 10, -10]} intensity={0.5} color="#00ffff" />
+      <directionalLight position={[0, 5, -15]} intensity={0.6} color="#ff00ff" />
+      <hemisphereLight args={['#4400ff', '#00ffff', 0.3]} />
+      <DynamicLights />
       <fog attach="fog" args={['#000011', 20, 50]} />
       <Environment preset="night" />
 
@@ -74,7 +91,7 @@ const Scene = ({ board, onCellClick, hoveredCell, onCellHover, boardTheme, playe
         player={1} 
         position={[0, -0.5, -10]} 
         inventory={playerInventories[0]}
-        onConeSelect={setSelectedCone}
+        onConeSelect={onConeSelect}
         selectedCone={selectedCone}
         isCurrentPlayer={currentPlayer === 1}
       />
@@ -82,7 +99,7 @@ const Scene = ({ board, onCellClick, hoveredCell, onCellHover, boardTheme, playe
         player={2} 
         position={[0, -0.5, 10]} 
         inventory={playerInventories[1]}
-        onConeSelect={setSelectedCone}
+        onConeSelect={onConeSelect}
         selectedCone={selectedCone}
         isCurrentPlayer={currentPlayer === 2}
       />
@@ -113,6 +130,7 @@ const Game = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { boardTheme } = useSettings();
+  const { playBGM, stopBGM, playPlace, playOverlap, playSelect } = useSound({ bgm: true, sfx: true, volume: 0.5 });
   
   const gameState = location.state || { mode: "ai", difficulty: "normal" };
   const { 
@@ -131,6 +149,11 @@ const Game = () => {
   const [hoveredCell, setHoveredCell] = useState<number | null>(null);
   const [showWinModal, setShowWinModal] = useState(false);
 
+  useEffect(() => {
+    playBGM();
+    return () => stopBGM();
+  }, []);
+
   const botName = useMemo(() => {
     return botNames[Math.floor(Math.random() * botNames.length)];
   }, []);
@@ -142,10 +165,23 @@ const Game = () => {
   }, [gameStatus, winner]);
 
   const handleCellClick = (position: number) => {
-    if (gameStatus !== "playing" || !selectedCone) return;
+    if (gameStatus !== "playing" || !selectedCone || currentPlayer !== 1) return;
     if (isValidMove(position, selectedCone)) {
+      const existingCell = board[position];
+      if (existingCell && existingCell.size < selectedCone) {
+        playOverlap();
+      } else {
+        playPlace();
+      }
       makeMove(position, selectedCone);
       setSelectedCone(null);
+    }
+  };
+
+  const handleConeSelect = (size: number) => {
+    if (currentPlayer === 1 && gameStatus === "playing") {
+      setSelectedCone(size);
+      playSelect();
     }
   };
 
@@ -237,6 +273,7 @@ const Game = () => {
                 selectedCone={selectedCone}
                 setSelectedCone={setSelectedCone}
                 currentPlayer={currentPlayer}
+                onConeSelect={handleConeSelect}
               />
             </Suspense>
           </Canvas>
