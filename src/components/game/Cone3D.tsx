@@ -2,6 +2,8 @@ import { useRef, useMemo } from 'react';
 import { Group } from 'three';
 import { useFrame } from '@react-three/fiber';
 import { MeshTransmissionMaterial } from '@react-three/drei';
+import { useSettings } from '@/contexts/SettingsContext';
+import { getConeStyleColors } from '@/utils/themeColors';
 
 interface Cone3DProps {
   position: [number, number, number];
@@ -12,15 +14,10 @@ interface Cone3DProps {
 
 export const Cone3D = ({ position, player, size, isNew = false }: Cone3DProps) => {
   const groupRef = useRef<Group>(null);
+  const { coneStyle } = useSettings();
 
-  // Get holographic colors based on player
-  const getHolographicColor = () => {
-    return player === 1 ? '#00ffff' : '#ff00ff';
-  };
-
-  const getRimColor = () => {
-    return player === 1 ? '#ff00ff' : '#00ffff';
-  };
+  // Get colors based on customization
+  const colors = useMemo(() => getConeStyleColors(coneStyle, player), [coneStyle, player]);
 
   // Scale based on cone size
   const getScale = () => {
@@ -52,8 +49,8 @@ export const Cone3D = ({ position, player, size, isNew = false }: Cone3DProps) =
     }
   });
 
-  const color = getHolographicColor();
-  const rimColor = getRimColor();
+  const color = colors.color;
+  const rimColor = colors.accent;
   const scale = getScale();
   const [scaleX, scaleY, scaleZ] = scale;
 

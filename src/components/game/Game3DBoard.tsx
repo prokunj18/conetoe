@@ -68,7 +68,7 @@ const Scene = ({ board, onCellClick, hoveredCell, onCellHover, boardTheme, playe
       {/* 3D Game Board */}
       <Board3DGrid 
         board={board}
-        boardTheme={boardTheme}
+        theme={boardTheme}
         onCellClick={onCellClick}
         hoveredCell={hoveredCell}
         onCellHover={onCellHover}

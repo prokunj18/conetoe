@@ -19,46 +19,78 @@ const botNames = [
   "VoidStriker", "NovaBlade", "EchoHunter", "ZenithBot", "OmegaTactician",
 ];
 
-const Scene = ({ board, onCellClick, hoveredCell, onCellHover, boardTheme, playerInventories }: any) => {
+const Scene = ({ board, onCellClick, hoveredCell, onCellHover, boardTheme, playerInventories, selectedCone, setSelectedCone, currentPlayer }: any) => {
   return (
     <>
       <color attach="background" args={['#000011']} />
-      <PerspectiveCamera makeDefault position={[0, 14, 14]} fov={55} />
+      <PerspectiveCamera makeDefault position={[0, 16, 16]} fov={50} />
       <OrbitControls 
         enablePan={false}
         minDistance={12}
-        maxDistance={22}
-        maxPolarAngle={Math.PI / 2.1}
+        maxDistance={26}
+        maxPolarAngle={Math.PI / 2.2}
         minPolarAngle={Math.PI / 6}
         enableDamping
         dampingFactor={0.08}
       />
 
-      <ambientLight intensity={0.3} />
+      <ambientLight intensity={0.4} />
       <directionalLight
         position={[15, 20, 10]}
-        intensity={1.5}
+        intensity={2}
         castShadow
         shadow-mapSize={[2048, 2048]}
-        shadow-camera-left={-15}
-        shadow-camera-right={15}
-        shadow-camera-top={15}
-        shadow-camera-bottom={-15}
+        shadow-camera-left={-20}
+        shadow-camera-right={20}
+        shadow-camera-top={20}
+        shadow-camera-bottom={-20}
       />
-      <directionalLight position={[-10, 10, -10]} intensity={0.5} color="#00ffff" />
-      <directionalLight position={[0, 5, -15]} intensity={0.6} color="#ff00ff" />
-      <hemisphereLight args={['#4400ff', '#00ffff', 0.4]} />
-      <fog attach="fog" args={['#000011', 15, 40]} />
+      <directionalLight position={[-10, 10, -10]} intensity={0.7} color="#00ffff" />
+      <directionalLight position={[0, 5, -15]} intensity={0.8} color="#ff00ff" />
+      <hemisphereLight args={['#4400ff', '#00ffff', 0.5]} />
+      <fog attach="fog" args={['#000011', 20, 50]} />
       <Environment preset="night" />
 
-      {/* Player Benches with Inventory */}
-      <PlayerBench3D player={1} position={[-7, -0.4, 0]} inventory={playerInventories[0]} />
-      <PlayerBench3D player={2} position={[7, -0.4, 0]} inventory={playerInventories[1]} />
+      {/* Wooden Floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]} receiveShadow>
+        <planeGeometry args={[60, 60]} />
+        <meshStandardMaterial 
+          color="#3d2817"
+          roughness={0.9}
+          metalness={0.1}
+        />
+      </mesh>
+
+      {/* Floor Wood Planks Pattern */}
+      {Array.from({ length: 30 }).map((_, i) => (
+        <mesh key={`plank-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[-15 + i * 2, -0.99, 0]}>
+          <planeGeometry args={[0.08, 60]} />
+          <meshBasicMaterial color="#2a1810" transparent opacity={0.6} />
+        </mesh>
+      ))}
+
+      {/* Player Benches - Horizontal with Selection */}
+      <PlayerBench3D 
+        player={1} 
+        position={[0, -0.5, -10]} 
+        inventory={playerInventories[0]}
+        onConeSelect={setSelectedCone}
+        selectedCone={selectedCone}
+        isCurrentPlayer={currentPlayer === 1}
+      />
+      <PlayerBench3D 
+        player={2} 
+        position={[0, -0.5, 10]} 
+        inventory={playerInventories[1]}
+        onConeSelect={setSelectedCone}
+        selectedCone={selectedCone}
+        isCurrentPlayer={currentPlayer === 2}
+      />
 
       {/* Game Board */}
       <Board3DGrid 
         board={board}
-        boardTheme={boardTheme}
+        theme={boardTheme}
         onCellClick={onCellClick}
         hoveredCell={hoveredCell}
         onCellHover={onCellHover}
@@ -202,6 +234,9 @@ const Game = () => {
                 onCellHover={setHoveredCell}
                 boardTheme={boardTheme}
                 playerInventories={playerInventories}
+                selectedCone={selectedCone}
+                setSelectedCone={setSelectedCone}
+                currentPlayer={currentPlayer}
               />
             </Suspense>
           </Canvas>

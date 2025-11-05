@@ -1,31 +1,32 @@
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
 import { CellData } from '@/types/game';
 import { useFrame } from '@react-three/fiber';
 import { Mesh } from 'three';
+import { Board } from '@/types/game';
+import { useSettings } from '@/contexts/SettingsContext';
+import { getBoardThemeColors } from '@/utils/themeColors';
 
 interface Board3DGridProps {
-  board: (CellData | null)[];
-  boardTheme: string;
-  onCellClick: (position: number) => void;
+  board: Board;
+  theme: string;
+  onCellClick: (index: number) => void;
+  onCellHover: (index: number | null) => void;
   hoveredCell: number | null;
-  onCellHover: (position: number | null) => void;
 }
 
-export const Board3DGrid = ({ 
-  board, 
-  boardTheme, 
-  onCellClick, 
-  hoveredCell,
-  onCellHover 
-}: Board3DGridProps) => {
+export const Board3DGrid = ({ board, theme, onCellClick, onCellHover, hoveredCell }: Board3DGridProps) => {
   const platformRef = useRef<Mesh>(null);
+  const { boardTheme } = useSettings();
   
-  // Animate platform glow
+  // Get theme colors
+  const themeColors = useMemo(() => getBoardThemeColors(boardTheme), [boardTheme]);
+  
+  // Animated platform glow
   useFrame((state) => {
     if (platformRef.current) {
-      const glow = Math.sin(state.clock.elapsedTime * 0.5) * 0.2 + 0.8;
+      const pulse = Math.sin(state.clock.elapsedTime * 1.5) * 0.3 + 0.7;
       // @ts-ignore
-      platformRef.current.material.emissiveIntensity = glow;
+      platformRef.current.material.emissiveIntensity = pulse;
     }
   });
 
@@ -41,14 +42,14 @@ export const Board3DGrid = ({
 
   return (
     <group>
-      {/* Main Platform Base with Multiple Layers */}
+      {/* Main Platform Base with Themed Colors */}
       <group position={[0, -0.5, 0]}>
-        {/* Bottom Tier - Holographic Platform */}
-        <mesh receiveShadow position={[0, -0.3, 0]}>
+        {/* Bottom Tier */}
+        <mesh receiveShadow castShadow position={[0, -0.3, 0]}>
           <boxGeometry args={[11, 0.3, 11]} />
           <meshStandardMaterial
-            color="#1a0033"
-            emissive="#6600ff"
+            color={themeColors.secondary}
+            emissive={themeColors.accent}
             emissiveIntensity={0.5}
             metalness={1}
             roughness={0.2}
@@ -59,8 +60,8 @@ export const Board3DGrid = ({
         <mesh position={[0, -0.15, 0]}>
           <boxGeometry args={[11.2, 0.15, 11.2]} />
           <meshStandardMaterial
-            color="#00ffff"
-            emissive="#00ffff"
+            color={themeColors.primary}
+            emissive={themeColors.primary}
             emissiveIntensity={2}
             transparent
             opacity={0.7}
@@ -69,11 +70,11 @@ export const Board3DGrid = ({
         </mesh>
 
         {/* Second Tier */}
-        <mesh receiveShadow>
+        <mesh receiveShadow castShadow>
           <boxGeometry args={[10.5, 0.4, 10.5]} />
           <meshStandardMaterial
-            color="#2d004d"
-            emissive="#8800ff"
+            color={themeColors.secondary}
+            emissive={themeColors.accent}
             emissiveIntensity={0.7}
             metalness={0.9}
             roughness={0.1}
@@ -84,8 +85,8 @@ export const Board3DGrid = ({
         <mesh position={[0, 0.2, 0]}>
           <boxGeometry args={[10.7, 0.1, 10.7]} />
           <meshStandardMaterial
-            color="#ff00ff"
-            emissive="#ff00ff"
+            color={themeColors.accent}
+            emissive={themeColors.accent}
             emissiveIntensity={2.5}
             transparent
             opacity={0.8}
@@ -95,12 +96,12 @@ export const Board3DGrid = ({
       </group>
 
       {/* Main Game Board Platform */}
-      <mesh ref={platformRef} receiveShadow position={[0, -0.1, 0]}>
+      <mesh ref={platformRef} receiveShadow castShadow position={[0, -0.1, 0]}>
         <boxGeometry args={[10, 0.3, 10]} />
         <meshStandardMaterial
-          color="#0a0015"
-          emissive="#4400ff"
-          emissiveIntensity={0.6}
+          color={themeColors.secondary}
+          emissive={themeColors.primary}
+          emissiveIntensity={0.7}
           metalness={0.95}
           roughness={0.05}
           transparent
@@ -130,8 +131,8 @@ export const Board3DGrid = ({
         >
           <boxGeometry args={[2.6, 0.2, 2.6]} />
           <meshStandardMaterial
-            color={hoveredCell === index ? '#00ffff' : '#1a0033'}
-            emissive={hoveredCell === index ? '#00ffff' : '#6600cc'}
+            color={hoveredCell === index ? themeColors.primary : themeColors.secondary}
+            emissive={hoveredCell === index ? themeColors.primary : themeColors.accent}
             emissiveIntensity={hoveredCell === index ? 1.5 : 0.4}
             metalness={0.9}
             roughness={0.1}
@@ -148,8 +149,8 @@ export const Board3DGrid = ({
           <mesh position={[0, 0.26, (i - 0.5) * 3]}>
             <boxGeometry args={[9, 0.08, 0.08]} />
             <meshStandardMaterial
-              color="#00ffff"
-              emissive="#00ffff"
+              color={themeColors.primary}
+              emissive={themeColors.primary}
               emissiveIntensity={3}
               metalness={1}
               roughness={0}
@@ -159,8 +160,8 @@ export const Board3DGrid = ({
           <mesh position={[(i - 0.5) * 3, 0.26, 0]}>
             <boxGeometry args={[0.08, 0.08, 9]} />
             <meshStandardMaterial
-              color="#00ffff"
-              emissive="#00ffff"
+              color={themeColors.primary}
+              emissive={themeColors.primary}
               emissiveIntensity={3}
               metalness={1}
               roughness={0}
@@ -175,7 +176,7 @@ export const Board3DGrid = ({
           <pointLight
             key={`${x}-${z}`}
             position={[x, 0.5, z]}
-            color="#00ffff"
+            color={themeColors.primary}
             intensity={1}
             distance={2}
           />
