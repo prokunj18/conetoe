@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { AnimatedBackground } from '@/components/ui/animated-background';
+import { ArrowLeft } from 'lucide-react';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -68,7 +69,7 @@ const Auth = () => {
           return;
         }
 
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -78,6 +79,19 @@ const Auth = () => {
         });
 
         if (error) throw error;
+
+        // Create profile after signup
+        if (data.user) {
+          const { error: profileError } = await supabase.from('profiles').insert({
+            id: data.user.id,
+            username,
+            avatar: 'avatar1'
+          });
+
+          if (profileError) {
+            console.error('Profile creation error:', profileError);
+          }
+        }
 
         toast({ 
           title: 'Account created!',
@@ -99,6 +113,15 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative">
       <AnimatedBackground />
+      
+      <Button
+        variant="outline"
+        onClick={() => navigate('/')}
+        className="fixed top-4 left-4 z-20 flex items-center gap-2"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back
+      </Button>
       
       <Card className="w-full max-w-md z-10 bg-card/95 backdrop-blur-sm">
         <CardHeader>

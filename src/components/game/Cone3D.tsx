@@ -1,7 +1,6 @@
 import { useRef, useMemo } from 'react';
 import { Group } from 'three';
 import { useFrame } from '@react-three/fiber';
-import { MeshTransmissionMaterial } from '@react-three/drei';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getConeStyleColors } from '@/utils/themeColors';
 
@@ -56,28 +55,23 @@ export const Cone3D = ({ position, player, size, isNew = false }: Cone3DProps) =
 
   return (
     <group ref={groupRef} position={position}>
-      {/* Main Holographic Cone */}
+      {/* Main Cone Body - Solid with glass effect */}
       <mesh
         castShadow
-        receiveShadow
         scale={[scaleX, scaleY, scaleZ]}
         position={[0, scaleY * 0.5, 0]}
       >
         <coneGeometry args={[0.7, 1.5, 32]} />
-        <MeshTransmissionMaterial
+        <meshPhysicalMaterial
           color={color}
-          thickness={0.5}
-          roughness={0.1}
-          transmission={0.95}
-          ior={1.5}
-          chromaticAberration={0.5}
-          anisotropy={1}
-          distortion={0.3}
-          distortionScale={0.2}
-          temporalDistortion={0.1}
+          emissive={color}
+          emissiveIntensity={0.3}
+          metalness={0.2}
+          roughness={0.2}
+          transmission={0.5}
+          thickness={0.8}
           clearcoat={1}
-          attenuationDistance={0.5}
-          attenuationColor={rimColor}
+          clearcoatRoughness={0.1}
         />
       </mesh>
 
@@ -99,8 +93,8 @@ export const Cone3D = ({ position, player, size, isNew = false }: Cone3DProps) =
       <pointLight
         position={[0, scaleY * 0.8, 0]}
         color={color}
-        intensity={1.5}
-        distance={2.5}
+        intensity={1.2}
+        distance={2}
         decay={2}
       />
     </group>

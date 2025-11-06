@@ -67,11 +67,21 @@ const Index = () => {
   ];
 
   const startAIGame = () => {
+    if (!user) {
+      toast("Playing without login - progress won't be saved", {
+        description: "Sign in to save your stats and earn bling!"
+      });
+    }
     setShowPlayDialog(false);
     navigate("/game", { state: { difficulty: selectedDifficulty, mode: "ai" } });
   };
 
   const startDuelGame = () => {
+    if (!user) {
+      toast("Playing without login - progress won't be saved", {
+        description: "Sign in to save your stats and earn bling!"
+      });
+    }
     setShowPlayDialog(false);
     navigate("/game", { state: { mode: "local" } });
   };

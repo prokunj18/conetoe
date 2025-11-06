@@ -57,11 +57,11 @@ const MainMenu = () => {
       <div className="max-w-4xl w-full space-y-8 relative z-10">
         
         {/* Back to Home Button */}
-        <div className="absolute left-4 top-4">
+        <div className="fixed left-4 top-4 z-20">
           <Button
-            variant="ghost"
+            variant="outline"
             onClick={() => navigate("/")}
-            className="text-foreground hover:text-primary"
+            className="flex items-center gap-2"
           >
             ← Back to Home
           </Button>

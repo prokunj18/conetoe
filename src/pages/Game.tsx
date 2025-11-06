@@ -39,7 +39,7 @@ const Scene = ({ board, onCellClick, hoveredCell, onCellHover, boardTheme, playe
   return (
     <>
       <color attach="background" args={['#000011']} />
-      <PerspectiveCamera makeDefault position={[0, 16, 16]} fov={50} />
+      <PerspectiveCamera makeDefault position={[0, 16, -16]} fov={50} />
       <OrbitControls 
         enablePan={false}
         minDistance={12}
@@ -86,7 +86,23 @@ const Scene = ({ board, onCellClick, hoveredCell, onCellHover, boardTheme, playe
         </mesh>
       ))}
 
-      {/* Player Benches - Horizontal with Selection */}
+      {/* Back Wall */}
+      <mesh position={[0, 5, 15]} receiveShadow>
+        <planeGeometry args={[40, 15]} />
+        <meshStandardMaterial color="#2a1810" roughness={0.8} />
+      </mesh>
+
+      {/* Side Walls */}
+      <mesh position={[-15, 5, 0]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
+        <planeGeometry args={[30, 15]} />
+        <meshStandardMaterial color="#3d2817" roughness={0.8} />
+      </mesh>
+      <mesh position={[15, 5, 0]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
+        <planeGeometry args={[30, 15]} />
+        <meshStandardMaterial color="#3d2817" roughness={0.8} />
+      </mesh>
+
+      {/* Player Benches - Player 1 at bottom (closer), Player 2 at back */}
       <PlayerBench3D 
         player={1} 
         position={[0, -0.5, -10]} 
@@ -165,7 +181,7 @@ const Game = () => {
   }, [gameStatus, winner]);
 
   const handleCellClick = (position: number) => {
-    if (gameStatus !== "playing" || !selectedCone || currentPlayer !== 1) return;
+    if (gameStatus !== "playing" || !selectedCone) return;
     if (isValidMove(position, selectedCone)) {
       const existingCell = board[position];
       if (existingCell && existingCell.size < selectedCone) {
@@ -173,13 +189,17 @@ const Game = () => {
       } else {
         playPlace();
       }
-      makeMove(position, selectedCone);
-      setSelectedCone(null);
+      
+      // Debounce to prevent lag
+      requestAnimationFrame(() => {
+        makeMove(position, selectedCone);
+        setSelectedCone(null);
+      });
     }
   };
 
   const handleConeSelect = (size: number) => {
-    if (currentPlayer === 1 && gameStatus === "playing") {
+    if (gameStatus === "playing") {
       setSelectedCone(size);
       playSelect();
     }

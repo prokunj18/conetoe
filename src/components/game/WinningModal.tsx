@@ -39,7 +39,7 @@ export const WinningModal = ({
   }, [isVisible, winner]);
 
   useEffect(() => {
-    // Award coins when player wins (only for AI mode, and only once)
+    // Award coins when player wins (only for AI mode, and only once, and only if logged in)
     if (isVisible && winner === 1 && gameMode === "ai" && !coinsAwarded && profile) {
       const coinReward = difficulty === "master" ? 50 : difficulty === "hard" ? 30 : difficulty === "normal" ? 20 : 10;
       updateProfile({ coins: profile.coins + coinReward });
@@ -47,6 +47,10 @@ export const WinningModal = ({
       toast.success(`You earned ${coinReward} Bling!`, {
         icon: <Coins className="w-4 h-4" />
       });
+    } else if (isVisible && winner === 1 && gameMode === "ai" && !coinsAwarded && !profile) {
+      // Show message that coins can't be saved without login
+      toast.info("Sign in to earn Bling and save your progress!");
+      setCoinsAwarded(true);
     }
   }, [isVisible, winner, gameMode, difficulty, coinsAwarded, profile, updateProfile]);
 
@@ -159,7 +163,7 @@ export const WinningModal = ({
                 Winner
               </div>
             </div>
-            {gameMode === "ai" && winner === 1 && (
+            {gameMode === "ai" && winner === 1 && profile && (
               <div>
                 <div className="text-2xl font-bold text-accent">
                   +{difficulty === "master" ? 50 : difficulty === "hard" ? 30 : difficulty === "normal" ? 20 : 10}
