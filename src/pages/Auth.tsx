@@ -49,12 +49,19 @@ const Auth = () => {
       }
 
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
-        if (error) throw error;
+        if (error) {
+          console.error('Sign in error:', error);
+          throw new Error(error.message || 'Invalid email or password');
+        }
+
+        if (!data.user) {
+          throw new Error('Sign in failed. Please try again.');
+        }
         
         toast({ title: 'Welcome back!' });
         navigate('/');
@@ -100,9 +107,11 @@ const Auth = () => {
         navigate('/');
       }
     } catch (error: any) {
+      console.error('Auth error:', error);
+      const errorMessage = error.message || 'An error occurred. Please try again.';
       toast({
-        title: 'Error',
-        description: error.message,
+        title: isForgotPassword ? 'Password Reset Error' : isLogin ? 'Sign In Error' : 'Sign Up Error',
+        description: errorMessage,
         variant: 'destructive'
       });
     } finally {

@@ -3,6 +3,7 @@ import { Group } from 'three';
 import { useFrame } from '@react-three/fiber';
 import { useSettings } from '@/contexts/SettingsContext';
 import { getConeStyleColors } from '@/utils/themeColors';
+import { CONES } from '@/data/cones';
 
 interface Cone3DProps {
   position: [number, number, number];
@@ -15,8 +16,10 @@ export const Cone3D = ({ position, player, size, isNew = false }: Cone3DProps) =
   const groupRef = useRef<Group>(null);
   const { coneStyle } = useSettings();
 
-  // Get colors based on customization
+  // Get colors and rarity based on customization
   const colors = useMemo(() => getConeStyleColors(coneStyle, player), [coneStyle, player]);
+  const coneData = useMemo(() => CONES.find(c => c.id === coneStyle), [coneStyle]);
+  const rarity = coneData?.rarity || 'rare';
 
   // Scale based on cone size
   const getScale = () => {
@@ -24,27 +27,37 @@ export const Cone3D = ({ position, player, size, isNew = false }: Cone3DProps) =
     return [baseScale, baseScale * 1.8, baseScale];
   };
 
-  // Smoother animations with reduced frequency
+  // Smoother animations with rarity-based effects
   useFrame((state) => {
     if (!groupRef.current) return;
 
     const scale = getScale();
+    const time = state.clock.elapsedTime;
     
     if (isNew) {
       // Spawn animation
-      const elapsed = state.clock.elapsedTime;
-      if (elapsed < 0.5) {
-        const progress = elapsed * 2;
+      if (time < 0.5) {
+        const progress = time * 2;
         groupRef.current.scale.setScalar(progress);
         groupRef.current.position.y = (scale[1] * 0.5) + (1 - progress) * 2;
       }
     } else {
-      // Gentle floating - reduced amplitude
-      const float = Math.sin(state.clock.elapsedTime * 0.8 + position[0] + position[2]) * 0.03;
+      // Base floating
+      const float = Math.sin(time * 0.8 + position[0] + position[2]) * 0.03;
       groupRef.current.position.y = (scale[1] * 0.5) + float;
       
-      // Slow rotation
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.15;
+      // Rarity-based rotation and effects
+      if (rarity === 'legendary') {
+        groupRef.current.rotation.y = time * 0.5;
+        groupRef.current.rotation.x = Math.sin(time * 0.3) * 0.1;
+      } else if (rarity === 'mythic') {
+        groupRef.current.rotation.y = time * 0.3;
+        groupRef.current.scale.setScalar(1 + Math.sin(time * 2) * 0.05);
+      } else if (rarity === 'epic') {
+        groupRef.current.rotation.y = time * 0.2;
+      } else {
+        groupRef.current.rotation.y = time * 0.15;
+      }
     }
   });
 
@@ -53,26 +66,44 @@ export const Cone3D = ({ position, player, size, isNew = false }: Cone3DProps) =
   const scale = getScale();
   const [scaleX, scaleY, scaleZ] = scale;
 
+  // Rarity-based material properties
+  const getMaterialProps = () => {
+    const base = {
+      color,
+      emissive: color,
+      metalness: 0.2,
+      roughness: 0.2,
+      transmission: 0.5,
+      thickness: 0.8,
+      clearcoat: 1,
+      clearcoatRoughness: 0.1,
+    };
+
+    switch (rarity) {
+      case 'legendary':
+        return { ...base, emissiveIntensity: 0.8, metalness: 0.9, clearcoat: 1.5 };
+      case 'mythic':
+        return { ...base, emissiveIntensity: 0.6, metalness: 0.6, transmission: 0.7 };
+      case 'epic':
+        return { ...base, emissiveIntensity: 0.4, metalness: 0.4 };
+      default:
+        return { ...base, emissiveIntensity: 0.3 };
+    }
+  };
+
+  const materialProps = getMaterialProps();
+  const lightIntensity = rarity === 'legendary' ? 2.5 : rarity === 'mythic' ? 2 : rarity === 'epic' ? 1.5 : 1.2;
+
   return (
     <group ref={groupRef} position={position}>
-      {/* Main Cone Body - Solid with glass effect */}
+      {/* Main Cone Body */}
       <mesh
         castShadow
         scale={[scaleX, scaleY, scaleZ]}
         position={[0, scaleY * 0.5, 0]}
       >
         <coneGeometry args={[0.7, 1.5, 32]} />
-        <meshPhysicalMaterial
-          color={color}
-          emissive={color}
-          emissiveIntensity={0.3}
-          metalness={0.2}
-          roughness={0.2}
-          transmission={0.5}
-          thickness={0.8}
-          clearcoat={1}
-          clearcoatRoughness={0.1}
-        />
+        <meshPhysicalMaterial {...materialProps} />
       </mesh>
 
       {/* Cone Base Ring */}
@@ -81,7 +112,7 @@ export const Cone3D = ({ position, player, size, isNew = false }: Cone3DProps) =
         <meshStandardMaterial
           color={color}
           emissive={color}
-          emissiveIntensity={1.2}
+          emissiveIntensity={lightIntensity * 0.6}
           metalness={1}
           roughness={0.1}
           transparent
@@ -89,14 +120,42 @@ export const Cone3D = ({ position, player, size, isNew = false }: Cone3DProps) =
         />
       </mesh>
 
-      {/* Center Light Point */}
+      {/* Center Light - Intensity based on rarity */}
       <pointLight
         position={[0, scaleY * 0.8, 0]}
         color={color}
-        intensity={1.2}
-        distance={2}
+        intensity={lightIntensity}
+        distance={rarity === 'legendary' ? 4 : rarity === 'mythic' ? 3 : 2}
         decay={2}
       />
+
+      {/* Legendary glow effect */}
+      {rarity === 'legendary' && (
+        <>
+          <pointLight
+            position={[0, scaleY * 0.5, 0]}
+            color={rimColor}
+            intensity={1.5}
+            distance={5}
+            decay={2}
+          />
+          <mesh position={[0, scaleY * 0.7, 0]} scale={[1.2, 1.2, 1.2]}>
+            <sphereGeometry args={[0.3, 16, 16]} />
+            <meshBasicMaterial color={color} transparent opacity={0.3} />
+          </mesh>
+        </>
+      )}
+
+      {/* Mythic particles effect */}
+      {rarity === 'mythic' && (
+        <pointLight
+          position={[0, scaleY * 0.5, 0]}
+          color={rimColor}
+          intensity={1}
+          distance={3.5}
+          decay={2}
+        />
+      )}
     </group>
   );
 };

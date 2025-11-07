@@ -42,10 +42,12 @@ const Scene = ({ board, onCellClick, hoveredCell, onCellHover, boardTheme, playe
       <PerspectiveCamera makeDefault position={[0, 16, -16]} fov={50} />
       <OrbitControls 
         enablePan={false}
-        minDistance={12}
-        maxDistance={26}
-        maxPolarAngle={Math.PI / 2.2}
+        minDistance={14}
+        maxDistance={24}
+        maxPolarAngle={Math.PI / 2.3}
         minPolarAngle={Math.PI / 6}
+        minAzimuthAngle={-Math.PI / 4}
+        maxAzimuthAngle={Math.PI / 4}
         enableDamping
         dampingFactor={0.08}
       />
@@ -87,18 +89,18 @@ const Scene = ({ board, onCellClick, hoveredCell, onCellHover, boardTheme, playe
       ))}
 
       {/* Back Wall */}
-      <mesh position={[0, 5, 15]} receiveShadow>
+      <mesh position={[0, 5, 18]} receiveShadow>
         <planeGeometry args={[40, 15]} />
         <meshStandardMaterial color="#2a1810" roughness={0.8} />
       </mesh>
 
       {/* Side Walls */}
-      <mesh position={[-15, 5, 0]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
-        <planeGeometry args={[30, 15]} />
+      <mesh position={[-18, 5, 0]} rotation={[0, Math.PI / 2, 0]} receiveShadow>
+        <planeGeometry args={[40, 15]} />
         <meshStandardMaterial color="#3d2817" roughness={0.8} />
       </mesh>
-      <mesh position={[15, 5, 0]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
-        <planeGeometry args={[30, 15]} />
+      <mesh position={[18, 5, 0]} rotation={[0, -Math.PI / 2, 0]} receiveShadow>
+        <planeGeometry args={[40, 15]} />
         <meshStandardMaterial color="#3d2817" roughness={0.8} />
       </mesh>
 
@@ -145,7 +147,7 @@ const Scene = ({ board, onCellClick, hoveredCell, onCellHover, boardTheme, playe
 const Game = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { boardTheme } = useSettings();
+  const { boardTheme, gameMode } = useSettings();
   const { playBGM, stopBGM, playPlace, playOverlap, playSelect } = useSound({ bgm: true, sfx: true, volume: 0.5 });
   
   const gameState = location.state || { mode: "ai", difficulty: "normal" };
@@ -266,39 +268,51 @@ const Game = () => {
         </div>
       </div>
 
-      {/* Full Screen 3D Game */}
-      <div className="fixed inset-0 pt-20">
-        <Game3DErrorBoundary>
-          <Canvas 
-            shadows 
-            gl={{ 
-              antialias: true, 
-              alpha: false,
-              powerPreference: "high-performance",
-              failIfMajorPerformanceCaveat: false
-            }}
-            dpr={[1, 1.5]}
-            onCreated={(state) => {
-              state.gl.setClearColor('#000011');
-            }}
-          >
-            <Suspense fallback={null}>
-              <Scene 
-                board={board}
-                onCellClick={handleCellClick}
-                hoveredCell={hoveredCell}
-                onCellHover={setHoveredCell}
-                boardTheme={boardTheme}
-                playerInventories={playerInventories}
-                selectedCone={selectedCone}
-                setSelectedCone={setSelectedCone}
-                currentPlayer={currentPlayer}
-                onConeSelect={handleConeSelect}
-              />
-            </Suspense>
-          </Canvas>
-        </Game3DErrorBoundary>
-      </div>
+      {/* Game Board - Conditional 2D/3D */}
+      {gameMode === '3D' ? (
+        <div className="fixed inset-0 pt-20">
+          <Game3DErrorBoundary>
+            <Canvas 
+              shadows 
+              gl={{ 
+                antialias: true, 
+                alpha: false,
+                powerPreference: "high-performance",
+                failIfMajorPerformanceCaveat: false
+              }}
+              dpr={[1, 1.5]}
+              onCreated={(state) => {
+                state.gl.setClearColor('#000011');
+              }}
+            >
+              <Suspense fallback={null}>
+                <Scene 
+                  board={board}
+                  onCellClick={handleCellClick}
+                  hoveredCell={hoveredCell}
+                  onCellHover={setHoveredCell}
+                  boardTheme={boardTheme}
+                  playerInventories={playerInventories}
+                  selectedCone={selectedCone}
+                  setSelectedCone={setSelectedCone}
+                  currentPlayer={currentPlayer}
+                  onConeSelect={handleConeSelect}
+                />
+              </Suspense>
+            </Canvas>
+          </Game3DErrorBoundary>
+        </div>
+      ) : (
+        <div className="fixed inset-0 pt-20 flex items-center justify-center">
+          <div className="text-center text-muted-foreground">
+            <p className="text-lg mb-2">2D mode coming soon!</p>
+            <p className="text-sm">Enable 3D mode in Settings to play now</p>
+            <Button onClick={() => navigate('/settings')} className="mt-4">
+              Go to Settings
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Winning Modal */}
       <WinningModal
