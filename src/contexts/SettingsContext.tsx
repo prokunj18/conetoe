@@ -61,7 +61,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
 
   const [gameMode, setGameMode] = useState<GameMode>(() => {
     const saved = localStorage.getItem('gameMode');
-    return saved !== null ? JSON.parse(saved) : '3D';
+    return saved !== null ? JSON.parse(saved) : '2D';
   });
 
   useEffect(() => {
