@@ -5,13 +5,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Mail, Lock, User, Eye, EyeOff, Loader2 } from 'lucide-react';
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [isResetPassword, setIsResetPassword] = useState(false);
+  const [isProcessingRecovery, setIsProcessingRecovery] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -22,19 +23,66 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check if this is a password recovery flow
+  // Handle password recovery from email link - extract and process tokens from URL
   useEffect(() => {
-    const type = searchParams.get('type');
-    if (type === 'recovery') {
-      setIsResetPassword(true);
-    }
-  }, [searchParams]);
+    const handleRecovery = async () => {
+      const type = searchParams.get('type');
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+      
+      if (type === 'recovery') {
+        setIsProcessingRecovery(true);
+        
+        // If we have tokens in the URL hash, set the session
+        if (accessToken && refreshToken) {
+          try {
+            const { error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken
+            });
+            
+            if (error) {
+              console.error('Session error:', error);
+              toast({
+                title: 'Session Error',
+                description: 'Could not establish session. Please try the reset link again.',
+                variant: 'destructive'
+              });
+              setIsProcessingRecovery(false);
+              return;
+            }
+            
+            // Clear the hash from URL
+            window.history.replaceState(null, '', window.location.pathname + '?type=recovery');
+            setIsResetPassword(true);
+          } catch (err) {
+            console.error('Recovery error:', err);
+            toast({
+              title: 'Error',
+              description: 'Failed to process recovery link.',
+              variant: 'destructive'
+            });
+          }
+        } else {
+          // No tokens but recovery type - check if we already have a session
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            setIsResetPassword(true);
+          }
+        }
+        setIsProcessingRecovery(false);
+      }
+    };
+    
+    handleRecovery();
+  }, [searchParams, toast]);
 
   useEffect(() => {
-    if (user && !isResetPassword) {
+    if (user && !isResetPassword && !isProcessingRecovery) {
       navigate('/');
     }
-  }, [user, navigate, isResetPassword]);
+  }, [user, navigate, isResetPassword, isProcessingRecovery]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -161,6 +209,18 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
+  // Loading state while processing recovery
+  if (isProcessingRecovery) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-amber-400 animate-spin mx-auto mb-4" />
+          <p className="text-white text-lg">Processing recovery link...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Password reset form
   if (isResetPassword) {
