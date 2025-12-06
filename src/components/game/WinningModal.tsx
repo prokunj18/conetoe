@@ -12,6 +12,7 @@ interface WinningModalProps {
   onNewGame: () => void;
   gameMode: string;
   difficulty?: string;
+  betAmount?: number;
 }
 
 export const WinningModal = ({ 
@@ -19,10 +20,11 @@ export const WinningModal = ({
   isVisible, 
   onNewGame, 
   gameMode, 
-  difficulty 
+  difficulty,
+  betAmount = 0
 }: WinningModalProps) => {
   const navigate = useNavigate();
-  const { profile, updateProfile } = useProfile();
+  const { profile, updateProfile, reload } = useProfile();
   const [showConfetti, setShowConfetti] = useState(false);
   const [coinsAwarded, setCoinsAwarded] = useState(false);
 
@@ -39,20 +41,61 @@ export const WinningModal = ({
   }, [isVisible, winner]);
 
   useEffect(() => {
-    // Award coins when player wins (only for AI mode, and only once, and only if logged in)
-    if (isVisible && winner === 1 && gameMode === "ai" && !coinsAwarded && profile) {
-      const coinReward = difficulty === "master" ? 50 : difficulty === "hard" ? 30 : difficulty === "normal" ? 20 : 10;
-      updateProfile({ coins: profile.coins + coinReward });
+    const handleGameEnd = async () => {
+      if (!isVisible || coinsAwarded) return;
+      
+      // Only process rewards for logged in users
+      if (!profile) {
+        if (winner === 1 && gameMode === "ai") {
+          toast.info("Sign in to earn Bling and save your progress!");
+        }
+        setCoinsAwarded(true);
+        return;
+      }
+
+      // Calculate reward/loss
+      let coinChange = 0;
+      let message = "";
+
+      if (gameMode === "ai") {
+        if (winner === 1) {
+          // Player won - give base reward + bet winnings (double the bet)
+          const baseReward = difficulty === "master" ? 50 : difficulty === "hard" ? 30 : difficulty === "normal" ? 20 : 10;
+          const betWinnings = betAmount * 2; // Win double the bet
+          coinChange = baseReward + betWinnings;
+          message = betAmount > 0 
+            ? `You earned ${baseReward} Bling + ${betWinnings} from bet!`
+            : `You earned ${baseReward} Bling!`;
+        } else {
+          // Player lost - deduct bet
+          if (betAmount > 0) {
+            coinChange = -betAmount;
+            message = `You lost ${betAmount} Bling!`;
+          }
+        }
+      }
+
+      // Update coins and increment total_games
+      if (coinChange !== 0 || gameMode === "ai") {
+        const newCoins = Math.max(0, profile.coins + coinChange);
+        await updateProfile({ 
+          coins: newCoins,
+          total_games: profile.total_games + 1,
+          total_wins: winner === 1 ? profile.total_wins + 1 : profile.total_wins
+        });
+        
+        if (coinChange > 0) {
+          toast.success(message, { icon: <Coins className="w-4 h-4 text-amber-400" /> });
+        } else if (coinChange < 0) {
+          toast.error(message, { icon: <Coins className="w-4 h-4 text-destructive" /> });
+        }
+      }
+
       setCoinsAwarded(true);
-      toast.success(`You earned ${coinReward} Bling!`, {
-        icon: <Coins className="w-4 h-4" />
-      });
-    } else if (isVisible && winner === 1 && gameMode === "ai" && !coinsAwarded && !profile) {
-      // Show message that coins can't be saved without login
-      toast.info("Sign in to earn Bling and save your progress!");
-      setCoinsAwarded(true);
-    }
-  }, [isVisible, winner, gameMode, difficulty, coinsAwarded, profile, updateProfile]);
+    };
+
+    handleGameEnd();
+  }, [isVisible, winner, gameMode, difficulty, coinsAwarded, profile, updateProfile, betAmount]);
 
   if (!isVisible || !winner) return null;
 
@@ -97,10 +140,16 @@ export const WinningModal = ({
     );
   };
 
+  // Calculate display values
+  const baseReward = difficulty === "master" ? 50 : difficulty === "hard" ? 30 : difficulty === "normal" ? 20 : 10;
+  const betWinnings = betAmount * 2;
+  const totalWin = winner === 1 ? baseReward + betWinnings : 0;
+  const totalLoss = winner === 2 ? betAmount : 0;
+
   const winnerInfo = getWinnerInfo();
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-end md:items-center justify-center z-50 animate-fade-in pb-safe">{/* Mobile: bottom, Desktop: center */}
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-end md:items-center justify-center z-50 animate-fade-in pb-safe">
       {/* Confetti Effect */}
       {showConfetti && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -120,7 +169,7 @@ export const WinningModal = ({
       )}
 
       {/* Modal Content */}
-      <div className="bg-gradient-glass backdrop-blur-xl border border-card-border rounded-2xl p-6 md:p-8 max-w-md w-full mx-4 mb-4 md:mb-0 shadow-board animate-scale-in">{/* Added bottom margin for mobile */}
+      <div className="bg-gradient-glass backdrop-blur-xl border border-card-border rounded-2xl p-6 md:p-8 max-w-md w-full mx-4 mb-4 md:mb-0 shadow-board animate-scale-in">
         {/* Winner Icon */}
         <div className="text-center mb-6">
           <div className={`inline-flex p-6 ${winnerInfo.gradient} rounded-full shadow-neon animate-glow-pulse mb-4`}>
@@ -163,10 +212,10 @@ export const WinningModal = ({
                 Winner
               </div>
             </div>
-            {gameMode === "ai" && winner === 1 && profile && (
+            {gameMode === "ai" && profile && (
               <div>
-                <div className="text-2xl font-bold text-accent">
-                  +{difficulty === "master" ? 50 : difficulty === "hard" ? 30 : difficulty === "normal" ? 20 : 10}
+                <div className={`text-2xl font-bold ${winner === 1 ? 'text-accent' : 'text-destructive'}`}>
+                  {winner === 1 ? `+${totalWin}` : totalLoss > 0 ? `-${totalLoss}` : '0'}
                 </div>
                 <div className="text-xs text-muted-foreground uppercase tracking-wide">
                   Bling

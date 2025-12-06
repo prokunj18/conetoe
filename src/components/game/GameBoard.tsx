@@ -2,16 +2,19 @@ import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, RotateCcw, Zap, Crown, Trophy, Box } from "lucide-react";
+import { ArrowLeft, RotateCcw, Zap, Crown, Trophy, AlertCircle } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ConeCell } from "./ConeCell";
 import { PlayerInventory } from "./PlayerInventory";
 import { WinningModal } from "./WinningModal";
 import { HintsPopup } from "./HintsPopup";
+import { BetSlider } from "./BetSlider";
 import { Game3DBoard } from "./Game3DBoard";
 import { useGameLogic } from "@/hooks/useGameLogic";
 import { useSettings } from "@/contexts/SettingsContext";
+import { useProfile, canAffordBet } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const botNames = [
   "CyberKnight", "NeonPhantom", "QuantumRogue", "ShadowCone", "PrismWarrior",
@@ -22,8 +25,9 @@ const botNames = [
 export const GameBoard = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { toast } = useToast();
+  const { toast: shadcnToast } = useToast();
   const { showMoveHints, animationsEnabled, boardTheme, gameMode } = useSettings();
+  const { profile, reload } = useProfile();
   
   const gameState = location.state || { mode: "ai", difficulty: "normal" };
   const { 
@@ -42,6 +46,9 @@ export const GameBoard = () => {
   const [selectedCone, setSelectedCone] = useState<number | null>(null);
   const [hoveredCell, setHoveredCell] = useState<number | null>(null);
   const [showWinModal, setShowWinModal] = useState(false);
+  const [betAmount, setBetAmount] = useState(0);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [betLocked, setBetLocked] = useState(false);
 
   // Random bot name for AI opponent
   const botName = useMemo(() => {
@@ -49,14 +56,40 @@ export const GameBoard = () => {
     return botNames[randomIndex];
   }, []);
 
+  // Reset bet when game resets
+  useEffect(() => {
+    if (gameStatus === "playing" && !gameStarted) {
+      setBetLocked(false);
+    }
+  }, [gameStatus, gameStarted]);
+
   useEffect(() => {
     if (gameStatus === "finished" && winner) {
       setShowWinModal(true);
+      setGameStarted(false);
+      setBetLocked(false);
     }
   }, [gameStatus, winner]);
 
+  // Lock bet after first move
+  useEffect(() => {
+    const totalMoves = playerMoves[0] + playerMoves[1];
+    if (totalMoves > 0 && !betLocked) {
+      setBetLocked(true);
+      setGameStarted(true);
+    }
+  }, [playerMoves, betLocked]);
+
   const handleCellClick = (position: number) => {
     if (gameStatus !== "playing" || !selectedCone) return;
+
+    // Check if player can afford bet before first move (only for player 1)
+    if (!betLocked && currentPlayer === 1 && betAmount > 0) {
+      if (!canAffordBet(profile, betAmount)) {
+        toast.error("Insufficient Bling balance for this bet!");
+        return;
+      }
+    }
     
     if (isValidMove(position, selectedCone)) {
       makeMove(position, selectedCone);
@@ -68,6 +101,12 @@ export const GameBoard = () => {
     const availableCones = getAvailableCones(currentPlayer);
     if (availableCones.includes(coneSize)) {
       setSelectedCone(selectedCone === coneSize ? null : coneSize);
+    }
+  };
+
+  const handleBetChange = (value: number) => {
+    if (!betLocked) {
+      setBetAmount(value);
     }
   };
 
@@ -159,6 +198,8 @@ export const GameBoard = () => {
     return bgMap[boardTheme] || bgMap.neon;
   };
 
+  const maxBet = profile?.coins || 0;
+
   return (
     <div className={`min-h-screen ${getBackgroundClass()} p-4`}>
       <div className="max-w-6xl mx-auto space-y-6">
@@ -183,7 +224,11 @@ export const GameBoard = () => {
             
             <Button 
               variant="outline" 
-              onClick={resetGame}
+              onClick={() => {
+                resetGame();
+                setBetLocked(false);
+                setGameStarted(false);
+              }}
               className={`flex items-center gap-2 border-border ${themeClasses.glow}`}
             >
               <RotateCcw className="w-4 h-4" />
@@ -191,6 +236,24 @@ export const GameBoard = () => {
             </Button>
           </div>
         </div>
+
+        {/* Bet Slider - Only show for AI mode and logged in users before game starts */}
+        {gameState.mode === "ai" && profile && !betLocked && (
+          <BetSlider
+            maxBet={maxBet}
+            currentBet={betAmount}
+            onBetChange={handleBetChange}
+            disabled={betLocked}
+          />
+        )}
+
+        {/* Bet locked indicator */}
+        {gameState.mode === "ai" && betLocked && betAmount > 0 && (
+          <div className="flex items-center justify-center gap-2 text-amber-400 text-sm">
+            <AlertCircle className="w-4 h-4" />
+            <span>Bet locked: {betAmount} Bling (Win: +{betAmount * 2})</span>
+          </div>
+        )}
 
         {/* Game Status */}
         {gameStatus === "playing" && (
@@ -278,9 +341,13 @@ export const GameBoard = () => {
           onNewGame={() => {
             resetGame();
             setShowWinModal(false);
+            setBetAmount(0);
+            setBetLocked(false);
+            setGameStarted(false);
           }}
           gameMode={gameState.mode}
           difficulty={gameState.difficulty}
+          betAmount={betAmount}
         />
 
         {/* Hints Popup */}
