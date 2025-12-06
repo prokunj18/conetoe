@@ -220,4 +220,18 @@
     animation-delay: 0s !important;
     transition-duration: 0s !important;
   }
+
+  /* Slow spin animation for auth page */
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 20s linear infinite;
+  }
 }
