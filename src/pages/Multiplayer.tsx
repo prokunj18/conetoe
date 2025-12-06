@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProfile, hasCompletedAIGame } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Copy } from 'lucide-react';
+import { ArrowLeft, Lock, AlertCircle } from 'lucide-react';
 import { AnimatedBackground } from '@/components/ui/animated-background';
 
 const Multiplayer = () => {
   const { user } = useAuth();
+  const { profile, loading: profileLoading } = useProfile();
   const [roomCode, setRoomCode] = useState('');
   const [creating, setCreating] = useState(false);
   const [joining, setJoining] = useState(false);
@@ -24,8 +26,18 @@ const Multiplayer = () => {
     }
   }, [user, navigate]);
 
+  const canAccessMultiplayer = hasCompletedAIGame(profile);
+
   const createRoom = async () => {
     if (!user) return;
+    if (!canAccessMultiplayer) {
+      toast({
+        title: 'Locked',
+        description: 'Complete at least one AI game first to unlock multiplayer!',
+        variant: 'destructive'
+      });
+      return;
+    }
     
     setCreating(true);
     try {
@@ -58,6 +70,14 @@ const Multiplayer = () => {
 
   const joinRoom = async () => {
     if (!user || !roomCode.trim()) return;
+    if (!canAccessMultiplayer) {
+      toast({
+        title: 'Locked',
+        description: 'Complete at least one AI game first to unlock multiplayer!',
+        variant: 'destructive'
+      });
+      return;
+    }
 
     setJoining(true);
     try {
@@ -122,6 +142,14 @@ const Multiplayer = () => {
 
   const quickMatch = async () => {
     if (!user) return;
+    if (!canAccessMultiplayer) {
+      toast({
+        title: 'Locked',
+        description: 'Complete at least one AI game first to unlock multiplayer!',
+        variant: 'destructive'
+      });
+      return;
+    }
     
     setQuickMatching(true);
     try {
@@ -155,13 +183,13 @@ const Multiplayer = () => {
         navigate(`/waiting-lobby?room=${room.room_code}&role=guest`);
       } else {
         // No rooms available, create bot match
-        const { data: profile } = await supabase
+        const { data: profileData } = await supabase
           .from('profiles')
           .select('level')
           .eq('id', user.id)
           .single();
 
-        const playerLevel = profile?.level || 1;
+        const playerLevel = profileData?.level || 1;
 
         // Select bot based on player level
         const { data: bots } = await supabase
@@ -203,6 +231,18 @@ const Multiplayer = () => {
     }
   };
 
+  // Show loading while profile is loading
+  if (profileLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative">
       <AnimatedBackground />
@@ -222,13 +262,27 @@ const Multiplayer = () => {
         </CardHeader>
         
         <CardContent className="space-y-6">
+          {/* Lock Notice */}
+          {!canAccessMultiplayer && (
+            <div className="flex items-center gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+              <Lock className="w-6 h-6 text-amber-400 shrink-0" />
+              <div>
+                <p className="font-medium text-amber-400">Multiplayer Locked</p>
+                <p className="text-sm text-muted-foreground">
+                  Complete at least one AI game to unlock multiplayer mode.
+                </p>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-3">
             <Button 
               onClick={quickMatch} 
-              disabled={quickMatching}
-              className="w-full h-16 text-lg bg-gradient-primary hover:shadow-neon"
+              disabled={quickMatching || !canAccessMultiplayer}
+              className="w-full h-16 text-lg bg-gradient-primary hover:shadow-neon disabled:opacity-50"
               size="lg"
             >
+              {!canAccessMultiplayer && <Lock className="w-5 h-5 mr-2" />}
               {quickMatching ? 'Finding Match...' : '⚡ Quick Match'}
             </Button>
             <p className="text-xs text-center text-muted-foreground">
@@ -248,10 +302,11 @@ const Multiplayer = () => {
           <div className="space-y-3">
             <Button 
               onClick={createRoom} 
-              disabled={creating}
-              className="w-full h-14 text-lg"
+              disabled={creating || !canAccessMultiplayer}
+              className="w-full h-14 text-lg disabled:opacity-50"
               variant="secondary"
             >
+              {!canAccessMultiplayer && <Lock className="w-4 h-4 mr-2" />}
               {creating ? 'Creating...' : 'Create Private Room'}
             </Button>
             <p className="text-xs text-center text-muted-foreground">
@@ -275,13 +330,15 @@ const Multiplayer = () => {
               onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
               maxLength={6}
               className="text-center text-lg tracking-widest"
+              disabled={!canAccessMultiplayer}
             />
             <Button 
               onClick={joinRoom} 
-              disabled={joining || !roomCode.trim()}
-              className="w-full h-14 text-lg"
+              disabled={joining || !roomCode.trim() || !canAccessMultiplayer}
+              className="w-full h-14 text-lg disabled:opacity-50"
               variant="outline"
             >
+              {!canAccessMultiplayer && <Lock className="w-4 h-4 mr-2" />}
               {joining ? 'Joining...' : 'Join Room'}
             </Button>
           </div>

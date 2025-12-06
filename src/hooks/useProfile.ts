@@ -13,6 +13,16 @@ export interface Profile {
   coins: number;
 }
 
+// Check if user has completed at least one AI game
+export const hasCompletedAIGame = (profile: Profile | null): boolean => {
+  return profile ? profile.total_games >= 1 : false;
+};
+
+// Check if user can afford a bet
+export const canAffordBet = (profile: Profile | null, amount: number): boolean => {
+  return profile ? profile.coins >= amount : false;
+};
+
 export const useProfile = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
