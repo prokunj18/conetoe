@@ -54,24 +54,25 @@ export const WinningModal = ({
       }
 
       // Calculate reward/loss
+      // Bling system: bet is already deducted at game start
+      // - Win: get base reward + bet back + bet profit (total: base + bet*2)
+      // - Lose: already lost the bet (no additional change)
       let coinChange = 0;
       let message = "";
 
       if (gameMode === "ai") {
+        const baseReward = difficulty === "master" ? 50 : difficulty === "hard" ? 30 : difficulty === "normal" ? 20 : 10;
+        
         if (winner === 1) {
-          // Player won - give base reward + bet winnings (double the bet)
-          const baseReward = difficulty === "master" ? 50 : difficulty === "hard" ? 30 : difficulty === "normal" ? 20 : 10;
-          const betWinnings = betAmount * 2; // Win double the bet
-          coinChange = baseReward + betWinnings;
+          // Player won - get base reward + double the bet (bet back + profit)
+          coinChange = baseReward + (betAmount * 2);
           message = betAmount > 0 
-            ? `You earned ${baseReward} Bling + ${betWinnings} from bet!`
-            : `You earned ${baseReward} Bling!`;
+            ? `+${baseReward} base + ${betAmount * 2} bet winnings!`
+            : `+${baseReward} Bling!`;
         } else {
-          // Player lost - deduct bet
-          if (betAmount > 0) {
-            coinChange = -betAmount;
-            message = `You lost ${betAmount} Bling!`;
-          }
+          // Player lost - bet was already deducted at start, just base reward lost
+          coinChange = 0; // Bet already taken
+          message = betAmount > 0 ? `Lost ${betAmount} Bling bet!` : "";
         }
       }
 
@@ -142,8 +143,7 @@ export const WinningModal = ({
 
   // Calculate display values
   const baseReward = difficulty === "master" ? 50 : difficulty === "hard" ? 30 : difficulty === "normal" ? 20 : 10;
-  const betWinnings = betAmount * 2;
-  const totalWin = winner === 1 ? baseReward + betWinnings : 0;
+  const totalWin = winner === 1 ? baseReward + (betAmount * 2) : 0;
   const totalLoss = winner === 2 ? betAmount : 0;
 
   const winnerInfo = getWinnerInfo();

@@ -13,6 +13,7 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const botNames = [
   "CyberKnight", "NeonPhantom", "QuantumRogue", "ShadowCone", "PrismWarrior",
@@ -44,6 +45,7 @@ export const GameBoard = () => {
   const [selectedCone, setSelectedCone] = useState<number | null>(null);
   const [hoveredCell, setHoveredCell] = useState<number | null>(null);
   const [showWinModal, setShowWinModal] = useState(false);
+  const [betDeducted, setBetDeducted] = useState(false);
   
   // Get bet amount from navigation state (set in MainMenu)
   const betAmount = gameState.betAmount || 0;
@@ -53,6 +55,25 @@ export const GameBoard = () => {
     const randomIndex = Math.floor(Math.random() * botNames.length);
     return botNames[randomIndex];
   }, []);
+
+  // Deduct bet at game start (once)
+  useEffect(() => {
+    const deductBet = async () => {
+      if (betAmount > 0 && profile && !betDeducted && gameStatus === "playing") {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ coins: Math.max(0, profile.coins - betAmount) })
+          .eq('id', profile.id);
+        
+        if (!error) {
+          setBetDeducted(true);
+          reload();
+          toast.info(`${betAmount} Bling wagered!`);
+        }
+      }
+    };
+    deductBet();
+  }, [betAmount, profile, betDeducted, gameStatus, reload]);
 
   useEffect(() => {
     if (gameStatus === "finished" && winner) {
