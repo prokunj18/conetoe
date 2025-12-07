@@ -188,7 +188,7 @@ const MainMenu = () => {
                     <span>Free</span>
                     {betAmount > 0 && (
                       <span className="text-amber-400 font-medium animate-pulse-soft">
-                        Win: +{betAmount * 2} Bling
+                        Win: +{betAmount} profit
                       </span>
                     )}
                     <span>Max: {maxBet}</span>
