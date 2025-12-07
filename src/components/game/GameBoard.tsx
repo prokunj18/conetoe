@@ -2,17 +2,15 @@ import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, RotateCcw, Zap, Crown, Trophy, AlertCircle } from "lucide-react";
+import { ArrowLeft, RotateCcw, Zap, Crown, Trophy, AlertCircle, Sparkles } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ConeCell } from "./ConeCell";
 import { PlayerInventory } from "./PlayerInventory";
 import { WinningModal } from "./WinningModal";
 import { HintsPopup } from "./HintsPopup";
-import { BetSlider } from "./BetSlider";
-import { Game3DBoard } from "./Game3DBoard";
 import { useGameLogic } from "@/hooks/useGameLogic";
 import { useSettings } from "@/contexts/SettingsContext";
-import { useProfile, canAffordBet } from "@/hooks/useProfile";
+import { useProfile } from "@/hooks/useProfile";
 import { useToast } from "@/hooks/use-toast";
 import { toast } from "sonner";
 
@@ -46,9 +44,9 @@ export const GameBoard = () => {
   const [selectedCone, setSelectedCone] = useState<number | null>(null);
   const [hoveredCell, setHoveredCell] = useState<number | null>(null);
   const [showWinModal, setShowWinModal] = useState(false);
-  const [betAmount, setBetAmount] = useState(0);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [betLocked, setBetLocked] = useState(false);
+  
+  // Get bet amount from navigation state (set in MainMenu)
+  const betAmount = gameState.betAmount || 0;
 
   // Random bot name for AI opponent
   const botName = useMemo(() => {
@@ -56,40 +54,14 @@ export const GameBoard = () => {
     return botNames[randomIndex];
   }, []);
 
-  // Reset bet when game resets
-  useEffect(() => {
-    if (gameStatus === "playing" && !gameStarted) {
-      setBetLocked(false);
-    }
-  }, [gameStatus, gameStarted]);
-
   useEffect(() => {
     if (gameStatus === "finished" && winner) {
       setShowWinModal(true);
-      setGameStarted(false);
-      setBetLocked(false);
     }
   }, [gameStatus, winner]);
 
-  // Lock bet after first move
-  useEffect(() => {
-    const totalMoves = playerMoves[0] + playerMoves[1];
-    if (totalMoves > 0 && !betLocked) {
-      setBetLocked(true);
-      setGameStarted(true);
-    }
-  }, [playerMoves, betLocked]);
-
   const handleCellClick = (position: number) => {
     if (gameStatus !== "playing" || !selectedCone) return;
-
-    // Check if player can afford bet before first move (only for player 1)
-    if (!betLocked && currentPlayer === 1 && betAmount > 0) {
-      if (!canAffordBet(profile, betAmount)) {
-        toast.error("Insufficient Bling balance for this bet!");
-        return;
-      }
-    }
     
     if (isValidMove(position, selectedCone)) {
       makeMove(position, selectedCone);
@@ -101,12 +73,6 @@ export const GameBoard = () => {
     const availableCones = getAvailableCones(currentPlayer);
     if (availableCones.includes(coneSize)) {
       setSelectedCone(selectedCone === coneSize ? null : coneSize);
-    }
-  };
-
-  const handleBetChange = (value: number) => {
-    if (!betLocked) {
-      setBetAmount(value);
     }
   };
 
@@ -198,17 +164,15 @@ export const GameBoard = () => {
     return bgMap[boardTheme] || bgMap.neon;
   };
 
-  const maxBet = profile?.coins || 0;
-
   return (
-    <div className={`min-h-screen ${getBackgroundClass()} p-4`}>
+    <div className={`min-h-screen ${getBackgroundClass()} p-4 animate-fade-in`}>
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between animate-slide-down">
           <Button 
             variant="outline" 
             onClick={() => navigate("/")}
-            className={`flex items-center gap-2 border-border ${themeClasses.glow}`}
+            className={`flex items-center gap-2 border-border ${themeClasses.glow} hover:scale-105 transition-all duration-300`}
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Menu
@@ -216,20 +180,23 @@ export const GameBoard = () => {
           
           <div className="flex items-center gap-4">
             {gameState.mode === "ai" && (
-              <Badge variant="secondary" className="flex items-center gap-2">
+              <Badge variant="secondary" className="flex items-center gap-2 animate-pulse-soft">
                 {getDifficultyIcon()}
                 {gameState.difficulty?.charAt(0).toUpperCase() + gameState.difficulty?.slice(1)} AI
               </Badge>
             )}
             
+            {betAmount > 0 && (
+              <Badge className="bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-2 animate-glow-pulse">
+                <Sparkles className="w-3 h-3" />
+                {betAmount} Bling at stake
+              </Badge>
+            )}
+            
             <Button 
               variant="outline" 
-              onClick={() => {
-                resetGame();
-                setBetLocked(false);
-                setGameStarted(false);
-              }}
-              className={`flex items-center gap-2 border-border ${themeClasses.glow}`}
+              onClick={() => resetGame()}
+              className={`flex items-center gap-2 border-border ${themeClasses.glow} hover:scale-105 transition-all duration-300`}
             >
               <RotateCcw className="w-4 h-4" />
               New Game
@@ -237,42 +204,26 @@ export const GameBoard = () => {
           </div>
         </div>
 
-        {/* Bet Slider - Only show for AI mode and logged in users before game starts */}
-        {gameState.mode === "ai" && profile && !betLocked && (
-          <BetSlider
-            maxBet={maxBet}
-            currentBet={betAmount}
-            onBetChange={handleBetChange}
-            disabled={betLocked}
-          />
-        )}
-
-        {/* Bet locked indicator */}
-        {gameState.mode === "ai" && betLocked && betAmount > 0 && (
-          <div className="flex items-center justify-center gap-2 text-amber-400 text-sm">
-            <AlertCircle className="w-4 h-4" />
-            <span>Bet locked: {betAmount} Bling (Win: +{betAmount * 2})</span>
-          </div>
-        )}
-
         {/* Game Status */}
         {gameStatus === "playing" && (
-          <div className="text-center space-y-3 animate-fade-in">
+          <div className="text-center space-y-3 animate-scale-in">
             <div className="relative">
               <h2 className="text-3xl font-bold">
-                <span className={`${getPlayerGradient(currentPlayer)} bg-clip-text text-transparent animate-glow-pulse`}>
+                <span className={`${getPlayerGradient(currentPlayer)} bg-clip-text text-transparent animate-glow-pulse drop-shadow-lg`}>
                   {gameState.mode === "ai" 
                     ? (currentPlayer === 1 ? "Your Turn" : `${botName}'s Turn`)
                     : `Player ${currentPlayer} Turn`
                   }
                 </span>
               </h2>
+              {/* Animated glow effect behind text */}
+              <div className={`absolute -inset-4 ${getPlayerGradient(currentPlayer)} opacity-20 blur-2xl rounded-full animate-pulse-soft -z-10`} />
             </div>
             <div className="flex justify-center gap-4 text-sm">
-              <Badge className="bg-gradient-glass border border-primary/30 backdrop-blur-sm">
+              <Badge className="bg-gradient-glass border border-primary/30 backdrop-blur-sm hover:scale-105 transition-transform">
                 Move #{Math.floor((playerMoves[0] + playerMoves[1]) / 2) + 1}
               </Badge>
-              <Badge className="bg-gradient-glass border border-secondary/30 backdrop-blur-sm">
+              <Badge className="bg-gradient-glass border border-secondary/30 backdrop-blur-sm hover:scale-105 transition-transform">
                 Next return: {4 - (playerMoves[currentPlayer - 1] % 4)} moves
               </Badge>
             </div>
@@ -281,7 +232,7 @@ export const GameBoard = () => {
 
         <div className="grid lg:grid-cols-3 gap-6 items-start">
           {/* Player 1 Inventory */}
-          <Card className={`p-4 ${themeClasses.card}`}>
+          <Card className={`p-4 ${themeClasses.card} animate-slide-in-left hover:shadow-neon transition-all duration-500`}>
             <PlayerInventory
               player={1}
               inventory={playerInventories[0]}
@@ -292,37 +243,27 @@ export const GameBoard = () => {
             />
           </Card>
 
-          {/* Game Board */}
-          <Card className={`p-6 ${themeClasses.container} transition-all duration-500`}>
-            {gameMode === '3D' ? (
-              <Game3DBoard
-                board={board}
-                onCellClick={handleCellClick}
-                hoveredCell={hoveredCell}
-                onCellHover={setHoveredCell}
-                playerInventories={playerInventories}
-              />
-            ) : (
-              <div className="aspect-square max-w-sm mx-auto">
-                <div className="grid grid-cols-3 gap-3 h-full p-2">
-                  {board.map((cell, index) => (
-                    <ConeCell
-                      key={index}
-                      cell={cell}
-                      isHovered={hoveredCell === index}
-                      isValidMove={showMoveHints && selectedCone ? isValidMove(index, selectedCone) : false}
-                      onClick={() => handleCellClick(index)}
-                      onMouseEnter={() => setHoveredCell(index)}
-                      onMouseLeave={() => setHoveredCell(null)}
-                    />
-                  ))}
-                </div>
+          {/* Game Board - Always 2D mode */}
+          <Card className={`p-6 ${themeClasses.container} transition-all duration-500 animate-scale-in hover:shadow-2xl`}>
+            <div className="aspect-square max-w-sm mx-auto">
+              <div className="grid grid-cols-3 gap-3 h-full p-2">
+                {board.map((cell, index) => (
+                  <ConeCell
+                    key={index}
+                    cell={cell}
+                    isHovered={hoveredCell === index}
+                    isValidMove={showMoveHints && selectedCone ? isValidMove(index, selectedCone) : false}
+                    onClick={() => handleCellClick(index)}
+                    onMouseEnter={() => setHoveredCell(index)}
+                    onMouseLeave={() => setHoveredCell(null)}
+                  />
+                ))}
               </div>
-            )}
+            </div>
           </Card>
 
           {/* Player 2/AI Inventory */}
-          <Card className={`p-4 ${themeClasses.card}`}>
+          <Card className={`p-4 ${themeClasses.card} animate-slide-in-right hover:shadow-neon transition-all duration-500`}>
             <PlayerInventory
               player={2}
               inventory={playerInventories[1]}
@@ -341,9 +282,6 @@ export const GameBoard = () => {
           onNewGame={() => {
             resetGame();
             setShowWinModal(false);
-            setBetAmount(0);
-            setBetLocked(false);
-            setGameStarted(false);
           }}
           gameMode={gameState.mode}
           difficulty={gameState.difficulty}

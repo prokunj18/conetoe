@@ -5,11 +5,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Copy, Check, Users, Coins } from 'lucide-react';
+import { ArrowLeft, Copy, Check, Users, Coins, Sparkles } from 'lucide-react';
 import { AnimatedBackground } from '@/components/ui/animated-background';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useProfile } from '@/hooks/useProfile';
 import { Badge } from '@/components/ui/badge';
+import { Slider } from '@/components/ui/slider';
 
 const avatarOptions = [
   { id: 'avatar1', emoji: '🤖' },
@@ -230,13 +231,12 @@ const WaitingLobby = () => {
     : null;
 
   const maxBet = Math.min(profile?.coins || 0, guestProfile?.coins || 999999) / 2;
-  const betOptions = [25, 50, 100, 200].filter(b => b <= maxBet);
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative">
+    <div className="min-h-screen flex items-center justify-center p-4 relative animate-fade-in">
       <AnimatedBackground />
       
-      <Card className="w-full max-w-md z-10 bg-card/95 backdrop-blur-sm">
+      <Card className="w-full max-w-md z-10 bg-card/95 backdrop-blur-sm animate-scale-in hover:shadow-neon transition-all duration-500">
         <CardHeader>
           <div className="flex items-center justify-between mb-2">
             <Button variant="ghost" size="icon" onClick={cancelRoom}>
@@ -281,26 +281,33 @@ const WaitingLobby = () => {
             </div>
           )}
 
-          {/* Bet Selection - Only for host */}
+          {/* Bet Selection - Only for host with slider */}
           {role === 'host' && guestJoined && (
-            <div className="space-y-3">
-              <div className="text-sm font-medium text-center">Select Bet Amount</div>
-              <div className="grid grid-cols-4 gap-2">
-                {betOptions.map(amount => (
-                  <Button
-                    key={amount}
-                    variant={betAmount === amount ? 'default' : 'outline'}
-                    onClick={() => setBetAmount(amount)}
-                    className="h-12"
-                  >
-                    <Coins className="h-4 w-4 mr-1" />
-                    {amount}
-                  </Button>
-                ))}
+            <div className="space-y-4 p-4 bg-surface-glass rounded-xl border border-border/30 animate-fade-in">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-400" />
+                  <span className="text-sm font-medium">Bet Amount</span>
+                </div>
+                <Badge className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-400 border-amber-500/30 px-3">
+                  {betAmount} Bling
+                </Badge>
               </div>
-              <p className="text-xs text-center text-muted-foreground">
-                Win: +{betAmount} | Lose: -{betAmount}
-              </p>
+              <Slider
+                value={[betAmount]}
+                onValueChange={(values) => setBetAmount(values[0])}
+                min={10}
+                max={Math.min(maxBet * 2, 1000)}
+                step={10}
+                className="w-full"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Min: 10</span>
+                <span className="text-amber-400 font-medium animate-pulse-soft">
+                  Win: +{betAmount} Bling
+                </span>
+                <span>Max: {Math.min(maxBet * 2, 1000)}</span>
+              </div>
             </div>
           )}
 
