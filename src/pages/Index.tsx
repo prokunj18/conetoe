@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Play, Settings, Trophy, Brain, Users, Zap, Crown, BookOpen, User, LogIn, Sparkles } from "lucide-react";
+import { Play, Settings, Trophy, Brain, Users, Zap, Crown, BookOpen, User, LogIn, Sparkles, BarChart3 } from "lucide-react";
 import { AnimatedBackground } from "@/components/ui/animated-background";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import { BlingCurrency } from "@/components/ui/BlingCurrency";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { TutorialPrompt } from "@/components/tutorial/TutorialPrompt";
 
 const avatarOptions = [
   { id: 'avatar1', emoji: '🤖' },
@@ -192,6 +193,14 @@ const Index = () => {
             </Button>
 
             <Button
+              onClick={() => navigate("/stats")}
+              className="w-full h-16 text-xl font-semibold bg-gradient-player-2 hover:shadow-neon hover:scale-105 transition-all duration-300 rounded-full border-0"
+            >
+              <BarChart3 className="w-6 h-6 mr-3" />
+              Stats & Achievements
+            </Button>
+
+            <Button
               onClick={() => navigate("/settings")}
               className="w-full h-16 text-xl font-semibold bg-gradient-glass hover:shadow-glow hover:scale-105 transition-all duration-300 rounded-full border border-border/30"
             >
@@ -208,6 +217,9 @@ const Index = () => {
 
         {/* Bling Currency */}
         <BlingCurrency />
+
+        {/* Tutorial Prompt for New Players */}
+        <TutorialPrompt />
       </div>
 
       {/* Play Mode Selection Dialog */}
