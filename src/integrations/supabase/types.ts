@@ -256,6 +256,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          claimed_at: string
+          id: string
+          reward_type: string
+          reward_value: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          claimed_at?: string
+          id?: string
+          reward_type: string
+          reward_value: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          claimed_at?: string
+          id?: string
+          reward_type?: string
+          reward_value?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       leaderboard: {
@@ -276,6 +303,14 @@ export type Database = {
         Returns: Json
       }
       apply_exp_decay: { Args: { user_id: string }; Returns: undefined }
+      claim_achievement: {
+        Args: {
+          p_achievement_id: string
+          p_reward_type: string
+          p_reward_value: string
+        }
+        Returns: Json
+      }
       cleanup_finished_game_rooms: { Args: never; Returns: undefined }
       cleanup_old_game_rooms: { Args: never; Returns: undefined }
       complete_game: {
