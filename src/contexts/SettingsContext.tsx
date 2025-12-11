@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-export type BoardTheme = 'neon' | 'wooden' | 'crystal' | 'lava' | 'space' | 'matrix' | 'royal' | 'ocean' | 'midnight' | 'sunset';
-export type ConeStyle = 'classic' | 'fire' | 'emerald' | 'galaxy' | 'golden' | 'arctic' | 'shadow' | 'rainbow' | 'chrome' | 'plasma';
+// Allow any string to support all cone/board IDs from data files
+export type BoardTheme = string;
+export type ConeStyle = string;
 export type GameMode = '2D' | '3D';
 
 interface SettingsContextType {

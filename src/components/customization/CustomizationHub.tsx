@@ -141,7 +141,7 @@ export const CustomizationHub = ({ isOpen, onClose }: CustomizationHubProps) => 
                       return (
                         <button
                           key={cone.id}
-                          onClick={() => owned && setConeStyle(cone.id as any)}
+                          onClick={() => owned && setConeStyle(cone.id)}
                           disabled={!owned}
                           className={`
                             p-3 rounded-xl border-2 transition-all
@@ -194,7 +194,7 @@ export const CustomizationHub = ({ isOpen, onClose }: CustomizationHubProps) => 
                       return (
                         <button
                           key={board.id}
-                          onClick={() => owned && setBoardTheme(board.id as any)}
+                          onClick={() => owned && setBoardTheme(board.id)}
                           disabled={!owned}
                           className={`
                             p-3 rounded-xl border-2 transition-all

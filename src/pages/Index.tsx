@@ -194,7 +194,7 @@ const Index = () => {
 
             <Button
               onClick={() => navigate("/stats")}
-              className="w-full h-16 text-xl font-semibold bg-gradient-player-2 hover:shadow-neon hover:scale-105 transition-all duration-300 rounded-full border-0"
+              className="w-full h-16 text-xl font-semibold bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 hover:shadow-neon hover:scale-105 transition-all duration-300 rounded-full border-0"
             >
               <BarChart3 className="w-6 h-6 mr-3" />
               Stats & Achievements
