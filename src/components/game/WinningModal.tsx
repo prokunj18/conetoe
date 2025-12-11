@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Crown, Zap, RotateCcw, Home, Star, Coins } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface WinningModalProps {
@@ -13,6 +15,7 @@ interface WinningModalProps {
   gameMode: string;
   difficulty?: string;
   betAmount?: number;
+  roomId?: string;
 }
 
 export const WinningModal = ({ 
@@ -21,12 +24,19 @@ export const WinningModal = ({
   onNewGame, 
   gameMode, 
   difficulty,
-  betAmount = 0
+  betAmount = 0,
+  roomId
 }: WinningModalProps) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { user } = useAuth();
   const { profile, updateProfile, reload } = useProfile();
   const [showConfetti, setShowConfetti] = useState(false);
   const [coinsAwarded, setCoinsAwarded] = useState(false);
+  
+  // Get room ID from props or URL params for multiplayer
+  const multiplayerRoomId = roomId || searchParams.get('room');
+  const isMultiplayerGame = gameMode === "multiplayer" && multiplayerRoomId;
 
   useEffect(() => {
     if (isVisible && winner) {
@@ -45,7 +55,7 @@ export const WinningModal = ({
       if (!isVisible || coinsAwarded) return;
       
       // Only process rewards for logged in users
-      if (!profile) {
+      if (!profile || !user) {
         if (winner === 1 && gameMode === "ai") {
           toast.info("Sign in to earn Bling and save your progress!");
         }
@@ -53,10 +63,54 @@ export const WinningModal = ({
         return;
       }
 
-      // Calculate reward/loss
-      // Bling system: bet is already deducted at game start
-      // - Win: get base reward + bet back + bet profit (total: base + bet*2)
-      // - Lose: already lost the bet (no additional change)
+      // MULTIPLAYER GAMES: Use secure server-side RPC
+      if (isMultiplayerGame && multiplayerRoomId) {
+        try {
+          // Determine winner ID - player 1 is host, player 2 is guest
+          // We need to get room info to determine who won
+          const { data: room } = await supabase
+            .from('game_rooms')
+            .select('id, host_id, guest_id, bet_amount, status')
+            .eq('room_code', multiplayerRoomId)
+            .single();
+
+          if (room && room.status === 'playing') {
+            const winnerId = winner === 1 ? room.host_id : room.guest_id;
+            
+            // Call secure server-side function to complete game with actual room UUID
+            const { error } = await supabase.rpc('complete_game', {
+              p_room_id: room.id,
+              p_winner_id: winnerId,
+              p_bet_amount: room.bet_amount
+            });
+
+            if (error) {
+              console.error('Error completing game:', error);
+              toast.error("Error processing game results");
+            } else {
+              reload();
+              const isWinner = (winner === 1 && room.host_id === user.id) || 
+                              (winner === 2 && room.guest_id === user.id);
+              if (isWinner) {
+                toast.success(`+${room.bet_amount * 2} Bling won!`, { 
+                  icon: <Coins className="w-4 h-4 text-amber-400" /> 
+                });
+              } else {
+                toast.error(`Lost ${room.bet_amount} Bling bet!`, { 
+                  icon: <Coins className="w-4 h-4 text-destructive" /> 
+                });
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error in multiplayer game completion:', error);
+        }
+        
+        setCoinsAwarded(true);
+        return;
+      }
+
+      // AI GAMES: Process rewards client-side (single-player, no exploitation risk)
       let coinChange = 0;
       let message = "";
 
@@ -76,7 +130,7 @@ export const WinningModal = ({
         }
       }
 
-      // Update coins and increment total_games
+      // Update coins and increment total_games for AI games
       if (coinChange !== 0 || gameMode === "ai") {
         const newCoins = Math.max(0, profile.coins + coinChange);
         await updateProfile({ 
@@ -96,7 +150,7 @@ export const WinningModal = ({
     };
 
     handleGameEnd();
-  }, [isVisible, winner, gameMode, difficulty, coinsAwarded, profile, updateProfile, betAmount]);
+  }, [isVisible, winner, gameMode, difficulty, coinsAwarded, profile, user, updateProfile, betAmount, isMultiplayerGame, multiplayerRoomId, reload]);
 
   if (!isVisible || !winner) return null;
 

@@ -350,6 +350,10 @@ export type Database = {
         Args: { p_cost: number; p_item_id: string; p_item_type: string }
         Returns: Json
       }
+      refund_bet: {
+        Args: { p_amount: number; p_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

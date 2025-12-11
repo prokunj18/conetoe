@@ -192,11 +192,11 @@ const WaitingLobby = () => {
             variant: 'destructive'
           });
           
-          // Refund host by adding coins back
-          await supabase
-            .from('profiles')
-            .update({ coins: profile.coins })
-            .eq('id', user!.id);
+          // Refund host by adding coins back using secure RPC
+          await supabase.rpc('refund_bet', {
+            p_user_id: user!.id,
+            p_amount: betAmount
+          });
           
           setStarting(false);
           return;
