@@ -327,6 +327,7 @@ export type Database = {
         Returns: Json
       }
       apply_exp_decay: { Args: { user_id: string }; Returns: undefined }
+      cancel_abandoned_game: { Args: { p_room_id: string }; Returns: boolean }
       claim_achievement: {
         Args: {
           p_achievement_id: string
@@ -356,6 +357,10 @@ export type Database = {
       }
       refund_bet: {
         Args: { p_amount: number; p_user_id: string }
+        Returns: boolean
+      }
+      start_ai_game: {
+        Args: { p_bet_amount: number; p_difficulty: string }
         Returns: boolean
       }
       start_multiplayer_game: {
