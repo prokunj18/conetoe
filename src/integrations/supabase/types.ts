@@ -283,6 +283,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_cosmetics: {
+        Row: {
+          claimed_at: string
+          id: string
+          item_id: string
+          item_type: string
+          user_id: string
+        }
+        Insert: {
+          claimed_at?: string
+          id?: string
+          item_id: string
+          item_type: string
+          user_id: string
+        }
+        Update: {
+          claimed_at?: string
+          id?: string
+          item_id?: string
+          item_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       leaderboard: {
@@ -322,6 +346,10 @@ export type Database = {
         Returns: boolean
       }
       generate_room_code: { Args: never; Returns: string }
+      purchase_cosmetic: {
+        Args: { p_cost: number; p_item_id: string; p_item_type: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never

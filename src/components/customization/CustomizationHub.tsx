@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { Card } from "@/components/ui/card";
 import { Palette, LayoutGrid, Package, Lock } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { CONES } from "@/data/cones";
 import { BOARDS } from "@/data/boards";
 import { CRATES } from "@/data/crates";
@@ -24,18 +26,52 @@ interface CustomizationHubProps {
 
 export const CustomizationHub = ({ isOpen, onClose }: CustomizationHubProps) => {
   const { coneStyle, setConeStyle, boardTheme, setBoardTheme } = useSettings();
-  const { profile, updateProfile } = useProfile();
-  const [ownedCones, setOwnedCones] = useState<string[]>(() => {
-    const saved = localStorage.getItem('ownedCones');
-    return saved ? JSON.parse(saved) : ['classic'];
-  });
-  const [ownedBoards, setOwnedBoards] = useState<string[]>(() => {
-    const saved = localStorage.getItem('ownedBoards');
-    return saved ? JSON.parse(saved) : ['neon'];
-  });
+  const { profile, reload: reloadProfile } = useProfile();
+  const { user } = useAuth();
+  const [ownedCones, setOwnedCones] = useState<string[]>(['classic']);
+  const [ownedBoards, setOwnedBoards] = useState<string[]>(['neon']);
   const [selectedCrate, setSelectedCrate] = useState<CrateType | null>(null);
   const [selectedCrateType, setSelectedCrateType] = useState<'cone' | 'board'>('cone');
   const [crateOpening, setCrateOpening] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Load owned cosmetics from database
+  useEffect(() => {
+    const loadCosmetics = async () => {
+      if (!user) {
+        // For guests, use localStorage as fallback (but purchases won't persist)
+        const savedCones = localStorage.getItem('ownedCones');
+        const savedBoards = localStorage.getItem('ownedBoards');
+        setOwnedCones(savedCones ? JSON.parse(savedCones) : ['classic']);
+        setOwnedBoards(savedBoards ? JSON.parse(savedBoards) : ['neon']);
+        setLoading(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('user_cosmetics')
+        .select('item_type, item_id')
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error loading cosmetics:', error);
+        setLoading(false);
+        return;
+      }
+
+      const cones = data.filter(item => item.item_type === 'cone').map(item => item.item_id);
+      const boards = data.filter(item => item.item_type === 'board').map(item => item.item_id);
+
+      // Always include default items
+      setOwnedCones(['classic', ...cones.filter(c => c !== 'classic')]);
+      setOwnedBoards(['neon', ...boards.filter(b => b !== 'neon')]);
+      setLoading(false);
+    };
+
+    if (isOpen) {
+      loadCosmetics();
+    }
+  }, [user, isOpen]);
 
   const handleCratePurchase = (crate: CrateType, type: 'cone' | 'board') => {
     if (!profile || profile.coins < crate.cost) {
@@ -48,26 +84,59 @@ export const CustomizationHub = ({ isOpen, onClose }: CustomizationHubProps) => 
   };
 
   const handleReward = async (itemId: string, rarity: Rarity, type: 'cone' | 'board') => {
-    if (!selectedCrate || !profile) return;
+    if (!selectedCrate) return;
     
-    // Deduct coins and update profile
-    const newCoins = profile.coins - selectedCrate.cost;
-    await updateProfile({ coins: newCoins });
+    if (!user) {
+      // Guest mode: use localStorage (won't persist between sessions)
+      if (type === 'cone') {
+        const newOwned = [...ownedCones, itemId];
+        setOwnedCones(newOwned);
+        localStorage.setItem('ownedCones', JSON.stringify(newOwned));
+        const item = CONES.find(c => c.id === itemId);
+        toast.success(`Unlocked ${item?.name}! (Sign in to save progress)`);
+      } else {
+        const newOwned = [...ownedBoards, itemId];
+        setOwnedBoards(newOwned);
+        localStorage.setItem('ownedBoards', JSON.stringify(newOwned));
+        const item = BOARDS.find(b => b.id === itemId);
+        toast.success(`Unlocked ${item?.name}! (Sign in to save progress)`);
+      }
+      return;
+    }
+
+    // Authenticated user: use secure RPC function
+    const { data, error } = await supabase.rpc('purchase_cosmetic', {
+      p_item_type: type,
+      p_item_id: itemId,
+      p_cost: selectedCrate.cost
+    });
+
+    if (error) {
+      console.error('Purchase error:', error);
+      toast.error('Failed to purchase item');
+      return;
+    }
+
+    const result = data as { success: boolean; error?: string; item_type?: string; item_id?: string };
     
-    // Add to inventory
+    if (!result.success) {
+      toast.error(result.error || 'Failed to purchase item');
+      return;
+    }
+
+    // Update local state
     if (type === 'cone') {
-      const newOwned = [...ownedCones, itemId];
-      setOwnedCones(newOwned);
-      localStorage.setItem('ownedCones', JSON.stringify(newOwned));
+      setOwnedCones(prev => [...prev, itemId]);
       const item = CONES.find(c => c.id === itemId);
       toast.success(`Unlocked ${item?.name}!`);
     } else {
-      const newOwned = [...ownedBoards, itemId];
-      setOwnedBoards(newOwned);
-      localStorage.setItem('ownedBoards', JSON.stringify(newOwned));
+      setOwnedBoards(prev => [...prev, itemId]);
       const item = BOARDS.find(b => b.id === itemId);
       toast.success(`Unlocked ${item?.name}!`);
     }
+
+    // Reload profile to get updated coin balance
+    await reloadProfile();
   };
 
   const getRarityColor = (rarity: Rarity) => {
@@ -129,91 +198,99 @@ export const CustomizationHub = ({ isOpen, onClose }: CustomizationHubProps) => 
             </TabsList>
 
             <TabsContent value="cones" className="max-h-[65vh] overflow-y-auto space-y-6">
-              {(['legendary', 'mythic', 'epic', 'rare'] as const).map(rarity => (
-                <div key={rarity}>
-                  <h3 className={`text-lg font-bold mb-4 capitalize bg-gradient-to-r ${getRarityColor(rarity)} bg-clip-text text-transparent`}>
-                    {rarity} ({conesGrouped[rarity].length})
-                  </h3>
-                  <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-                    {conesGrouped[rarity].map(cone => {
-                      const owned = ownedCones.includes(cone.id);
-                      const selected = coneStyle === cone.id;
-                      return (
-                        <button
-                          key={cone.id}
-                          onClick={() => owned && setConeStyle(cone.id)}
-                          disabled={!owned}
-                          className={`
-                            p-3 rounded-xl border-2 transition-all
-                            ${owned ? 'hover:scale-105 cursor-pointer' : 'opacity-50 cursor-not-allowed'}
-                            ${selected ? `${getRarityBorder(cone.rarity)} bg-primary/15 shadow-glow scale-105` : 'border-border'}
-                            ${cone.effect && owned ? cone.effect : ''}
-                          `}
-                        >
-                      <div className="space-y-2">
-                        <div className="relative">
-                          <div className="w-12 h-12 mx-auto rounded-lg overflow-hidden bg-black/50">
-                            <div className="w-full h-full relative flex items-center justify-center">
-                              <div 
-                                className="w-8 h-8 relative shadow-glow"
-                                style={{
-                                  background: cone.preview,
-                                  clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)',
-                                  filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
-                                }}
-                              >
+              {loading ? (
+                <div className="text-center py-8 text-muted-foreground">Loading...</div>
+              ) : (
+                (['legendary', 'mythic', 'epic', 'rare'] as const).map(rarity => (
+                  <div key={rarity}>
+                    <h3 className={`text-lg font-bold mb-4 capitalize bg-gradient-to-r ${getRarityColor(rarity)} bg-clip-text text-transparent`}>
+                      {rarity} ({conesGrouped[rarity].length})
+                    </h3>
+                    <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+                      {conesGrouped[rarity].map(cone => {
+                        const owned = ownedCones.includes(cone.id);
+                        const selected = coneStyle === cone.id;
+                        return (
+                          <button
+                            key={cone.id}
+                            onClick={() => owned && setConeStyle(cone.id)}
+                            disabled={!owned}
+                            className={`
+                              p-3 rounded-xl border-2 transition-all
+                              ${owned ? 'hover:scale-105 cursor-pointer' : 'opacity-50 cursor-not-allowed'}
+                              ${selected ? `${getRarityBorder(cone.rarity)} bg-primary/15 shadow-glow scale-105` : 'border-border'}
+                              ${cone.effect && owned ? cone.effect : ''}
+                            `}
+                          >
+                        <div className="space-y-2">
+                          <div className="relative">
+                            <div className="w-12 h-12 mx-auto rounded-lg overflow-hidden bg-black/50">
+                              <div className="w-full h-full relative flex items-center justify-center">
                                 <div 
-                                  className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-black/20"
-                                  style={{ clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)' }}
-                                />
+                                  className="w-8 h-8 relative shadow-glow"
+                                  style={{
+                                    background: cone.preview,
+                                    clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)',
+                                    filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))'
+                                  }}
+                                >
+                                  <div 
+                                    className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-black/20"
+                                    style={{ clipPath: 'polygon(50% 5%, 5% 95%, 95% 95%)' }}
+                                  />
+                                </div>
                               </div>
                             </div>
+                            {!owned && <Lock className="w-4 h-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-foreground" />}
                           </div>
-                          {!owned && <Lock className="w-4 h-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-foreground" />}
+                          <p className="text-xs font-medium text-center truncate">{cone.name}</p>
                         </div>
-                        <p className="text-xs font-medium text-center truncate">{cone.name}</p>
-                      </div>
-                        </button>
-                      );
-                    })}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </TabsContent>
 
             <TabsContent value="boards" className="max-h-[65vh] overflow-y-auto space-y-6">
-              {(['legendary', 'mythic', 'epic', 'rare'] as const).map(rarity => (
-                <div key={rarity}>
-                  <h3 className={`text-lg font-bold mb-4 capitalize bg-gradient-to-r ${getRarityColor(rarity)} bg-clip-text text-transparent`}>
-                    {rarity} ({boardsGrouped[rarity].length})
-                  </h3>
-                  <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-                    {boardsGrouped[rarity].map(board => {
-                      const owned = ownedBoards.includes(board.id);
-                      const selected = boardTheme === board.id;
-                      return (
-                        <button
-                          key={board.id}
-                          onClick={() => owned && setBoardTheme(board.id)}
-                          disabled={!owned}
-                          className={`
-                            p-3 rounded-xl border-2 transition-all
-                            ${owned ? 'hover:scale-105 cursor-pointer' : 'opacity-50 cursor-not-allowed'}
-                            ${selected ? `${getRarityBorder(board.rarity)} bg-primary/15 shadow-glow scale-105` : 'border-border'}
-                          `}
-                        >
-                          <div className="space-y-2">
-                            <div className={`w-12 h-12 mx-auto ${board.gradient} rounded-lg border ${board.preview} relative`}>
-                              {!owned && <Lock className="w-4 h-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-foreground" />}
+              {loading ? (
+                <div className="text-center py-8 text-muted-foreground">Loading...</div>
+              ) : (
+                (['legendary', 'mythic', 'epic', 'rare'] as const).map(rarity => (
+                  <div key={rarity}>
+                    <h3 className={`text-lg font-bold mb-4 capitalize bg-gradient-to-r ${getRarityColor(rarity)} bg-clip-text text-transparent`}>
+                      {rarity} ({boardsGrouped[rarity].length})
+                    </h3>
+                    <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+                      {boardsGrouped[rarity].map(board => {
+                        const owned = ownedBoards.includes(board.id);
+                        const selected = boardTheme === board.id;
+                        return (
+                          <button
+                            key={board.id}
+                            onClick={() => owned && setBoardTheme(board.id)}
+                            disabled={!owned}
+                            className={`
+                              p-3 rounded-xl border-2 transition-all
+                              ${owned ? 'hover:scale-105 cursor-pointer' : 'opacity-50 cursor-not-allowed'}
+                              ${selected ? `${getRarityBorder(board.rarity)} bg-primary/15 shadow-glow scale-105` : 'border-border'}
+                            `}
+                          >
+                            <div className="space-y-2">
+                              <div className={`w-12 h-12 mx-auto ${board.gradient} rounded-lg border ${board.preview} relative`}>
+                                {!owned && <Lock className="w-4 h-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-foreground" />}
+                              </div>
+                              <p className="text-xs font-medium text-center truncate">{board.name}</p>
                             </div>
-                            <p className="text-xs font-medium text-center truncate">{board.name}</p>
-                          </div>
-                        </button>
-                      );
-                    })}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </TabsContent>
 
             <TabsContent value="crates" className="max-h-[65vh] overflow-y-auto space-y-6">
