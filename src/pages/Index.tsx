@@ -1,15 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Play, Settings, Trophy, Brain, Users, Zap, Crown, BookOpen, User, LogIn, Sparkles, BarChart3 } from "lucide-react";
+import { Play, Settings, Trophy, Brain, Users, Zap, Crown, BookOpen, LogIn, Sparkles, BarChart3 } from "lucide-react";
 import { AnimatedBackground } from "@/components/ui/animated-background";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { ConePreview } from "@/components/game/ConePreview";
-import { CustomizationButton } from "@/components/customization/CustomizationButton";
-import { CustomizationHub } from "@/components/customization/CustomizationHub";
 import { BlingCurrency } from "@/components/ui/BlingCurrency";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
@@ -34,7 +32,6 @@ const Index = () => {
   const { profile } = useProfile();
   const [showPlayDialog, setShowPlayDialog] = useState(false);
   const [selectedDifficulty, setSelectedDifficulty] = useState<"easy" | "normal" | "hard" | "master">("normal");
-  const [showCustomization, setShowCustomization] = useState(false);
 
   const difficulties = [
     { 
@@ -177,7 +174,7 @@ const Index = () => {
             </Button>
 
             <Button
-              onClick={() => setShowCustomization(true)}
+              onClick={() => navigate("/customization")}
               className="w-full h-16 text-xl font-semibold bg-gradient-secondary hover:shadow-neon hover:scale-105 transition-all duration-300 rounded-full border-0"
             >
               <Sparkles className="w-6 h-6 mr-3" />
@@ -315,12 +312,6 @@ const Index = () => {
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* Customization Hub */}
-      <CustomizationHub 
-        isOpen={showCustomization} 
-        onClose={() => setShowCustomization(false)} 
-      />
     </>
   );
 };
