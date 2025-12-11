@@ -90,18 +90,19 @@ const Multiplayer = () => {
         .eq('room_code', roomCode.toUpperCase())
         .single();
 
+      // Use generic error message to prevent room enumeration attacks
       if (error || !room) {
-        throw new Error('Room not found');
+        throw new Error('Room not available');
       }
 
-      // Check if room is still valid
+      // Check if room is still valid - use generic error for security
       if (room.status !== 'waiting') {
-        throw new Error('Game already started');
+        throw new Error('Room not available');
       }
 
       const roomAge = Date.now() - new Date(room.created_at).getTime();
       if (roomAge > 30 * 60 * 1000) { // 30 minutes
-        throw new Error('Room expired');
+        throw new Error('Room not available');
       }
 
       if (room.host_id === user.id) {
@@ -109,7 +110,7 @@ const Multiplayer = () => {
       }
 
       if (room.guest_id) {
-        throw new Error('Room is full');
+        throw new Error('Room not available');
       }
 
       const { error: updateError } = await supabase
