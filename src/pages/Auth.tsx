@@ -180,17 +180,8 @@ const Auth = () => {
           throw error;
         }
 
-        if (data.user) {
-          const { error: profileError } = await supabase.from('profiles').insert({
-            id: data.user.id,
-            username,
-            avatar: 'avatar1'
-          });
-
-          if (profileError) {
-            console.error('Profile creation error:', profileError);
-          }
-        }
+        // Profile is now created server-side by the handle_new_user() trigger
+        // The username is passed via user metadata in signUp options above
 
         toast({ 
           title: 'Account created!',
