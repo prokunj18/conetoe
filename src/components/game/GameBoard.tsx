@@ -56,24 +56,27 @@ export const GameBoard = () => {
     return botNames[randomIndex];
   }, []);
 
-  // Deduct bet at game start (once)
+  // Deduct bet at game start (once) using secure server-side RPC
   useEffect(() => {
     const deductBet = async () => {
       if (betAmount > 0 && profile && !betDeducted && gameStatus === "playing") {
-        const { error } = await supabase
-          .from('profiles')
-          .update({ coins: Math.max(0, profile.coins - betAmount) })
-          .eq('id', profile.id);
+        const { error } = await supabase.rpc('start_ai_game', {
+          p_bet_amount: betAmount,
+          p_difficulty: gameState.difficulty || 'normal'
+        });
         
         if (!error) {
           setBetDeducted(true);
           reload();
           toast.info(`${betAmount} Bling wagered!`);
+        } else {
+          console.error('Failed to deduct bet:', error);
+          toast.error('Failed to start game: ' + error.message);
         }
       }
     };
     deductBet();
-  }, [betAmount, profile, betDeducted, gameStatus, reload]);
+  }, [betAmount, profile, betDeducted, gameStatus, reload, gameState.difficulty]);
 
   useEffect(() => {
     if (gameStatus === "finished" && winner) {
