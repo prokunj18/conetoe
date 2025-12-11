@@ -341,6 +341,10 @@ export type Database = {
         Args: { p_bet_amount: number; p_room_id: string; p_winner_id: string }
         Returns: undefined
       }
+      confirm_game_participation: {
+        Args: { p_room_id: string }
+        Returns: boolean
+      }
       deduct_bet: {
         Args: { p_amount: number; p_user_id: string }
         Returns: boolean
@@ -352,6 +356,10 @@ export type Database = {
       }
       refund_bet: {
         Args: { p_amount: number; p_user_id: string }
+        Returns: boolean
+      }
+      start_multiplayer_game: {
+        Args: { p_bet_amount: number; p_room_code: string }
         Returns: boolean
       }
     }

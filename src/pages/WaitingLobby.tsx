@@ -162,56 +162,32 @@ const WaitingLobby = () => {
 
     setStarting(true);
     try {
-      // Deduct bet amount from host using secure function
-      const { data: hostDeducted, error: hostError } = await supabase.rpc('deduct_bet', {
-        p_user_id: user!.id,
-        p_amount: betAmount
+      // Use secure atomic RPC that handles all bet deductions and game start
+      const { data, error } = await supabase.rpc('start_multiplayer_game', {
+        p_room_code: roomCode,
+        p_bet_amount: betAmount
       });
 
-      if (hostError || !hostDeducted) {
+      if (error) {
+        // Parse error message for user-friendly display
+        let errorMessage = error.message;
+        if (errorMessage.includes('insufficient coins')) {
+          errorMessage = 'One of the players has insufficient coins to play.';
+        } else if (errorMessage.includes('host')) {
+          errorMessage = `You need ${betAmount} coins to play.`;
+        }
+        
         toast({
-          title: 'Insufficient coins',
-          description: `You need ${betAmount} coins to play`,
+          title: 'Cannot start game',
+          description: errorMessage,
           variant: 'destructive'
         });
         setStarting(false);
         return;
       }
 
-      // Deduct from guest if not bot using secure function
-      if (!isBot && guestProfile) {
-        const { data: guestDeducted, error: guestError } = await supabase.rpc('deduct_bet', {
-          p_user_id: guestProfile.id,
-          p_amount: betAmount
-        });
-
-        if (guestError || !guestDeducted) {
-          toast({
-            title: 'Guest has insufficient coins',
-            description: 'The game cannot start. Bet has been refunded.',
-            variant: 'destructive'
-          });
-          
-          // Refund host by adding coins back using secure RPC
-          await supabase.rpc('refund_bet', {
-            p_user_id: user!.id,
-            p_amount: betAmount
-          });
-          
-          setStarting(false);
-          return;
-        }
-      }
-
-      // Update room to playing status
-      await supabase
-        .from('game_rooms')
-        .update({ 
-          status: 'playing', 
-          started_at: new Date().toISOString(),
-          bet_amount: betAmount
-        })
-        .eq('room_code', roomCode);
+      // Game started successfully - room status updated by RPC
+      // Navigation will happen via the realtime subscription
 
     } catch (error: any) {
       toast({
