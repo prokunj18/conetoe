@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Play, Settings, Trophy, Brain, Users, Zap, Crown, BookOpen, LogIn, Sparkles, BarChart3 } from "lucide-react";
+import { Play, Settings, Trophy, Brain, Users, Zap, Crown, BookOpen, LogIn, Sparkles, BarChart3, Grid3X3, Triangle } from "lucide-react";
 import { AnimatedBackground } from "@/components/ui/animated-background";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { TutorialPrompt } from "@/components/tutorial/TutorialPrompt";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const avatarOptions = [
   { id: 'avatar1', emoji: '🤖' },
@@ -32,6 +33,7 @@ const Index = () => {
   const { profile } = useProfile();
   const [showPlayDialog, setShowPlayDialog] = useState(false);
   const [selectedDifficulty, setSelectedDifficulty] = useState<"easy" | "normal" | "hard" | "master">("normal");
+  const [gameVariant, setGameVariant] = useState<"conetoe" | "classic">("conetoe");
 
   const difficulties = [
     { 
@@ -71,7 +73,8 @@ const Index = () => {
       });
     }
     setShowPlayDialog(false);
-    navigate("/game", { state: { difficulty: selectedDifficulty, mode: "ai" } });
+    const route = gameVariant === "classic" ? "/classic-game" : "/game";
+    navigate(route, { state: { difficulty: selectedDifficulty, mode: "ai" } });
   };
 
   const startDuelGame = () => {
@@ -81,8 +84,10 @@ const Index = () => {
       });
     }
     setShowPlayDialog(false);
-    navigate("/game", { state: { mode: "local" } });
+    const route = gameVariant === "classic" ? "/classic-game" : "/game";
+    navigate(route, { state: { mode: "local" } });
   };
+
 
   // Stars and particles background
   const renderStars = () => {
@@ -227,6 +232,41 @@ const Index = () => {
               Select Game Mode
             </DialogTitle>
           </DialogHeader>
+          
+          {/* Game Variant Toggle */}
+          <div className="flex justify-center mb-4">
+            <Tabs value={gameVariant} onValueChange={(v) => setGameVariant(v as "conetoe" | "classic")} className="w-full max-w-md">
+              <TabsList className="grid w-full grid-cols-2 bg-card-glass border border-card-border">
+                <TabsTrigger 
+                  value="conetoe" 
+                  className="flex items-center gap-2 data-[state=active]:bg-gradient-primary data-[state=active]:text-white"
+                >
+                  <Triangle className="w-4 h-4" />
+                  Conetoe
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="classic" 
+                  className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-slate-600 data-[state=active]:to-slate-700 data-[state=active]:text-white"
+                >
+                  <Grid3X3 className="w-4 h-4" />
+                  Classic
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+          
+          {/* Variant Description */}
+          <div className="text-center mb-4 px-4">
+            {gameVariant === "conetoe" ? (
+              <p className="text-sm text-muted-foreground">
+                <span className="text-primary font-medium">Strategic cones</span> with stacking, size-based replacement, and 4-move returns
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                <span className="text-cyan-400 font-medium">Classic Tic-Tac-Toe</span> with traditional X and O gameplay
+              </p>
+            )}
+          </div>
           
           <div className="p-2">
             {/* Responsive Game Mode Selection */}

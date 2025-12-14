@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import MainMenu from "./pages/MainMenu";
 import Game from "./pages/Game";
+import ClassicGame from "./pages/ClassicGame";
 import Rules from "./pages/Rules";
 import Settings from "./pages/Settings";
 import Stats from "./pages/Stats";
@@ -32,6 +33,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/menu" element={<MainMenu />} />
               <Route path="/game" element={<Game />} />
+              <Route path="/classic-game" element={<ClassicGame />} />
               <Route path="/rules" element={<Rules />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/stats" element={<Stats />} />
