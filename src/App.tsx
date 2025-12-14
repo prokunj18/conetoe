@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SettingsProvider } from "@/contexts/SettingsContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
+import ClassicIndex from "./pages/ClassicIndex";
 import MainMenu from "./pages/MainMenu";
 import Game from "./pages/Game";
 import ClassicGame from "./pages/ClassicGame";
@@ -31,6 +32,7 @@ const App = () => (
           <AuthProvider>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/classic" element={<ClassicIndex />} />
               <Route path="/menu" element={<MainMenu />} />
               <Route path="/game" element={<Game />} />
               <Route path="/classic-game" element={<ClassicGame />} />
