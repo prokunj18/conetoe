@@ -50,7 +50,7 @@ export const ClassicCell = ({
         </div>
       );
     } else {
-      // O symbol with retro neon style
+      // O symbol with cool violet/pink neon style
       return (
         <div className="relative w-16 h-16 flex items-center justify-center">
           <svg viewBox="0 0 100 100" className="w-full h-full">
@@ -59,13 +59,13 @@ export const ClassicCell = ({
               fill="none" 
               stroke="url(#oGradient1)" 
               strokeWidth="12"
-              className="drop-shadow-[0_0_10px_hsl(15,100%,55%)]"
+              className="drop-shadow-[0_0_10px_hsl(280,100%,60%)]"
             />
             <defs>
               <linearGradient id="oGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="hsl(25, 100%, 65%)" />
-                <stop offset="50%" stopColor="hsl(15, 100%, 55%)" />
-                <stop offset="100%" stopColor="hsl(0, 90%, 55%)" />
+                <stop offset="0%" stopColor="hsl(280, 100%, 65%)" />
+                <stop offset="50%" stopColor="hsl(300, 80%, 55%)" />
+                <stop offset="100%" stopColor="hsl(320, 90%, 60%)" />
               </linearGradient>
             </defs>
           </svg>

@@ -120,7 +120,7 @@ export const ClassicGameBoard = () => {
         <div className="flex items-center justify-between animate-slide-down">
           <Button 
             variant="outline" 
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/classic")}
             className="flex items-center gap-2 border-slate-600/50 bg-slate-800/50 hover:bg-slate-700/50 hover:scale-105 transition-all duration-300"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -162,7 +162,7 @@ export const ClassicGameBoard = () => {
         {gameStatus === "playing" && (
           <div className="text-center space-y-3 animate-scale-in">
             <h2 className="text-3xl font-bold">
-              <span className={`${currentPlayer === 1 ? "text-cyan-400" : "text-orange-400"} drop-shadow-[0_0_10px_currentColor]`}>
+              <span className={`${currentPlayer === 1 ? "text-cyan-400" : "text-violet-400"} drop-shadow-[0_0_10px_currentColor]`}>
                 {gameState.mode === "ai" 
                   ? (currentPlayer === 1 ? "Your Turn (X)" : `${botName}'s Turn (O)`)
                   : `Player ${currentPlayer} Turn (${currentPlayer === 1 ? "X" : "O"})`
@@ -200,7 +200,7 @@ export const ClassicGameBoard = () => {
               <span className="text-slate-400">{gameState.mode === "ai" ? "You" : "Player 1"}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 flex items-center justify-center text-orange-400 font-bold text-lg drop-shadow-[0_0_5px_currentColor]">O</div>
+              <div className="w-6 h-6 flex items-center justify-center text-violet-400 font-bold text-lg drop-shadow-[0_0_5px_currentColor]">O</div>
               <span className="text-slate-400">{gameState.mode === "ai" ? botName : "Player 2"}</span>
             </div>
           </div>
