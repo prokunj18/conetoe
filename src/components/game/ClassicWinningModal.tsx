@@ -52,7 +52,7 @@ export const ClassicWinningModal = ({
             particleCount: 150,
             spread: 100,
             origin: { y: 0.6 },
-            colors: ['#22d3ee', '#f97316', '#fbbf24', '#a855f7']
+            colors: ['#22d3ee', '#8b5cf6', '#ec4899', '#a855f7']
           });
         }
       }
@@ -95,7 +95,7 @@ export const ClassicWinningModal = ({
               {getIcon()}
               <span className={`text-3xl font-bold ${
                 isDraw ? "text-slate-300" : 
-                (winner === 1 ? "text-cyan-400" : "text-orange-400")
+                (winner === 1 ? "text-cyan-400" : "text-violet-400")
               } drop-shadow-[0_0_10px_currentColor]`}>
                 {getTitle()}
               </span>
@@ -143,7 +143,7 @@ export const ClassicWinningModal = ({
             </Button>
             <Button 
               variant="outline"
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/classic")}
               className="w-full border-slate-600/50 hover:bg-slate-700/50"
             >
               <Home className="w-4 h-4 mr-2" />
