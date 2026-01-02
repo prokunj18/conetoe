@@ -7,8 +7,8 @@ export const BlingCurrency = () => {
   const { profile, loading } = useProfile();
   const location = useLocation();
 
-  // Only show on home page and customization page
-  const shouldShow = location.pathname === '/' || location.pathname === '/customize';
+  // Only show on home pages and customization page
+  const shouldShow = location.pathname === '/' || location.pathname === '/classic' || location.pathname === '/customize';
 
   if (!shouldShow) {
     return null;

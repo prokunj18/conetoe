@@ -126,13 +126,13 @@ const Index = () => {
           </Button>
         </div>
 
-        {/* Account Button - Top Right */}
-        <div className="absolute top-4 right-4 z-20">
+        {/* Account Button - Top Right (left of Bling) */}
+        <div className="absolute top-4 right-28 z-20">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => user ? navigate("/account") : navigate("/auth")}
-            className="bg-card/80 backdrop-blur-sm hover:bg-card/90 hover:scale-105 transition-all duration-300"
+            className="bg-card/80 backdrop-blur-sm hover:bg-card/90 hover:scale-105 transition-all duration-300 border border-border/50"
           >
             {user && profile ? (
               <Avatar className="w-8 h-8">
