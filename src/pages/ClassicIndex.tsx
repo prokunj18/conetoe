@@ -10,6 +10,7 @@ import { BlingCurrency } from "@/components/ui/BlingCurrency";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { DailyChallengeCard } from "@/components/game/DailyChallengeCard";
 
 const avatarOptions = [
   { id: 'avatar1', emoji: '🤖' },
@@ -176,7 +177,7 @@ const ClassicIndex = () => {
           </Button>
         </div>
 
-        <div className="max-w-md w-full flex flex-col items-center space-y-8 relative z-10">
+        <div className="max-w-md w-full flex flex-col items-center space-y-6 relative z-10">
           {/* Title Section - Cool Aesthetic */}
           <div className={`text-center space-y-4 ${animationsEnabled ? 'animate-fade-in' : ''}`}>
             <div className="relative">
@@ -205,6 +206,9 @@ const ClassicIndex = () => {
               <Grid3X3 className="w-5 h-5 text-violet-400/70 animate-pulse" style={{ animationDelay: '0.5s' }} />
             </div>
           </div>
+
+          {/* Daily Challenge Card */}
+          <DailyChallengeCard variant="classic" />
 
           {/* Menu Buttons - Cool Neon Style */}
           <div className={`w-full space-y-4 ${animationsEnabled ? 'animate-scale-in' : ''}`} style={animationsEnabled ? { animationDelay: '0.3s' } : {}}>

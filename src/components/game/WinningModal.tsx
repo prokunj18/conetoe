@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Crown, Zap, RotateCcw, Home, Star, Coins } from "lucide-react";
+import { Trophy, Crown, Zap, RotateCcw, Home, Star, Coins, Calendar } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDailyChallenge } from "@/hooks/useDailyChallenge";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -16,6 +17,7 @@ interface WinningModalProps {
   difficulty?: string;
   betAmount?: number;
   roomId?: string;
+  isDailyChallenge?: boolean;
 }
 
 export const WinningModal = ({ 
@@ -25,14 +27,17 @@ export const WinningModal = ({
   gameMode, 
   difficulty,
   betAmount = 0,
-  roomId
+  roomId,
+  isDailyChallenge = false
 }: WinningModalProps) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { profile, updateProfile, reload } = useProfile();
+  const { challenge, completeChallenge } = useDailyChallenge();
   const [showConfetti, setShowConfetti] = useState(false);
   const [coinsAwarded, setCoinsAwarded] = useState(false);
+  const [dailyChallengeReward, setDailyChallengeReward] = useState(0);
   
   // Get room ID from props or URL params for multiplayer
   const multiplayerRoomId = roomId || searchParams.get('room');
@@ -44,9 +49,10 @@ export const WinningModal = ({
       const timer = setTimeout(() => setShowConfetti(false), 3000);
       return () => clearTimeout(timer);
     }
-    // Reset coinsAwarded when modal closes
+    // Reset states when modal closes
     if (!isVisible) {
       setCoinsAwarded(false);
+      setDailyChallengeReward(0);
     }
   }, [isVisible, winner]);
 
@@ -146,11 +152,22 @@ export const WinningModal = ({
         }
       }
 
+      // Process daily challenge completion
+      if (isDailyChallenge && winner === 1 && challenge && !challenge.completed) {
+        const result = await completeChallenge();
+        if (result.success) {
+          setDailyChallengeReward(result.reward);
+          toast.success(`Daily Challenge Complete! +${result.reward} bonus Bling!`, { 
+            icon: <Calendar className="w-4 h-4 text-amber-400" /> 
+          });
+        }
+      }
+
       setCoinsAwarded(true);
     };
 
     handleGameEnd();
-  }, [isVisible, winner, gameMode, difficulty, coinsAwarded, profile, user, updateProfile, betAmount, isMultiplayerGame, multiplayerRoomId, reload]);
+  }, [isVisible, winner, gameMode, difficulty, coinsAwarded, profile, user, updateProfile, betAmount, isMultiplayerGame, multiplayerRoomId, reload, isDailyChallenge, challenge, completeChallenge]);
 
   if (!isVisible || !winner) return null;
 
@@ -197,7 +214,7 @@ export const WinningModal = ({
 
   // Calculate display values
   const baseReward = difficulty === "master" ? 50 : difficulty === "hard" ? 30 : difficulty === "normal" ? 20 : 10;
-  const totalWin = winner === 1 ? baseReward + (betAmount * 2) : 0;
+  const totalWin = winner === 1 ? baseReward + (betAmount * 2) + dailyChallengeReward : 0;
   const totalLoss = winner === 2 ? betAmount : 0;
 
   const winnerInfo = getWinnerInfo();
@@ -241,11 +258,15 @@ export const WinningModal = ({
         </div>
 
         {/* Difficulty Badge */}
-        {getDifficultyBadge() && (
-          <div className="flex justify-center mb-6">
-            {getDifficultyBadge()}
-          </div>
-        )}
+        <div className="flex justify-center gap-2 mb-6 flex-wrap">
+          {getDifficultyBadge()}
+          {isDailyChallenge && (
+            <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2 text-white border-0">
+              <Calendar className="w-4 h-4 mr-2" />
+              Daily Challenge
+            </Badge>
+          )}
+        </div>
 
         {/* Game Stats */}
         <div className="bg-surface-glass rounded-xl p-4 mb-6 border border-border/50">
