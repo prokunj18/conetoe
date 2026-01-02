@@ -157,8 +157,8 @@ const ClassicIndex = () => {
           </Button>
         </div>
 
-        {/* Account Button - Top Right */}
-        <div className="absolute top-4 right-4 z-20">
+        {/* Account Button - Top Right (left of Bling area) */}
+        <div className="absolute top-4 right-28 z-20">
           <Button
             variant="ghost"
             size="icon"
