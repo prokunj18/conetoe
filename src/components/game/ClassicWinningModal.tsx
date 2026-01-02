@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, RotateCcw, Home, Sparkles, Frown, Handshake } from "lucide-react";
+import { Trophy, RotateCcw, Home, Sparkles, Frown, Handshake, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
+import { useDailyChallenge } from "@/hooks/useDailyChallenge";
 import confetti from "canvas-confetti";
+import { toast } from "sonner";
 
 interface ClassicWinningModalProps {
   winner: number | null;
@@ -16,6 +18,7 @@ interface ClassicWinningModalProps {
   gameMode: "ai" | "local";
   difficulty?: string;
   betAmount?: number;
+  isDailyChallenge?: boolean;
 }
 
 export const ClassicWinningModal = ({
@@ -25,11 +28,14 @@ export const ClassicWinningModal = ({
   onNewGame,
   gameMode,
   difficulty,
-  betAmount = 0
+  betAmount = 0,
+  isDailyChallenge = false
 }: ClassicWinningModalProps) => {
   const navigate = useNavigate();
   const { profile, reload } = useProfile();
+  const { challenge, completeChallenge } = useDailyChallenge();
   const [rewardProcessed, setRewardProcessed] = useState(false);
+  const [dailyChallengeReward, setDailyChallengeReward] = useState(0);
 
   const isPlayerWin = gameMode === "ai" ? winner === 1 : true;
   const winAmount = betAmount * 2;
@@ -56,15 +62,28 @@ export const ClassicWinningModal = ({
           });
         }
       }
+
+      // Process daily challenge completion
+      if (isDailyChallenge && winner === 1 && !isDraw && challenge && !challenge.completed) {
+        const result = await completeChallenge();
+        if (result.success) {
+          setDailyChallengeReward(result.reward);
+          toast.success(`Daily Challenge Complete! +${result.reward} bonus Bling!`, { 
+            icon: <Calendar className="w-4 h-4 text-cyan-400" /> 
+          });
+        }
+      }
+
       setRewardProcessed(true);
     };
 
     processReward();
-  }, [isVisible, winner, isDraw, betAmount, profile, reload, isPlayerWin, rewardProcessed]);
+  }, [isVisible, winner, isDraw, betAmount, profile, reload, isPlayerWin, rewardProcessed, isDailyChallenge, challenge, completeChallenge]);
 
   useEffect(() => {
     if (!isVisible) {
       setRewardProcessed(false);
+      setDailyChallengeReward(0);
     }
   }, [isVisible]);
 
@@ -110,7 +129,7 @@ export const ClassicWinningModal = ({
               {winner === 1 && gameMode === "ai" ? (
                 <Badge className="bg-gradient-to-r from-amber-500/30 to-yellow-500/30 text-amber-300 border-amber-500/50 px-4 py-2 text-lg flex items-center gap-2 mx-auto w-fit">
                   <Sparkles className="w-5 h-5" />
-                  +{winAmount} Bling Won!
+                  +{winAmount + dailyChallengeReward} Bling Won!
                 </Badge>
               ) : (
                 <Badge className="bg-slate-700/50 text-slate-400 border-slate-500/50 px-4 py-2">
@@ -121,7 +140,7 @@ export const ClassicWinningModal = ({
           )}
 
           {/* Game Info */}
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-4 flex-wrap">
             {gameMode === "ai" && difficulty && (
               <Badge variant="outline" className="border-slate-500/50 text-slate-300">
                 {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} AI
@@ -130,6 +149,12 @@ export const ClassicWinningModal = ({
             <Badge variant="outline" className="border-slate-500/50 text-slate-300">
               Classic Tic-Tac-Toe
             </Badge>
+            {isDailyChallenge && (
+              <Badge className="bg-gradient-to-r from-cyan-500 to-violet-500 border-0">
+                <Calendar className="w-3 h-3 mr-1" />
+                Daily Challenge
+              </Badge>
+            )}
           </div>
 
           {/* Actions */}

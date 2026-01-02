@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { TutorialPrompt } from "@/components/tutorial/TutorialPrompt";
+import { DailyChallengeCard } from "@/components/game/DailyChallengeCard";
 
 const avatarOptions = [
   { id: 'avatar1', emoji: '🤖' },
@@ -145,7 +146,7 @@ const Index = () => {
           </Button>
         </div>
 
-        <div className="max-w-md w-full flex flex-col items-center space-y-8 relative z-10">
+        <div className="max-w-md w-full flex flex-col items-center space-y-6 relative z-10">
           {/* Title Section */}
           <div className={`text-center space-y-4 ${animationsEnabled ? 'animate-fade-in' : ''}`}>
             <div className="relative">
@@ -163,6 +164,9 @@ const Index = () => {
               TACTICAL WARFARE
             </div>
           </div>
+
+          {/* Daily Challenge Card */}
+          <DailyChallengeCard variant="conetoe" />
 
           {/* Menu Buttons */}
           <div className={`w-full space-y-4 ${animationsEnabled ? 'animate-scale-in' : ''}`} style={animationsEnabled ? { animationDelay: '0.3s' } : {}}>
