@@ -15,6 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import confetti from "canvas-confetti";
+import { QuestsPanel } from "@/components/game/QuestsPanel";
 
 interface Achievement {
   id: string;
@@ -375,6 +376,11 @@ const Stats = () => {
             {stats.level * 100 - stats.exp} XP until Level {stats.level + 1}
           </p>
         </Card>
+
+        {/* Quests Section */}
+        <div className="animate-fade-in" style={{ animationDelay: '0.15s' }}>
+          <QuestsPanel />
+        </div>
 
         {/* Achievements Section */}
         <Card className="p-6 bg-gradient-glass border border-card-border backdrop-blur-xl animate-fade-in" style={{ animationDelay: '0.2s' }}>

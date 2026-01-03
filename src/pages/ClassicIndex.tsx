@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Play, Settings, Brain, Users, Zap, Crown, BookOpen, LogIn, BarChart3, Grid3X3, Triangle, ArrowLeftRight } from "lucide-react";
+import { Play, Settings, Brain, Users, Zap, Crown, BookOpen, LogIn, BarChart3, Grid3X3, Triangle, ArrowLeftRight, Palette, ChevronDown } from "lucide-react";
 import { useSettings } from "@/contexts/SettingsContext";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -11,6 +11,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DailyChallengeButton } from "@/components/game/DailyChallengeButton";
+import { BOARDS } from "@/data/boards";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const avatarOptions = [
   { id: 'avatar1', emoji: '🤖' },
@@ -30,6 +32,8 @@ const ClassicIndex = () => {
   const { profile } = useProfile();
   const [showPlayDialog, setShowPlayDialog] = useState(false);
   const [selectedDifficulty, setSelectedDifficulty] = useState<"easy" | "normal" | "hard" | "master">("normal");
+  const [selectedBoard, setSelectedBoard] = useState("neon");
+  const [showBoardPicker, setShowBoardPicker] = useState(false);
 
   const difficulties = [
     { 
@@ -62,6 +66,8 @@ const ClassicIndex = () => {
     },
   ];
 
+  const currentBoard = BOARDS.find(b => b.id === selectedBoard);
+
   const startAIGame = () => {
     if (!user) {
       toast("Playing without login - progress won't be saved", {
@@ -69,7 +75,13 @@ const ClassicIndex = () => {
       });
     }
     setShowPlayDialog(false);
-    navigate("/classic-game", { state: { difficulty: selectedDifficulty, mode: "ai" } });
+    navigate("/classic-game", { 
+      state: { 
+        difficulty: selectedDifficulty, 
+        mode: "ai",
+        selectedBoard 
+      } 
+    });
   };
 
   const startDuelGame = () => {
@@ -79,7 +91,12 @@ const ClassicIndex = () => {
       });
     }
     setShowPlayDialog(false);
-    navigate("/classic-game", { state: { mode: "local" } });
+    navigate("/classic-game", { 
+      state: { 
+        mode: "local",
+        selectedBoard 
+      } 
+    });
   };
 
   // Retro grid pattern
@@ -266,7 +283,52 @@ const ClassicIndex = () => {
             </DialogTitle>
           </DialogHeader>
           
-          <div className="p-2">
+          <div className="p-2 space-y-4">
+            {/* Board Selection */}
+            <div className="relative">
+              <button
+                onClick={() => setShowBoardPicker(!showBoardPicker)}
+                className="w-full p-3 rounded-xl border border-slate-700 bg-slate-900/60 hover:border-cyan-500/50 transition-all flex items-center justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-r from-cyan-600 to-violet-600 rounded-lg">
+                    <Palette className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="text-left">
+                    <span className="text-xs text-slate-400">Board Style</span>
+                    <div className="font-semibold text-cyan-400">{currentBoard?.name || 'Neon Cyber'}</div>
+                  </div>
+                </div>
+                <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${showBoardPicker ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {showBoardPicker && (
+                <div className="absolute z-20 mt-2 w-full bg-slate-900/95 border border-slate-700 rounded-xl overflow-hidden shadow-2xl">
+                  <ScrollArea className="h-48">
+                    <div className="p-2 grid grid-cols-2 gap-2">
+                      {BOARDS.slice(0, 12).map((board) => (
+                        <button
+                          key={board.id}
+                          onClick={() => {
+                            setSelectedBoard(board.id);
+                            setShowBoardPicker(false);
+                          }}
+                          className={`p-2 rounded-lg border text-left transition-all ${
+                            selectedBoard === board.id
+                              ? 'border-cyan-400 bg-cyan-500/10'
+                              : 'border-slate-700 hover:border-slate-600'
+                          }`}
+                        >
+                          <div className={`w-full h-6 rounded ${board.gradient} mb-1`} />
+                          <span className="text-xs font-medium text-slate-300">{board.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              )}
+            </div>
+
             {/* Game Mode Selection */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* VS AI Section */}
