@@ -2,46 +2,26 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
+import { useAvatars } from '@/hooks/useAvatars';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, LogOut, Coins, Trophy, Gamepad2, Target, Sparkles, Star, Crown, Zap } from 'lucide-react';
+import { ArrowLeft, LogOut, Coins, Trophy, Gamepad2, Target, Sparkles, Star, Crown, Zap, Lock, ShoppingCart } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-
-const avatarOptions = [
-  { id: 'avatar1', emoji: '🤖', name: 'Robot', tier: 'common' },
-  { id: 'avatar2', emoji: '👨‍🚀', name: 'Astronaut', tier: 'common' },
-  { id: 'avatar3', emoji: '⚔️', name: 'Knight', tier: 'common' },
-  { id: 'avatar4', emoji: '🧙', name: 'Wizard', tier: 'common' },
-  { id: 'avatar5', emoji: '🥷', name: 'Ninja', tier: 'rare' },
-  { id: 'avatar6', emoji: '🏴‍☠️', name: 'Pirate', tier: 'rare' },
-  { id: 'avatar7', emoji: '🔬', name: 'Scientist', tier: 'rare' },
-  { id: 'avatar8', emoji: '🧭', name: 'Explorer', tier: 'rare' },
-  { id: 'avatar9', emoji: '🐉', name: 'Dragon', tier: 'epic' },
-  { id: 'avatar10', emoji: '👑', name: 'Royal', tier: 'epic' },
-  { id: 'avatar11', emoji: '🦄', name: 'Unicorn', tier: 'legendary' },
-  { id: 'avatar12', emoji: '🌟', name: 'Celestial', tier: 'legendary' },
-];
-
-const getTierStyles = (tier: string) => {
-  switch (tier) {
-    case 'legendary': return 'from-yellow-400 to-orange-500 border-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.5)]';
-    case 'epic': return 'from-purple-500 to-pink-600 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)]';
-    case 'rare': return 'from-blue-500 to-cyan-600 border-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.3)]';
-    default: return 'from-slate-500 to-slate-600 border-slate-500';
-  }
-};
+import { AVATARS, getTierStyles, getUnlockText } from '@/data/avatars';
 
 const Account = () => {
   const { user, signOut } = useAuth();
-  const { profile, loading, updateProfile } = useProfile();
+  const { profile, loading, updateProfile, reload } = useProfile();
+  const { isUnlocked, canPurchase, purchaseAvatar } = useAvatars();
   const [username, setUsername] = useState('');
   const [selectedAvatar, setSelectedAvatar] = useState('avatar1');
   const [saving, setSaving] = useState(false);
+  const [purchasing, setPurchasing] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -49,7 +29,7 @@ const Account = () => {
     if (!loading && !user) {
       navigate('/auth');
     }
-  }, [user, loading, navigate]);
+  }, [loading, user, navigate]);
 
   useEffect(() => {
     if (profile) {
@@ -63,6 +43,15 @@ const Account = () => {
       toast({
         title: 'Invalid username',
         description: 'Username must be 3-16 characters',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    if (!isUnlocked(selectedAvatar)) {
+      toast({
+        title: 'Avatar locked',
+        description: 'You need to unlock this avatar first',
         variant: 'destructive'
       });
       return;
@@ -84,6 +73,17 @@ const Account = () => {
       toast({ title: 'Profile updated!' });
     }
     setSaving(false);
+  };
+
+  const handlePurchase = async (avatarId: string) => {
+    if (!canPurchase(avatarId)) return;
+    
+    setPurchasing(avatarId);
+    const success = await purchaseAvatar(avatarId);
+    if (success) {
+      reload();
+    }
+    setPurchasing(null);
   };
 
   // Render stars background
@@ -143,10 +143,10 @@ const Account = () => {
             <div className="flex items-center gap-6">
               {/* Current Avatar Display */}
               <div className="relative">
-                <div className={`w-24 h-24 rounded-2xl bg-gradient-to-br ${getTierStyles(avatarOptions.find(a => a.id === profile.avatar)?.tier || 'common')} p-1 animate-pulse`}>
+                <div className={`w-24 h-24 rounded-2xl bg-gradient-to-br ${getTierStyles(AVATARS.find(a => a.id === profile.avatar)?.tier || 'common')} p-1 animate-pulse`}>
                   <div className="w-full h-full bg-card rounded-xl flex items-center justify-center">
                     <span className="text-5xl">
-                      {avatarOptions.find(a => a.id === profile.avatar)?.emoji || '🤖'}
+                      {AVATARS.find(a => a.id === profile.avatar)?.emoji || '🤖'}
                     </span>
                   </div>
                 </div>
@@ -216,7 +216,7 @@ const Account = () => {
             
             {/* Tier Sections */}
             {['legendary', 'epic', 'rare', 'common'].map(tier => {
-              const tierAvatars = avatarOptions.filter(a => a.tier === tier);
+              const tierAvatars = AVATARS.filter(a => a.tier === tier);
               return (
                 <div key={tier} className="space-y-2">
                   <div className="flex items-center gap-2">
@@ -224,22 +224,61 @@ const Account = () => {
                     <span className="text-sm font-medium capitalize">{tier}</span>
                   </div>
                   <div className="grid grid-cols-4 gap-3">
-                    {tierAvatars.map((avatar) => (
-                      <button
-                        key={avatar.id}
-                        onClick={() => setSelectedAvatar(avatar.id)}
-                        className={`p-3 rounded-xl border-2 transition-all hover:scale-105 ${
-                          selectedAvatar === avatar.id
-                            ? `border-primary bg-gradient-to-br ${getTierStyles(avatar.tier)} shadow-glow`
-                            : 'border-border hover:border-primary/50 bg-card/50'
-                        }`}
-                      >
-                        <Avatar className="w-10 h-10 mx-auto mb-1">
-                          <AvatarFallback className="text-2xl bg-transparent">{avatar.emoji}</AvatarFallback>
-                        </Avatar>
-                        <p className="text-xs text-center truncate">{avatar.name}</p>
-                      </button>
-                    ))}
+                    {tierAvatars.map((avatar) => {
+                      const unlocked = isUnlocked(avatar.id);
+                      const purchasable = canPurchase(avatar.id);
+                      const isPurchasing = purchasing === avatar.id;
+                      
+                      return (
+                        <div key={avatar.id} className="relative">
+                          <button
+                            onClick={() => unlocked ? setSelectedAvatar(avatar.id) : null}
+                            disabled={!unlocked && !purchasable}
+                            className={`w-full p-3 rounded-xl border-2 transition-all ${
+                              !unlocked
+                                ? 'border-slate-700 bg-slate-800/50 opacity-60'
+                                : selectedAvatar === avatar.id
+                                  ? `border-primary bg-gradient-to-br ${getTierStyles(avatar.tier)} shadow-glow`
+                                  : 'border-border hover:border-primary/50 bg-card/50 hover:scale-105'
+                            }`}
+                          >
+                            <Avatar className="w-10 h-10 mx-auto mb-1">
+                              <AvatarFallback className={`text-2xl bg-transparent ${!unlocked ? 'grayscale' : ''}`}>
+                                {avatar.emoji}
+                              </AvatarFallback>
+                            </Avatar>
+                            <p className="text-xs text-center truncate">{avatar.name}</p>
+                            
+                            {/* Lock overlay */}
+                            {!unlocked && (
+                              <div className="absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-black/40">
+                                <Lock className="w-4 h-4 text-slate-400 mb-1" />
+                                <span className="text-[10px] text-slate-400">{getUnlockText(avatar)}</span>
+                              </div>
+                            )}
+                          </button>
+                          
+                          {/* Purchase button */}
+                          {!unlocked && purchasable && (
+                            <Button
+                              size="sm"
+                              onClick={() => handlePurchase(avatar.id)}
+                              disabled={isPurchasing}
+                              className="absolute -bottom-2 left-1/2 -translate-x-1/2 h-6 text-[10px] bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 px-2"
+                            >
+                              {isPurchasing ? (
+                                <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <>
+                                  <ShoppingCart className="w-3 h-3 mr-1" />
+                                  {avatar.cost}
+                                </>
+                              )}
+                            </Button>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               );
