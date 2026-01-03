@@ -13,7 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { TutorialPrompt } from "@/components/tutorial/TutorialPrompt";
-import { DailyChallengeCard } from "@/components/game/DailyChallengeCard";
+import { DailyChallengeButton } from "@/components/game/DailyChallengeButton";
 
 const avatarOptions = [
   { id: 'avatar1', emoji: '🤖' },
@@ -112,8 +112,9 @@ const Index = () => {
           {renderStars()}
         </div>
 
-        {/* Gamemode Switch Button - Top Left */}
-        <div className="absolute top-4 left-4 z-20">
+        {/* Top Left Controls - Gamemode Switch & Account */}
+        <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
+          {/* Gamemode Switch Button */}
           <Button
             onClick={() => navigate("/classic")}
             className="group relative overflow-hidden bg-gradient-to-r from-cyan-600/20 to-orange-600/20 border border-cyan-500/40 hover:border-cyan-400/70 backdrop-blur-md px-4 py-2 gap-2 transition-all duration-500 hover:scale-105 hover:shadow-[0_0_30px_rgba(34,211,238,0.3)]"
@@ -124,15 +125,13 @@ const Index = () => {
             <ArrowLeftRight className="w-4 h-4 text-foreground/80 group-hover:scale-110 transition-transform duration-300" />
             <span className="hidden sm:inline text-sm font-medium bg-gradient-to-r from-cyan-400 to-orange-400 bg-clip-text text-transparent">Classic</span>
           </Button>
-        </div>
 
-        {/* Account Button - Top Right (left of Bling) */}
-        <div className="absolute top-4 right-28 z-20">
+          {/* Account Button */}
           <Button
             variant="ghost"
             size="icon"
             onClick={() => user ? navigate("/account") : navigate("/auth")}
-            className="bg-card/80 backdrop-blur-sm hover:bg-card/90 hover:scale-105 transition-all duration-300 border border-border/50"
+            className="bg-card/80 backdrop-blur-sm hover:bg-card/90 hover:scale-105 transition-all duration-300 border border-border/50 w-10 h-10"
           >
             {user && profile ? (
               <Avatar className="w-8 h-8">
@@ -165,8 +164,6 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Daily Challenge Card */}
-          <DailyChallengeCard variant="conetoe" />
 
           {/* Menu Buttons */}
           <div className={`w-full space-y-4 ${animationsEnabled ? 'animate-scale-in' : ''}`} style={animationsEnabled ? { animationDelay: '0.3s' } : {}}>
@@ -233,6 +230,9 @@ const Index = () => {
 
         {/* Bling Currency */}
         <BlingCurrency />
+
+        {/* Daily Challenge Button - Right Side */}
+        <DailyChallengeButton variant="conetoe" />
 
         {/* Tutorial Prompt for New Players */}
         <TutorialPrompt />
