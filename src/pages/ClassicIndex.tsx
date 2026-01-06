@@ -241,6 +241,14 @@ const ClassicIndex = () => {
             </Button>
 
             <Button
+              onClick={() => navigate("/customization")}
+              className="w-full h-16 text-xl font-semibold bg-gradient-to-r from-violet-600 via-purple-500 to-cyan-500 hover:from-violet-500 hover:via-purple-400 hover:to-cyan-400 hover:shadow-[0_0_40px_rgba(139,92,246,0.5)] hover:scale-105 transition-all duration-300 rounded-full border-0"
+            >
+              <Palette className="w-6 h-6 mr-3" />
+              Boards & Cones
+            </Button>
+
+            <Button
               onClick={() => navigate("/rules")}
               className="w-full h-16 text-xl font-semibold bg-slate-900/60 hover:bg-slate-800/80 hover:shadow-[0_0_25px_rgba(139,92,246,0.2)] hover:scale-105 transition-all duration-300 rounded-full border border-violet-500/30 hover:border-violet-400/50 backdrop-blur-sm"
             >
@@ -250,7 +258,7 @@ const ClassicIndex = () => {
 
             <Button
               onClick={() => navigate("/stats")}
-              className="w-full h-16 text-xl font-semibold bg-gradient-to-r from-violet-600 via-purple-500 to-pink-500 hover:from-violet-500 hover:via-purple-400 hover:to-pink-400 hover:shadow-[0_0_40px_rgba(139,92,246,0.5)] hover:scale-105 transition-all duration-300 rounded-full border-0"
+              className="w-full h-16 text-xl font-semibold bg-gradient-to-r from-pink-600 via-rose-500 to-orange-500 hover:from-pink-500 hover:via-rose-400 hover:to-orange-400 hover:shadow-[0_0_40px_rgba(244,63,94,0.5)] hover:scale-105 transition-all duration-300 rounded-full border-0"
             >
               <BarChart3 className="w-6 h-6 mr-3" />
               Stats & Achievements
