@@ -1,8 +1,8 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, RotateCcw, Zap, Crown, Trophy, Sparkles, Grid3X3, Palette, Settings2 } from "lucide-react";
+import { ArrowLeft, RotateCcw, Zap, Crown, Trophy, Sparkles, Grid3X3, Palette, Triangle, AlertTriangle } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ClassicCell } from "./ClassicCell";
 import { ClassicWinningModal } from "./ClassicWinningModal";
@@ -12,8 +12,9 @@ import { useProfile } from "@/hooks/useProfile";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { GameErrorBoundary } from "@/components/ui/GameErrorBoundary";
-import { getSafeAssets, DEFAULT_CONE_ID, DEFAULT_BOARD_ID } from "@/utils/gameValidation";
+import { getSafeAssets, DEFAULT_CONE_ID, DEFAULT_BOARD_ID, validateCombination } from "@/utils/gameValidation";
 import { BOARDS } from "@/data/boards";
+import { CONES } from "@/data/cones";
 
 const botNames = [
   "RetroBot", "ClassicMind", "TicTacPro", "GridMaster", "OldSchool",
@@ -42,24 +43,32 @@ export const ClassicGameBoard = () => {
   const [showWinModal, setShowWinModal] = useState(false);
   const [betDeducted, setBetDeducted] = useState(false);
   const [assetError, setAssetError] = useState(false);
+  const [fallbackMode, setFallbackMode] = useState(false);
   
   const betAmount = gameState.betAmount || 0;
   
-  // Get selected customizations with fallback
-  const selectedCone = gameState.selectedCone || DEFAULT_CONE_ID;
-  const selectedBoard = gameState.selectedBoard || DEFAULT_BOARD_ID;
+  // Get selected customizations with independent fallback
+  const requestedCone = gameState.selectedCone || DEFAULT_CONE_ID;
+  const requestedBoard = gameState.selectedBoard || DEFAULT_BOARD_ID;
   
-  // Validate and get safe assets
+  // Validate and get safe assets with independent fallback for each
   const safeAssets = useMemo(() => {
-    const result = getSafeAssets(selectedCone, selectedBoard);
-    if (result.usedFallback) {
-      console.warn('Using fallback assets due to invalid selection');
-      setAssetError(true);
+    const result = getSafeAssets(requestedCone, requestedBoard);
+    const validation = validateCombination(result.coneId, result.boardId);
+    
+    if (result.usedFallback || !validation.isValid) {
+      console.warn('Using fallback assets:', { 
+        requested: { cone: requestedCone, board: requestedBoard },
+        using: { cone: result.coneId, board: result.boardId },
+        errors: validation.errors 
+      });
+      setFallbackMode(true);
     }
     return result;
-  }, [selectedCone, selectedBoard]);
+  }, [requestedCone, requestedBoard]);
   
   const currentBoard = BOARDS.find(b => b.id === safeAssets.boardId);
+  const currentCone = CONES.find(c => c.id === safeAssets.coneId);
 
   const botName = useMemo(() => {
     const randomIndex = Math.floor(Math.random() * botNames.length);
@@ -95,12 +104,13 @@ export const ClassicGameBoard = () => {
   }, [gameStatus, winner]);
 
   useEffect(() => {
-    if (assetError) {
-      toast.warning("Using default board - selected asset unavailable", {
+    if (fallbackMode) {
+      toast.warning("Using safe mode - some assets unavailable", {
+        description: "Game will continue with default assets",
         duration: 3000
       });
     }
-  }, [assetError]);
+  }, [fallbackMode]);
 
   const handleCellClick = (position: number) => {
     if (gameStatus !== "playing") return;
@@ -173,6 +183,20 @@ export const ClassicGameBoard = () => {
                 <Badge variant="outline" className="border-cyan-500/40 text-cyan-400 flex items-center gap-1">
                   <Palette className="w-3 h-3" />
                   {currentBoard.name}
+                </Badge>
+              )}
+              
+              {currentCone && (
+                <Badge variant="outline" className="border-violet-500/40 text-violet-400 flex items-center gap-1">
+                  <Triangle className="w-3 h-3" />
+                  {currentCone.name}
+                </Badge>
+              )}
+              
+              {fallbackMode && (
+                <Badge variant="outline" className="border-amber-500/40 text-amber-400 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" />
+                  Safe Mode
                 </Badge>
               )}
               
