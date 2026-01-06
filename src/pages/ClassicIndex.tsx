@@ -12,6 +12,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DailyChallengeButton } from "@/components/game/DailyChallengeButton";
 import { BOARDS } from "@/data/boards";
+import { CONES } from "@/data/cones";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const avatarOptions = [
@@ -33,7 +34,9 @@ const ClassicIndex = () => {
   const [showPlayDialog, setShowPlayDialog] = useState(false);
   const [selectedDifficulty, setSelectedDifficulty] = useState<"easy" | "normal" | "hard" | "master">("normal");
   const [selectedBoard, setSelectedBoard] = useState("neon");
+  const [selectedCone, setSelectedCone] = useState("classic");
   const [showBoardPicker, setShowBoardPicker] = useState(false);
+  const [showConePicker, setShowConePicker] = useState(false);
 
   const difficulties = [
     { 
@@ -67,6 +70,7 @@ const ClassicIndex = () => {
   ];
 
   const currentBoard = BOARDS.find(b => b.id === selectedBoard);
+  const currentCone = CONES.find(c => c.id === selectedCone);
 
   const startAIGame = () => {
     if (!user) {
@@ -79,7 +83,8 @@ const ClassicIndex = () => {
       state: { 
         difficulty: selectedDifficulty, 
         mode: "ai",
-        selectedBoard 
+        selectedBoard,
+        selectedCone
       } 
     });
   };
@@ -94,7 +99,8 @@ const ClassicIndex = () => {
     navigate("/classic-game", { 
       state: { 
         mode: "local",
-        selectedBoard 
+        selectedBoard,
+        selectedCone
       } 
     });
   };
@@ -284,49 +290,97 @@ const ClassicIndex = () => {
           </DialogHeader>
           
           <div className="p-2 space-y-4">
-            {/* Board Selection */}
-            <div className="relative">
-              <button
-                onClick={() => setShowBoardPicker(!showBoardPicker)}
-                className="w-full p-3 rounded-xl border border-slate-700 bg-slate-900/60 hover:border-cyan-500/50 transition-all flex items-center justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-r from-cyan-600 to-violet-600 rounded-lg">
-                    <Palette className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="text-left">
-                    <span className="text-xs text-slate-400">Board Style</span>
-                    <div className="font-semibold text-cyan-400">{currentBoard?.name || 'Neon Cyber'}</div>
-                  </div>
-                </div>
-                <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform ${showBoardPicker ? 'rotate-180' : ''}`} />
-              </button>
-              
-              {showBoardPicker && (
-                <div className="absolute z-20 mt-2 w-full bg-slate-900/95 border border-slate-700 rounded-xl overflow-hidden shadow-2xl">
-                  <ScrollArea className="h-48">
-                    <div className="p-2 grid grid-cols-2 gap-2">
-                      {BOARDS.slice(0, 12).map((board) => (
-                        <button
-                          key={board.id}
-                          onClick={() => {
-                            setSelectedBoard(board.id);
-                            setShowBoardPicker(false);
-                          }}
-                          className={`p-2 rounded-lg border text-left transition-all ${
-                            selectedBoard === board.id
-                              ? 'border-cyan-400 bg-cyan-500/10'
-                              : 'border-slate-700 hover:border-slate-600'
-                          }`}
-                        >
-                          <div className={`w-full h-6 rounded ${board.gradient} mb-1`} />
-                          <span className="text-xs font-medium text-slate-300">{board.name}</span>
-                        </button>
-                      ))}
+            {/* Board & Cone Selection Row */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Board Selection */}
+              <div className="relative">
+                <button
+                  onClick={() => { setShowBoardPicker(!showBoardPicker); setShowConePicker(false); }}
+                  className="w-full p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 hover:border-cyan-500/50 transition-all flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 bg-gradient-to-r from-cyan-600 to-violet-600 rounded-lg">
+                      <Palette className="w-3.5 h-3.5 text-white" />
                     </div>
-                  </ScrollArea>
-                </div>
-              )}
+                    <div className="text-left">
+                      <span className="text-[10px] text-slate-400">Board</span>
+                      <div className="text-sm font-semibold text-cyan-400">{currentBoard?.name || 'Neon'}</div>
+                    </div>
+                  </div>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showBoardPicker ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {showBoardPicker && (
+                  <div className="absolute z-20 mt-2 w-full bg-slate-900/95 border border-slate-700 rounded-xl overflow-hidden shadow-2xl">
+                    <ScrollArea className="h-40">
+                      <div className="p-2 grid grid-cols-2 gap-1.5">
+                        {BOARDS.slice(0, 12).map((board) => (
+                          <button
+                            key={board.id}
+                            onClick={() => {
+                              setSelectedBoard(board.id);
+                              setShowBoardPicker(false);
+                            }}
+                            className={`p-1.5 rounded-lg border text-left transition-all ${
+                              selectedBoard === board.id
+                                ? 'border-cyan-400 bg-cyan-500/10'
+                                : 'border-slate-700 hover:border-slate-600'
+                            }`}
+                          >
+                            <div className={`w-full h-5 rounded ${board.gradient} mb-1`} />
+                            <span className="text-[10px] font-medium text-slate-300">{board.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                )}
+              </div>
+
+              {/* Cone Selection */}
+              <div className="relative">
+                <button
+                  onClick={() => { setShowConePicker(!showConePicker); setShowBoardPicker(false); }}
+                  className="w-full p-2.5 rounded-xl border border-slate-700 bg-slate-900/60 hover:border-violet-500/50 transition-all flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className={`p-1.5 rounded-lg ${currentCone?.gradient || 'bg-gradient-to-br from-cyan-400 to-blue-600'}`}>
+                      <Triangle className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <span className="text-[10px] text-slate-400">Cone</span>
+                      <div className="text-sm font-semibold text-violet-400">{currentCone?.name || 'Classic'}</div>
+                    </div>
+                  </div>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showConePicker ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {showConePicker && (
+                  <div className="absolute z-20 mt-2 w-full bg-slate-900/95 border border-slate-700 rounded-xl overflow-hidden shadow-2xl">
+                    <ScrollArea className="h-40">
+                      <div className="p-2 grid grid-cols-2 gap-1.5">
+                        {CONES.slice(0, 12).map((cone) => (
+                          <button
+                            key={cone.id}
+                            onClick={() => {
+                              setSelectedCone(cone.id);
+                              setShowConePicker(false);
+                            }}
+                            className={`p-1.5 rounded-lg border text-left transition-all ${
+                              selectedCone === cone.id
+                                ? 'border-violet-400 bg-violet-500/10'
+                                : 'border-slate-700 hover:border-slate-600'
+                            }`}
+                          >
+                            <div className={`w-full h-5 rounded ${cone.gradient} mb-1`} />
+                            <span className="text-[10px] font-medium text-slate-300">{cone.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Game Mode Selection */}
