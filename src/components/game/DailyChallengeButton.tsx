@@ -18,13 +18,33 @@ export const DailyChallengeButton = ({ variant }: DailyChallengeButtonProps) => 
   const dragRef = useRef<HTMLDivElement>(null);
   const dragStartRef = useRef<{ x: number; y: number; posX: number; posY: number } | null>(null);
 
-  // Initialize position on mount
+  // Initialize position on mount and handle resize
   useEffect(() => {
-    if (position === null && dragRef.current) {
-      const rect = dragRef.current.getBoundingClientRect();
-      setPosition({ x: window.innerWidth - rect.width - 16, y: window.innerHeight / 2 - rect.height / 2 });
-    }
-  }, [position]);
+    const updatePosition = () => {
+      if (dragRef.current) {
+        const rect = dragRef.current.getBoundingClientRect();
+        const padding = 8;
+        
+        if (position === null) {
+          // Initial position - right side, vertically centered
+          setPosition({ 
+            x: window.innerWidth - rect.width - padding, 
+            y: Math.max(padding, Math.min(window.innerHeight - rect.height - padding, window.innerHeight / 2 - rect.height / 2))
+          });
+        } else {
+          // Clamp existing position within bounds on resize
+          setPosition(prev => prev ? {
+            x: Math.max(padding, Math.min(window.innerWidth - rect.width - padding, prev.x)),
+            y: Math.max(padding, Math.min(window.innerHeight - rect.height - padding, prev.y))
+          } : prev);
+        }
+      }
+    };
+    
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+    return () => window.removeEventListener('resize', updatePosition);
+  }, [position === null]);
 
   const handleDragStart = (clientX: number, clientY: number) => {
     if (!position) return;
@@ -37,9 +57,10 @@ export const DailyChallengeButton = ({ variant }: DailyChallengeButtonProps) => 
     
     const deltaX = clientX - dragStartRef.current.x;
     const deltaY = clientY - dragStartRef.current.y;
+    const padding = 8;
     
-    const newX = Math.max(0, Math.min(window.innerWidth - dragRef.current.offsetWidth, dragStartRef.current.posX + deltaX));
-    const newY = Math.max(0, Math.min(window.innerHeight - dragRef.current.offsetHeight, dragStartRef.current.posY + deltaY));
+    const newX = Math.max(padding, Math.min(window.innerWidth - dragRef.current.offsetWidth - padding, dragStartRef.current.posX + deltaX));
+    const newY = Math.max(padding, Math.min(window.innerHeight - dragRef.current.offsetHeight - padding, dragStartRef.current.posY + deltaY));
     
     setPosition({ x: newX, y: newY });
   };
