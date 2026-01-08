@@ -14,6 +14,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { TutorialPrompt } from "@/components/tutorial/TutorialPrompt";
 import { DailyChallengeButton } from "@/components/game/DailyChallengeButton";
+import { PageTransition } from "@/components/ui/PageTransition";
 
 const avatarOptions = [
   { id: 'avatar1', emoji: '🤖' },
@@ -103,7 +104,7 @@ const Index = () => {
   };
 
   return (
-    <>
+    <PageTransition variant="conetoe">
       <div className="min-h-screen bg-gradient-hero flex flex-col items-center justify-center p-4 relative overflow-hidden">
         <AnimatedBackground />
         
@@ -332,7 +333,7 @@ const Index = () => {
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </PageTransition>
   );
 };
 

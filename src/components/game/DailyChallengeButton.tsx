@@ -54,20 +54,21 @@ export const DailyChallengeButton = ({ variant }: DailyChallengeButtonProps) => 
   };
 
   const isConetoe = variant === 'conetoe';
+  // Conetoe uses play button colors (pink/violet), Classic uses cyan/violet
   const gradientColors = isConetoe 
-    ? 'from-amber-500/20 via-orange-500/10 to-yellow-500/20' 
+    ? 'from-pink-500/20 via-violet-500/10 to-purple-500/20' 
     : 'from-cyan-500/20 via-violet-500/10 to-pink-500/20';
-  const borderColor = isConetoe ? 'border-amber-500/40' : 'border-cyan-500/40';
-  const hoverBorder = isConetoe ? 'hover:border-amber-400/70' : 'hover:border-cyan-400/70';
-  const accentColor = isConetoe ? 'text-amber-400' : 'text-cyan-400';
+  const borderColor = isConetoe ? 'border-pink-500/40' : 'border-cyan-500/40';
+  const hoverBorder = isConetoe ? 'hover:border-pink-400/70' : 'hover:border-cyan-400/70';
+  const accentColor = isConetoe ? 'text-pink-400' : 'text-cyan-400';
   const pulseGradient = isConetoe 
-    ? 'from-amber-500 to-orange-500' 
+    ? 'from-pink-500 to-violet-500' 
     : 'from-cyan-500 to-violet-500';
   const buttonGradient = isConetoe
-    ? 'from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400'
+    ? 'from-pink-500 to-violet-500 hover:from-pink-400 hover:to-violet-400'
     : 'from-cyan-500 to-violet-500 hover:from-cyan-400 hover:to-violet-400';
   const glowColor = isConetoe
-    ? 'hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]'
+    ? 'hover:shadow-[0_0_30px_rgba(236,72,153,0.4)]'
     : 'hover:shadow-[0_0_30px_rgba(34,211,238,0.4)]';
 
   return (
@@ -128,7 +129,7 @@ export const DailyChallengeButton = ({ variant }: DailyChallengeButtonProps) => 
           </button>
 
           {/* Glow effect */}
-          <div className={`absolute inset-0 bg-gradient-to-r ${isConetoe ? 'from-amber-500/10 to-orange-500/10' : 'from-cyan-500/10 to-violet-500/10'} blur-xl`} />
+          <div className={`absolute inset-0 bg-gradient-to-r ${isConetoe ? 'from-pink-500/10 to-violet-500/10' : 'from-cyan-500/10 to-violet-500/10'} blur-xl`} />
           
           {/* Header */}
           <div className="flex items-center gap-2 mb-4 relative z-10">
@@ -146,7 +147,7 @@ export const DailyChallengeButton = ({ variant }: DailyChallengeButtonProps) => 
 
           {/* Challenge Info */}
           <div className="flex flex-wrap items-center gap-2 mb-4 relative z-10">
-            <Badge variant="outline" className={`${isConetoe ? 'border-amber-500/50 text-amber-400' : 'border-cyan-500/50 text-cyan-400'} gap-1`}>
+            <Badge variant="outline" className={`${isConetoe ? 'border-pink-500/50 text-pink-400' : 'border-cyan-500/50 text-cyan-400'} gap-1`}>
               {challenge.gameMode === 'conetoe' ? (
                 <Triangle className="w-3 h-3" />
               ) : (

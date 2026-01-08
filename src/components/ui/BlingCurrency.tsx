@@ -17,7 +17,7 @@ export const BlingCurrency = () => {
     return null;
   }
 
-  // Mode-specific colors
+  // Mode-specific colors - Conetoe uses play button colors (pink/violet), Classic uses cyan/violet
   const colors = isClassicMode ? {
     glow: "from-cyan-500/20 to-violet-500/20",
     bg: "from-slate-800/80 to-slate-900/80",
@@ -28,14 +28,14 @@ export const BlingCurrency = () => {
     text: "from-cyan-200 to-violet-300",
     sparkle: "text-cyan-300"
   } : {
-    glow: "from-amber-500/20 to-yellow-500/20",
-    bg: "from-amber-900/80 to-yellow-900/80",
-    border: "border-amber-500/50",
-    hoverBorder: "group-hover:border-amber-400/70",
-    icon: "from-amber-400 to-yellow-500",
-    iconText: "text-amber-950",
-    text: "from-amber-200 to-yellow-300",
-    sparkle: "text-yellow-300"
+    glow: "from-pink-500/20 to-violet-500/20",
+    bg: "from-pink-900/80 to-violet-900/80",
+    border: "border-pink-500/50",
+    hoverBorder: "group-hover:border-pink-400/70",
+    icon: "from-pink-500 to-violet-500",
+    iconText: "text-pink-950",
+    text: "from-pink-200 to-violet-300",
+    sparkle: "text-pink-300"
   };
 
   if (loading) {
