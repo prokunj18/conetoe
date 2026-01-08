@@ -14,6 +14,7 @@ import { DailyChallengeButton } from "@/components/game/DailyChallengeButton";
 import { BOARDS } from "@/data/boards";
 import { CONES } from "@/data/cones";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { PageTransition } from "@/components/ui/PageTransition";
 
 const avatarOptions = [
   { id: 'avatar1', emoji: '🤖' },
@@ -141,7 +142,7 @@ const ClassicIndex = () => {
   };
 
   return (
-    <>
+    <PageTransition variant="classic">
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950/50 to-slate-950 flex flex-col items-center justify-center p-4 relative overflow-hidden">
         {/* Cool aurora effect background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -474,7 +475,7 @@ const ClassicIndex = () => {
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </PageTransition>
   );
 };
 
