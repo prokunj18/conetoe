@@ -1,5 +1,4 @@
-import { ReactNode, useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { ReactNode, useRef, useLayoutEffect } from "react";
 
 interface PageTransitionProps {
   children: ReactNode;
@@ -7,46 +6,31 @@ interface PageTransitionProps {
 }
 
 export const PageTransition = ({ children, variant = 'conetoe' }: PageTransitionProps) => {
-  const location = useLocation();
-  const [isVisible, setIsVisible] = useState(false);
-  const [showContent, setShowContent] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    setIsVisible(false);
-    setShowContent(false);
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
     
-    // Quick fade out, then fade in with content
-    const timer = setTimeout(() => {
-      setShowContent(true);
-      setIsVisible(true);
-    }, 50);
-
-    return () => clearTimeout(timer);
-  }, [location.pathname]);
-
-  const gradientColors = variant === 'conetoe' 
-    ? 'from-pink-500/10 via-transparent to-violet-500/10'
-    : 'from-cyan-500/10 via-transparent to-violet-500/10';
+    // Use GPU-accelerated animation with will-change
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(8px)';
+    
+    // Force reflow then animate
+    requestAnimationFrame(() => {
+      el.style.transition = 'opacity 200ms ease-out, transform 200ms ease-out';
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+    });
+  }, []);
 
   return (
-    <div className="relative w-full h-full">
-      {/* Transition overlay */}
-      <div 
-        className={`absolute inset-0 pointer-events-none z-50 bg-gradient-to-br ${gradientColors} transition-opacity duration-300 ${
-          isVisible ? 'opacity-0' : 'opacity-100'
-        }`}
-      />
-      
-      {/* Content with fade animation */}
-      <div 
-        className={`w-full h-full transition-all duration-500 ease-out ${
-          isVisible 
-            ? 'opacity-100 scale-100 translate-y-0' 
-            : 'opacity-0 scale-[0.98] translate-y-2'
-        }`}
-      >
-        {showContent && children}
-      </div>
+    <div 
+      ref={containerRef}
+      className="w-full h-full will-change-transform"
+      style={{ opacity: 0 }}
+    >
+      {children}
     </div>
   );
 };
