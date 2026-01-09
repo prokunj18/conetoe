@@ -2,7 +2,8 @@ import { CellData } from "@/types/game";
 import { useSettings } from "@/contexts/SettingsContext";
 
 interface ConeCellProps {
-  cell: CellData;
+  cell: CellData | null;
+  stackSize?: number; // How many cones are stacked (for visual indicator)
   isHovered: boolean;
   isValidMove: boolean;
   onClick: () => void;
@@ -12,6 +13,7 @@ interface ConeCellProps {
 
 export const ConeCell = ({ 
   cell, 
+  stackSize = 1,
   isHovered, 
   isValidMove, 
   onClick, 
@@ -19,6 +21,9 @@ export const ConeCell = ({
   onMouseLeave 
 }: ConeCellProps) => {
   const { boardTheme, coneStyle } = useSettings();
+  
+  // Show indicator when there are hidden pieces underneath
+  const hasHiddenPieces = stackSize > 1;
 
   const getConeSize = (size: number) => {
     switch (size) {
@@ -254,6 +259,22 @@ export const ConeCell = ({
               className={`absolute inset-1 opacity-30 ${getConeGradient(cell.player, boardTheme === 'wooden')} blur-sm`}
               style={{ clipPath: 'polygon(50% 10%, 10% 90%, 90% 90%)' }}
             />
+          )}
+          
+          {/* Stacking indicator - show when pieces are hidden underneath */}
+          {hasHiddenPieces && (
+            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
+              {Array.from({ length: Math.min(stackSize - 1, 3) }).map((_, i) => (
+                <div 
+                  key={i}
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    boardTheme === 'wooden' 
+                      ? 'bg-wooden-accent/80' 
+                      : 'bg-white/80'
+                  } shadow-sm`}
+                />
+              ))}
+            </div>
           )}
         </div>
       ) : (
