@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { GameState, GameConfig, CellData, MoveResult } from "@/types/game";
+import { GameState, GameConfig, CellData, MoveResult, CellStack, getTopCone } from "@/types/game";
 import { useAI } from "./useAI";
 import { CONES } from "@/data/cones";
 
@@ -24,12 +24,12 @@ export const useGameLogic = (config: GameConfig) => {
     if (config.mode === 'ai') {
       const allCones = CONES;
       const randomCone = allCones[Math.floor(Math.random() * allCones.length)];
-      // Store the bot's cone style for this game session
       sessionStorage.setItem('botConeStyle', randomCone.id);
     }
   }, [config.mode]);
 
-  const checkWinner = useCallback((board: (CellData | null)[]): number | null => {
+  // Check winner based on TOP-MOST visible cones only
+  const checkWinner = useCallback((board: (CellStack | null)[]): number | null => {
     const winPatterns = [
       [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
       [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
@@ -38,26 +38,35 @@ export const useGameLogic = (config: GameConfig) => {
 
     for (const pattern of winPatterns) {
       const [a, b, c] = pattern;
-      if (board[a] && board[b] && board[c] &&
-          board[a]!.player === board[b]!.player &&
-          board[b]!.player === board[c]!.player) {
-        return board[a]!.player;
+      const topA = getTopCone(board[a]);
+      const topB = getTopCone(board[b]);
+      const topC = getTopCone(board[c]);
+      
+      if (topA && topB && topC &&
+          topA.player === topB.player &&
+          topB.player === topC.player) {
+        return topA.player;
       }
     }
     return null;
   }, []);
 
+  // Validate move: can place if empty OR if placing a LARGER cone on top
   const isValidMove = useCallback((position: number, coneSize: number): boolean => {
     if (gameState.gameStatus !== "playing") return false;
     
-    const cell = gameState.board[position];
+    const stack = gameState.board[position];
+    const topCone = getTopCone(stack);
     const currentInventory = gameState.playerInventories[gameState.currentPlayer - 1];
     
-    // Check if player has this cone size
+    // Check if player has this cone size in inventory
     if (!currentInventory.includes(coneSize)) return false;
     
-    // Can place on empty cell or replace smaller cone
-    return !cell || cell.size < coneSize;
+    // Can place on empty cell
+    if (!topCone) return true;
+    
+    // Can place ONLY if new cone is LARGER than existing top cone
+    return coneSize > topCone.size;
   }, [gameState]);
 
   const getAvailableCones = useCallback((player: number): number[] => {
@@ -70,7 +79,9 @@ export const useGameLogic = (config: GameConfig) => {
     }
 
     setGameState(prevState => {
-      const newBoard = [...prevState.board];
+      const newBoard: (CellStack | null)[] = prevState.board.map(stack => 
+        stack ? [...stack] : null
+      );
       const newInventories: [number[], number[]] = [
         [...prevState.playerInventories[0]],
         [...prevState.playerInventories[1]]
@@ -84,18 +95,19 @@ export const useGameLogic = (config: GameConfig) => {
       const currentPlayer = prevState.currentPlayer;
       const currentInventory = newInventories[currentPlayer - 1];
       
-      // Handle replacement
-      let replacedCone: CellData | undefined;
-      const existingCell = newBoard[position];
-      if (existingCell) {
-        replacedCone = existingCell;
-        // Return replaced cone to its owner
-        newInventories[existingCell.player - 1].push(existingCell.size);
-      }
-
-      // Place new cone
+      // Create the new cone
       const newCone: CellData = { player: currentPlayer, size: coneSize };
-      newBoard[position] = newCone;
+      
+      // STACKING: Add cone on top of existing stack (don't return old cone to inventory!)
+      const existingStack = newBoard[position];
+      if (existingStack) {
+        // Push new cone on top of the stack
+        existingStack.push(newCone);
+        newBoard[position] = existingStack;
+      } else {
+        // Create new stack with just this cone
+        newBoard[position] = [newCone];
+      }
       
       // Remove cone from inventory
       const coneIndex = currentInventory.indexOf(coneSize);
@@ -112,13 +124,25 @@ export const useGameLogic = (config: GameConfig) => {
         if (playerHistory.length >= 4) {
           const oldestMove = playerHistory.shift();
           if (oldestMove) {
-            // Find and remove the oldest cone from board
             const oldestPosition = (oldestMove as any).position;
-            const oldestCell = newBoard[oldestPosition];
-            if (oldestCell && oldestCell.player === currentPlayer) {
-              newBoard[oldestPosition] = null;
-              newInventories[currentPlayer - 1].push(oldestCell.size);
-              returnedCone = oldestCell;
+            const stack = newBoard[oldestPosition];
+            
+            if (stack) {
+              // Find and remove the oldest cone from the stack
+              const coneIndexInStack = stack.findIndex(
+                c => c.player === currentPlayer && c.size === oldestMove.size
+              );
+              
+              if (coneIndexInStack !== -1) {
+                const [removed] = stack.splice(coneIndexInStack, 1);
+                returnedCone = removed;
+                newInventories[currentPlayer - 1].push(removed.size);
+                
+                // If stack is empty, set cell to null
+                if (stack.length === 0) {
+                  newBoard[oldestPosition] = null;
+                }
+              }
             }
           }
         }
@@ -164,8 +188,14 @@ export const useGameLogic = (config: GameConfig) => {
     }
   }, [gameState.currentPlayer, gameState.gameStatus, config, makeAIMove, makeMove]);
 
+  // Return top cones for display (backward compatible with existing UI)
+  const getDisplayBoard = useCallback((): (CellData | null)[] => {
+    return gameState.board.map(stack => getTopCone(stack));
+  }, [gameState.board]);
+
   return {
-    board: gameState.board,
+    board: getDisplayBoard(),
+    fullBoard: gameState.board, // Expose full stacks for advanced features
     currentPlayer: gameState.currentPlayer,
     playerInventories: gameState.playerInventories,
     gameStatus: gameState.gameStatus,

@@ -3,7 +3,16 @@ export interface CellData {
   size: number;
 }
 
-export type Board = (CellData | null)[];
+// A cell can now contain a STACK of cones (bottom to top)
+export type CellStack = CellData[];
+
+export type Board = (CellStack | null)[];
+
+// Helper to get the top cone of a stack
+export const getTopCone = (stack: CellStack | null): CellData | null => {
+  if (!stack || stack.length === 0) return null;
+  return stack[stack.length - 1];
+};
 
 export interface GameState {
   board: Board;

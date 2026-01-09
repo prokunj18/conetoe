@@ -30,7 +30,8 @@ export const GameBoard = () => {
   
   const gameState = location.state || { mode: "ai", difficulty: "normal" };
   const { 
-    board, 
+    board,
+    fullBoard, // Get full stacks for stack size display
     currentPlayer, 
     playerInventories, 
     gameStatus, 
@@ -271,17 +272,23 @@ export const GameBoard = () => {
           <Card className={`p-6 ${themeClasses.container} transition-all duration-500 animate-scale-in hover:shadow-2xl`}>
             <div className="aspect-square max-w-sm mx-auto">
               <div className="grid grid-cols-3 gap-3 h-full p-2">
-                {board.map((cell, index) => (
-                  <ConeCell
-                    key={index}
-                    cell={cell}
-                    isHovered={hoveredCell === index}
-                    isValidMove={showMoveHints && selectedCone ? isValidMove(index, selectedCone) : false}
-                    onClick={() => handleCellClick(index)}
-                    onMouseEnter={() => setHoveredCell(index)}
-                    onMouseLeave={() => setHoveredCell(null)}
-                  />
-                ))}
+                {board.map((cell, index) => {
+                  const stack = fullBoard?.[index];
+                  const stackSize = stack ? stack.length : 0;
+                  
+                  return (
+                    <ConeCell
+                      key={index}
+                      cell={cell}
+                      stackSize={stackSize}
+                      isHovered={hoveredCell === index}
+                      isValidMove={showMoveHints && selectedCone ? isValidMove(index, selectedCone) : false}
+                      onClick={() => handleCellClick(index)}
+                      onMouseEnter={() => setHoveredCell(index)}
+                      onMouseLeave={() => setHoveredCell(null)}
+                    />
+                  );
+                })}
               </div>
             </div>
           </Card>
