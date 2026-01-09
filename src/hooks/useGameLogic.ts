@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { GameState, GameConfig, CellData, MoveResult, CellStack, getTopCone } from "@/types/game";
 import { useAI } from "./useAI";
 import { CONES } from "@/data/cones";
+import { aiMemory } from "@/services/AIMemoryService";
 
 const initialInventory = (): number[] => [1, 2, 3, 4];
 
@@ -15,8 +16,16 @@ const createInitialState = (): GameState => ({
   playerHistory: [[], []],
 });
 
+export interface GobbledPieceEvent {
+  piece: CellData;
+  fromPosition: number;
+  toPlayer: number;
+  returned: boolean;
+}
+
 export const useGameLogic = (config: GameConfig) => {
   const [gameState, setGameState] = useState<GameState>(createInitialState);
+  const [gobbledPiece, setGobbledPiece] = useState<GobbledPieceEvent | null>(null);
   const { makeAIMove } = useAI();
   
   // Set random cone for bot at game start
@@ -73,10 +82,17 @@ export const useGameLogic = (config: GameConfig) => {
     return gameState.playerInventories[player - 1];
   }, [gameState]);
 
+  // Clear gobbled piece animation
+  const clearGobbledPiece = useCallback(() => {
+    setGobbledPiece(null);
+  }, []);
+
   const makeMove = useCallback((position: number, coneSize: number): MoveResult => {
     if (!isValidMove(position, coneSize)) {
       return { success: false };
     }
+
+    let gobbledEvent: GobbledPieceEvent | null = null;
 
     setGameState(prevState => {
       const newBoard: (CellStack | null)[] = prevState.board.map(stack => 
@@ -98,18 +114,55 @@ export const useGameLogic = (config: GameConfig) => {
       // Create the new cone
       const newCone: CellData = { player: currentPlayer, size: coneSize };
       
-      // STACKING: Add cone on top of existing stack (don't return old cone to inventory!)
+      // STACKING: Check if gobbling an opponent's piece
       const existingStack = newBoard[position];
-      if (existingStack) {
-        // Push new cone on top of the stack
-        existingStack.push(newCone);
-        newBoard[position] = existingStack;
+      const topCone = getTopCone(existingStack);
+      
+      if (existingStack && topCone) {
+        // GOBBLING: A larger cone is covering a smaller one
+        const gobbledPlayer = topCone.player;
+        const gobbledPlayerInventory = newInventories[gobbledPlayer - 1];
+        const gobbledPlayerMoves = newPlayerMoves[gobbledPlayer - 1];
+        
+        // Check CONDITIONAL RETURN conditions:
+        // 1. Gobbled player has 0 pieces left in inventory, OR
+        // 2. Gobbled player has made 4+ moves
+        const shouldReturnToInventory = 
+          gobbledPlayerInventory.length === 0 || 
+          gobbledPlayerMoves >= 4;
+        
+        if (shouldReturnToInventory) {
+          // Remove the top cone from stack and return to owner's inventory
+          const removedCone = existingStack.pop();
+          if (removedCone) {
+            newInventories[gobbledPlayer - 1].push(removedCone.size);
+            
+            // Trigger fly-back animation
+            gobbledEvent = {
+              piece: removedCone,
+              fromPosition: position,
+              toPlayer: gobbledPlayer,
+              returned: true
+            };
+          }
+          
+          // If stack is empty after removal, set to null before adding new cone
+          if (existingStack.length === 0) {
+            newBoard[position] = [newCone];
+          } else {
+            existingStack.push(newCone);
+          }
+        } else {
+          // Piece stays hidden under the new cone (standard behavior)
+          existingStack.push(newCone);
+          newBoard[position] = existingStack;
+        }
       } else {
         // Create new stack with just this cone
         newBoard[position] = [newCone];
       }
       
-      // Remove cone from inventory
+      // Remove cone from current player's inventory
       const coneIndex = currentInventory.indexOf(coneSize);
       currentInventory.splice(coneIndex, 1);
       
@@ -148,9 +201,18 @@ export const useGameLogic = (config: GameConfig) => {
         }
       }
 
+      // Track board state for AI memory
+      aiMemory.trackBoardState(newBoard);
+
       // Check for winner
       const winner = checkWinner(newBoard);
       const gameEnded = winner !== null;
+
+      // Record game result for AI learning
+      if (gameEnded && config.mode === 'ai') {
+        // AI is player 2
+        aiMemory.recordGameResult(winner === 2, newBoard);
+      }
 
       return {
         ...prevState,
@@ -164,11 +226,17 @@ export const useGameLogic = (config: GameConfig) => {
       };
     });
 
+    // Set gobbled piece for animation (after state update)
+    if (gobbledEvent) {
+      setTimeout(() => setGobbledPiece(gobbledEvent), 50);
+    }
+
     return { success: true };
-  }, [isValidMove, checkWinner]);
+  }, [isValidMove, checkWinner, config.mode]);
 
   const resetGame = useCallback(() => {
     setGameState(createInitialState());
+    setGobbledPiece(null);
   }, []);
 
   // AI Move Effect
@@ -205,5 +273,7 @@ export const useGameLogic = (config: GameConfig) => {
     resetGame,
     isValidMove,
     getAvailableCones,
+    gobbledPiece,
+    clearGobbledPiece,
   };
 };

@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { GameState, CellData, CellStack, getTopCone } from "@/types/game";
+import { aiMemory } from "@/services/AIMemoryService";
 
 interface AIMove {
   position: number;
@@ -57,14 +58,13 @@ export const useAI = () => {
       
       // Two in a row with empty third
       if (playerCells === 2 && emptyCells === 1) score += 50;
-      if (opponentCells === 2 && emptyCells === 1) score -= 50;
+      if (opponentCells === 2 && emptyCells === 1) score -= 70; // Higher penalty for opponent threats
       
       // Two in a row where we can gobble the third
       if (playerCells === 2 && opponentCells === 1) {
-        // Check if we can gobble the opponent's piece
         const opponentCell = cells.find(c => c?.player === opponent);
         if (opponentCell) {
-          score += 30; // Potential gobble opportunity
+          score += 60; // Higher bonus for gobble opportunity
         }
       }
       
@@ -72,7 +72,7 @@ export const useAI = () => {
       if (opponentCells === 2 && playerCells === 1) {
         const ourCell = cells.find(c => c?.player === player);
         if (ourCell && ourCell.size < 4) {
-          score -= 40; // Our piece is in danger
+          score -= 80; // Higher penalty - our piece is in danger
         }
       }
       
@@ -83,14 +83,14 @@ export const useAI = () => {
 
     // Bonus for center control
     const centerTop = getTopCone(board[4]);
-    if (centerTop?.player === player) score += 25;
-    if (centerTop?.player === opponent) score -= 25;
+    if (centerTop?.player === player) score += 35;
+    if (centerTop?.player === opponent) score -= 35;
 
     // Bonus for corner control
     for (const corner of [0, 2, 6, 8]) {
       const cornerTop = getTopCone(board[corner]);
-      if (cornerTop?.player === player) score += 10;
-      if (cornerTop?.player === opponent) score -= 10;
+      if (cornerTop?.player === player) score += 15;
+      if (cornerTop?.player === opponent) score -= 15;
     }
 
     // Evaluate hidden pieces danger - check if moving a top piece would expose opponent's winning piece
@@ -110,12 +110,18 @@ export const useAI = () => {
               
               if (otherTops.every(t => t?.player === opponent)) {
                 // If we move our piece, opponent wins! Don't move this piece.
-                score += 100; // This is actually protecting us
+                score += 150; // This is actually protecting us
               }
             }
           }
         }
       }
+    }
+
+    // Apply AI memory penalty for known losing patterns
+    const memoryPenalty = aiMemory.getPatternPenalty(board);
+    if (memoryPenalty > 0) {
+      score -= memoryPenalty;
     }
 
     return score;
@@ -141,7 +147,7 @@ export const useAI = () => {
     return moves;
   }, []);
 
-  // Simulate a move with proper stacking
+  // Simulate a move with proper stacking and conditional return logic
   const simulateMove = useCallback((gameState: GameState, move: AIMove, player: number): GameState => {
     const newBoard: (CellStack | null)[] = gameState.board.map(stack => 
       stack ? [...stack] : null
@@ -150,14 +156,37 @@ export const useAI = () => {
       [...gameState.playerInventories[0]],
       [...gameState.playerInventories[1]]
     ];
+    const newPlayerMoves: [number, number] = [...gameState.playerMoves];
     
     const currentInventory = newInventories[player - 1];
     const newCone: CellData = { player, size: move.coneSize };
     
-    // Add cone to stack (STACKING - don't return old cone)
     const existingStack = newBoard[move.position];
-    if (existingStack) {
-      existingStack.push(newCone);
+    const topCone = getTopCone(existingStack);
+    
+    if (existingStack && topCone) {
+      // GOBBLING: Check conditional return
+      const gobbledPlayer = topCone.player;
+      const gobbledPlayerInventory = newInventories[gobbledPlayer - 1];
+      const gobbledPlayerMoves = newPlayerMoves[gobbledPlayer - 1];
+      
+      const shouldReturnToInventory = 
+        gobbledPlayerInventory.length === 0 || 
+        gobbledPlayerMoves >= 4;
+      
+      if (shouldReturnToInventory) {
+        const removedCone = existingStack.pop();
+        if (removedCone) {
+          newInventories[gobbledPlayer - 1].push(removedCone.size);
+        }
+        if (existingStack.length === 0) {
+          newBoard[move.position] = [newCone];
+        } else {
+          existingStack.push(newCone);
+        }
+      } else {
+        existingStack.push(newCone);
+      }
     } else {
       newBoard[move.position] = [newCone];
     }
@@ -165,16 +194,20 @@ export const useAI = () => {
     // Remove cone from inventory
     const coneIndex = currentInventory.indexOf(move.coneSize);
     currentInventory.splice(coneIndex, 1);
+    
+    // Track moves
+    newPlayerMoves[player - 1]++;
 
     return {
       ...gameState,
       board: newBoard,
       playerInventories: newInventories,
+      playerMoves: newPlayerMoves,
       currentPlayer: player === 1 ? 2 : 1 as 1 | 2,
     };
   }, []);
 
-  // Minimax with alpha-beta pruning and stacking awareness
+  // Minimax with alpha-beta pruning, deeper search, and memory awareness
   const minimax = useCallback((
     gameState: GameState, 
     depth: number, 
@@ -197,7 +230,7 @@ export const useAI = () => {
         const evalScore = minimax(newState, depth - 1, false, alpha, beta);
         maxEval = Math.max(maxEval, evalScore);
         alpha = Math.max(alpha, evalScore);
-        if (beta <= alpha) break;
+        if (beta <= alpha) break; // Alpha-beta pruning
       }
       return maxEval;
     } else {
@@ -207,13 +240,13 @@ export const useAI = () => {
         const evalScore = minimax(newState, depth - 1, true, alpha, beta);
         minEval = Math.min(minEval, evalScore);
         beta = Math.min(beta, evalScore);
-        if (beta <= alpha) break;
+        if (beta <= alpha) break; // Alpha-beta pruning
       }
       return minEval;
     }
   }, [getAllValidMoves, evaluateBoard, checkWinner, simulateMove]);
 
-  // Score a move for strategic value (gobbling priority)
+  // Score a move for strategic value (aggressive gobbling priority)
   const scoreMoveStrategically = useCallback((
     gameState: GameState, 
     move: AIMove,
@@ -226,7 +259,7 @@ export const useAI = () => {
     
     // GOBBLING PRIORITY: Huge bonus for covering opponent's piece
     if (topCone && topCone.player === opponent) {
-      score += 200 + (topCone.size * 50); // More valuable to gobble larger pieces
+      score += 300 + (topCone.size * 75); // Even more valuable to gobble larger pieces
       
       // Extra bonus if the gobbled piece was part of a line
       const winPatterns = [
@@ -243,32 +276,53 @@ export const useAI = () => {
           
           // Breaking opponent's two-in-a-row
           if (otherTops.filter(t => t?.player === opponent).length >= 1) {
-            score += 100;
+            score += 150;
+          }
+          
+          // Completing our line by gobbling
+          if (otherTops.filter(t => t?.player === player).length === 2) {
+            score += 500; // Winning move!
           }
         }
       }
     }
     
     // Bonus for center and corners
-    if (move.position === 4) score += 30;
-    if ([0, 2, 6, 8].includes(move.position)) score += 15;
+    if (move.position === 4) score += 40;
+    if ([0, 2, 6, 8].includes(move.position)) score += 20;
     
-    // Prefer using smaller cones when possible (save big ones for gobbling)
+    // Prefer using smaller cones for empty cells (save big ones for gobbling)
     if (!topCone) {
-      score += (5 - move.coneSize) * 5; // Prefer smaller for empty cells
+      score += (5 - move.coneSize) * 8;
     }
     
-    // Check if this move would expose a dangerous hidden piece if we later move away
-    // (Penalty for creating risky stacks where opponent is underneath)
-    if (stack && stack.length > 0) {
-      const hasOpponentUnderneath = stack.some(c => c.player === opponent);
-      if (hasOpponentUnderneath) {
-        score -= 20; // Small penalty, we might want to do this anyway
+    // Check if this move creates a threat
+    const newState = simulateMove(gameState, move, player);
+    const winPatterns = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6]
+    ];
+    
+    for (const pattern of winPatterns) {
+      if (pattern.includes(move.position)) {
+        const cells = pattern.map(p => getTopCone(newState.board[p]));
+        const playerCells = cells.filter(c => c?.player === player).length;
+        const emptyCells = cells.filter(c => c === null).length;
+        
+        // Creating a threat (2 in a row with empty/gobbable third)
+        if (playerCells === 2 && emptyCells === 1) {
+          score += 80;
+        }
       }
     }
     
+    // Memory-based penalty: avoid moves that lead to known losing patterns
+    const memoryPenalty = aiMemory.getPatternPenalty(newState.board);
+    score -= memoryPenalty;
+    
     return score;
-  }, []);
+  }, [simulateMove]);
 
   const makeAIMove = useCallback((gameState: GameState, difficulty: string): AIMove | null => {
     const validMoves = getAllValidMoves(gameState, 2);
@@ -335,10 +389,9 @@ export const useAI = () => {
         return validMoves[Math.floor(Math.random() * validMoves.length)];
       }
 
-      case "hard":
-      case "master": {
-        // Search depth based on difficulty
-        const searchDepth = difficulty === "master" ? 7 : 5;
+      case "hard": {
+        // Search depth 6 for hard
+        const searchDepth = 6;
         
         // First check for immediate wins
         for (const move of validMoves) {
@@ -353,10 +406,8 @@ export const useAI = () => {
         for (const oppMove of opponentMoves) {
           const oppTestState = simulateMove(gameState, oppMove, 1);
           if (checkWinner(oppTestState.board) === 1) {
-            // Find the best blocking move
             const blockingMoves = validMoves.filter(m => m.position === oppMove.position);
             if (blockingMoves.length > 0) {
-              // Prefer smallest cone that can block
               blockingMoves.sort((a, b) => a.coneSize - b.coneSize);
               return blockingMoves[0];
             }
@@ -372,6 +423,81 @@ export const useAI = () => {
           const minimaxScore = minimax(newState, searchDepth, false);
           const strategicScore = scoreMoveStrategically(gameState, move, 2);
           const totalScore = minimaxScore + strategicScore;
+          
+          if (totalScore > bestScore) {
+            bestScore = totalScore;
+            bestMove = move;
+          }
+        }
+
+        return bestMove;
+      }
+
+      case "master": {
+        // MASTER AI: Deep search (8-9 levels) + aggressive gobbling + memory learning
+        const searchDepth = 9;
+        
+        // First check for immediate wins
+        for (const move of validMoves) {
+          const testState = simulateMove(gameState, move, 2);
+          if (checkWinner(testState.board) === 2) {
+            return move;
+          }
+        }
+        
+        // Block immediate opponent wins with priority
+        const opponentMoves = getAllValidMoves(gameState, 1);
+        const blockingRequired: AIMove[] = [];
+        
+        for (const oppMove of opponentMoves) {
+          const oppTestState = simulateMove(gameState, oppMove, 1);
+          if (checkWinner(oppTestState.board) === 1) {
+            const blockingMoves = validMoves.filter(m => m.position === oppMove.position);
+            if (blockingMoves.length > 0) {
+              blockingRequired.push(...blockingMoves);
+            }
+          }
+        }
+        
+        // If blocking is required, choose the best blocking move
+        if (blockingRequired.length > 0) {
+          // Prefer smallest cone that can block
+          blockingRequired.sort((a, b) => a.coneSize - b.coneSize);
+          return blockingRequired[0];
+        }
+        
+        // AGGRESSIVE GOBBLING: Prioritize disrupting opponent's lines
+        const gobbleMoves = validMoves.filter(move => {
+          const topCone = getTopCone(gameState.board[move.position]);
+          return topCone && topCone.player === 1;
+        });
+        
+        // Score all moves with deep minimax + strategy + memory
+        let bestMove = validMoves[0];
+        let bestScore = -Infinity;
+        
+        // Prioritize gobble moves in evaluation
+        const prioritizedMoves = [
+          ...gobbleMoves,
+          ...validMoves.filter(m => !gobbleMoves.some(g => g.position === m.position && g.coneSize === m.coneSize))
+        ];
+        
+        for (const move of prioritizedMoves) {
+          const newState = simulateMove(gameState, move, 2);
+          
+          // Check memory for known losing patterns - heavily penalize
+          const memoryPenalty = aiMemory.getPatternPenalty(newState.board);
+          if (memoryPenalty > 0) {
+            continue; // Skip moves that lead to known losing patterns
+          }
+          
+          const minimaxScore = minimax(newState, searchDepth, false);
+          const strategicScore = scoreMoveStrategically(gameState, move, 2);
+          
+          // Extra bonus for gobbling
+          const gobbleBonus = gobbleMoves.some(g => g.position === move.position && g.coneSize === move.coneSize) ? 100 : 0;
+          
+          const totalScore = minimaxScore + strategicScore + gobbleBonus;
           
           if (totalScore > bestScore) {
             bestScore = totalScore;

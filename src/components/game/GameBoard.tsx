@@ -8,6 +8,7 @@ import { ConeCell } from "./ConeCell";
 import { PlayerInventory } from "./PlayerInventory";
 import { WinningModal } from "./WinningModal";
 import { HintsPopup } from "./HintsPopup";
+import { FlyBackAnimation } from "./FlyBackAnimation";
 import { useGameLogic } from "@/hooks/useGameLogic";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useProfile } from "@/hooks/useProfile";
@@ -40,7 +41,9 @@ export const GameBoard = () => {
     makeMove, 
     resetGame,
     isValidMove,
-    getAvailableCones
+    getAvailableCones,
+    gobbledPiece,
+    clearGobbledPiece,
   } = useGameLogic(gameState);
 
   const [selectedCone, setSelectedCone] = useState<number | null>(null);
@@ -258,14 +261,16 @@ export const GameBoard = () => {
         <div className="grid lg:grid-cols-3 gap-6 items-start">
           {/* Player 1 Inventory */}
           <Card className={`p-4 ${themeClasses.card} animate-slide-in-left hover:shadow-neon transition-all duration-500`}>
-            <PlayerInventory
-              player={1}
-              inventory={playerInventories[0]}
-              isCurrentPlayer={currentPlayer === 1 && gameStatus === "playing"}
-              selectedCone={selectedCone}
-              onConeSelect={handleConeSelect}
-              label={gameState.mode === "ai" ? "Your Triangles" : "Player 1"}
-            />
+            <div data-inventory-player="1">
+              <PlayerInventory
+                player={1}
+                inventory={playerInventories[0]}
+                isCurrentPlayer={currentPlayer === 1 && gameStatus === "playing"}
+                selectedCone={selectedCone}
+                onConeSelect={handleConeSelect}
+                label={gameState.mode === "ai" ? "Your Triangles" : "Player 1"}
+              />
+            </div>
           </Card>
 
           {/* Game Board - Always 2D mode */}
@@ -277,16 +282,17 @@ export const GameBoard = () => {
                   const stackSize = stack ? stack.length : 0;
                   
                   return (
-                    <ConeCell
-                      key={index}
-                      cell={cell}
-                      stackSize={stackSize}
-                      isHovered={hoveredCell === index}
-                      isValidMove={showMoveHints && selectedCone ? isValidMove(index, selectedCone) : false}
-                      onClick={() => handleCellClick(index)}
-                      onMouseEnter={() => setHoveredCell(index)}
-                      onMouseLeave={() => setHoveredCell(null)}
-                    />
+                    <div key={index} data-cell-index={index}>
+                      <ConeCell
+                        cell={cell}
+                        stackSize={stackSize}
+                        isHovered={hoveredCell === index}
+                        isValidMove={showMoveHints && selectedCone ? isValidMove(index, selectedCone) : false}
+                        onClick={() => handleCellClick(index)}
+                        onMouseEnter={() => setHoveredCell(index)}
+                        onMouseLeave={() => setHoveredCell(null)}
+                      />
+                    </div>
                   );
                 })}
               </div>
@@ -295,14 +301,16 @@ export const GameBoard = () => {
 
           {/* Player 2/AI Inventory */}
           <Card className={`p-4 ${themeClasses.card} animate-slide-in-right hover:shadow-neon transition-all duration-500`}>
-            <PlayerInventory
-              player={2}
-              inventory={playerInventories[1]}
-              isCurrentPlayer={currentPlayer === 2 && gameStatus === "playing"}
-              selectedCone={selectedCone}
-              onConeSelect={handleConeSelect}
-              label={gameState.mode === "ai" ? `${botName}'s Triangles` : "Player 2"}
-            />
+            <div data-inventory-player="2">
+              <PlayerInventory
+                player={2}
+                inventory={playerInventories[1]}
+                isCurrentPlayer={currentPlayer === 2 && gameStatus === "playing"}
+                selectedCone={selectedCone}
+                onConeSelect={handleConeSelect}
+                label={gameState.mode === "ai" ? `${botName}'s Triangles` : "Player 2"}
+              />
+            </div>
           </Card>
         </div>
 
@@ -321,6 +329,16 @@ export const GameBoard = () => {
 
         {/* Hints Popup */}
         <HintsPopup />
+
+        {/* Fly-back Animation for gobbled pieces */}
+        {gobbledPiece && gobbledPiece.returned && (
+          <FlyBackAnimation
+            piece={gobbledPiece.piece}
+            fromPosition={gobbledPiece.fromPosition}
+            toPlayer={gobbledPiece.toPlayer}
+            onComplete={clearGobbledPiece}
+          />
+        )}
       </div>
     </div>
   );
