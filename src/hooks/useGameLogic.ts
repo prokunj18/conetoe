@@ -170,31 +170,56 @@ export const useGameLogic = (config: GameConfig) => {
       newPlayerHistory[currentPlayer - 1].push({ ...newCone, position } as any);
       newPlayerMoves[currentPlayer - 1]++;
 
-      // Handle 4th move return rule - returns oldest cone every 4 moves by this player
+      // Keep the game playable: every 4 moves by the current player,
+      // return their OLDEST *visible* (top-most) cone back to inventory.
+      // (If the oldest cone is currently covered, skip it and try the next.)
       let returnedCone: CellData | undefined;
-      if (newPlayerMoves[currentPlayer - 1] >= 4 && newPlayerMoves[currentPlayer - 1] % 4 === 0) {
+      if (newPlayerMoves[currentPlayer - 1] > 0 && newPlayerMoves[currentPlayer - 1] % 4 === 0) {
         const playerHistory = newPlayerHistory[currentPlayer - 1];
-        if (playerHistory.length >= 4) {
-          const oldestMove = playerHistory.shift();
-          if (oldestMove) {
-            const oldestPosition = (oldestMove as any).position;
-            const stack = newBoard[oldestPosition];
-            
-            if (stack) {
-              // Find and remove the oldest cone from the stack
-              const coneIndexInStack = stack.findIndex(
-                c => c.player === currentPlayer && c.size === oldestMove.size
-              );
-              
-              if (coneIndexInStack !== -1) {
-                const [removed] = stack.splice(coneIndexInStack, 1);
-                returnedCone = removed;
-                newInventories[currentPlayer - 1].push(removed.size);
-                
-                // If stack is empty, set cell to null
-                if (stack.length === 0) {
-                  newBoard[oldestPosition] = null;
-                }
+
+        // Find the oldest move that is still visible on top of its cell.
+        let idxToRemove: number | null = null;
+        let posToRemove: number | null = null;
+
+        for (let i = 0; i < playerHistory.length; i++) {
+          const move = playerHistory[i] as any;
+          const pos = typeof move?.position === "number" ? move.position : null;
+          if (pos === null) continue;
+
+          const stackAtPos = newBoard[pos];
+          const topAtPos = getTopCone(stackAtPos);
+          if (topAtPos && topAtPos.player === currentPlayer && topAtPos.size === move.size) {
+            idxToRemove = i;
+            posToRemove = pos;
+            break;
+          }
+        }
+
+        if (idxToRemove !== null && posToRemove !== null) {
+          // Remove that move from history (so we don't keep targeting it)
+          playerHistory.splice(idxToRemove, 1);
+
+          const stackAtPos = newBoard[posToRemove];
+          if (stackAtPos && stackAtPos.length > 0) {
+            // It must be the top cone by construction above
+            const removed = stackAtPos.pop();
+            if (removed) {
+              returnedCone = removed;
+              newInventories[currentPlayer - 1].push(removed.size);
+
+              // If stack is empty, set cell to null
+              if (stackAtPos.length === 0) {
+                newBoard[posToRemove] = null;
+              }
+
+              // Trigger fly-back animation (only if we didn't already trigger one for gobbling)
+              if (!gobbledEvent) {
+                gobbledEvent = {
+                  piece: removed,
+                  fromPosition: posToRemove,
+                  toPlayer: currentPlayer,
+                  returned: true,
+                };
               }
             }
           }

@@ -3,7 +3,7 @@
  * Records board states where AI lost and uses them to avoid similar mistakes
  */
 
-import { CellStack, getTopCone } from "@/types/game";
+import { CellStack } from "@/types/game";
 
 interface LossPattern {
   boardHash: string;
@@ -21,16 +21,17 @@ const STORAGE_KEY = 'ai_memory_log';
 const MAX_PATTERNS = 100; // Limit memory size
 const PATTERN_PENALTY = 500; // Score penalty for known bad patterns
 
-// Convert board state to a unique hash for comparison
+// Convert board state (INCLUDING hidden stacks) to a unique hash for comparison
 export const hashBoardState = (board: (CellStack | null)[]): string => {
-  return board.map(stack => {
-    if (!stack || stack.length === 0) return '0';
-    const topCone = getTopCone(stack);
-    if (!topCone) return '0';
-    // Encode as player + size
-    return `${topCone.player}${topCone.size}`;
-  }).join('-');
+  return board
+    .map((stack) => {
+      if (!stack || stack.length === 0) return "0";
+      // Encode full stack bottom->top so we don't "forget" hidden threats
+      return stack.map((c) => `${c.player}${c.size}`).join("");
+    })
+    .join("-");
 };
+
 
 // Get normalized board states (considers rotational symmetry)
 const getSymmetricHashes = (board: (CellStack | null)[]): string[] => {
