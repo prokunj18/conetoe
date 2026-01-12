@@ -249,7 +249,7 @@ export const useAI = () => {
     }
   }, [getAllValidMoves, evaluateBoard, checkWinner, simulateMove]);
 
-  // Score a move for strategic value (aggressive gobbling priority)
+  // Score a move for strategic value (AGGRESSIVE CAPTURING priority)
   const scoreMoveStrategically = useCallback((
     gameState: GameState, 
     move: AIMove,
@@ -260,72 +260,73 @@ export const useAI = () => {
     const stack = gameState.board[move.position];
     const topCone = getTopCone(stack);
     
-    // GOBBLING PRIORITY: Huge bonus for covering opponent's piece
-    if (topCone && topCone.player === opponent) {
-      score += 300 + (topCone.size * 75); // Even more valuable to gobble larger pieces
-      
-      // Extra bonus if the gobbled piece was part of a line
-      const winPatterns = [
-        [0, 1, 2], [3, 4, 5], [6, 7, 8],
-        [0, 3, 6], [1, 4, 7], [2, 5, 8],
-        [0, 4, 8], [2, 4, 6]
-      ];
-      
-      for (const pattern of winPatterns) {
-        if (pattern.includes(move.position)) {
-          const [a, b, c] = pattern;
-          const others = [a, b, c].filter(p => p !== move.position);
-          const otherTops = others.map(p => getTopCone(gameState.board[p]));
-          
-          // Breaking opponent's two-in-a-row
-          if (otherTops.filter(t => t?.player === opponent).length >= 1) {
-            score += 150;
-          }
-          
-          // Completing our line by gobbling
-          if (otherTops.filter(t => t?.player === player).length === 2) {
-            score += 500; // Winning move!
-          }
-        }
-      }
-    }
-    
-    // Bonus for center and corners
-    if (move.position === 4) score += 40;
-    if ([0, 2, 6, 8].includes(move.position)) score += 20;
-    
-    // Prefer using smaller cones for empty cells (save big ones for gobbling)
-    if (!topCone) {
-      score += (5 - move.coneSize) * 8;
-    }
-    
-    // Check if this move creates a threat
-    const newState = simulateMove(gameState, move, player);
     const winPatterns = [
       [0, 1, 2], [3, 4, 5], [6, 7, 8],
       [0, 3, 6], [1, 4, 7], [2, 5, 8],
       [0, 4, 8], [2, 4, 6]
     ];
-    
+
+    // ========== CAPTURING (GOBBLING) IS KING ==========
+    if (topCone && topCone.player === opponent) {
+      // Massive base bonus for any capture
+      score += 600 + topCone.size * 120;
+
+      // Check lines involving this cell
+      for (const pattern of winPatterns) {
+        if (!pattern.includes(move.position)) continue;
+        const others = pattern.filter(p => p !== move.position);
+        const otherTops = others.map(p => getTopCone(gameState.board[p]));
+
+        // Capturing breaks opponent's 2-in-a-row → huge defensive win
+        const opponentInLine = otherTops.filter(t => t?.player === opponent).length;
+        if (opponentInLine >= 1) score += 250;
+
+        // Capturing completes OUR 3-in-a-row → instant win
+        const playerInLine = otherTops.filter(t => t?.player === player).length;
+        if (playerInLine === 2) score += 1500; // winning move!
+      }
+
+      // Capturing a large piece that's hard to recapture → extra value
+      if (topCone.size >= 3) score += 150;
+    }
+
+    // ========== POSITIONAL VALUE (secondary) ==========
+    if (move.position === 4) score += 50; // center
+    if ([0, 2, 6, 8].includes(move.position)) score += 25; // corners
+
+    // Prefer smaller cones for empty cells (save big ones for captures!)
+    if (!topCone) {
+      score += (5 - move.coneSize) * 12;
+    }
+
+    // ========== THREAT CREATION ==========
+    const newState = simulateMove(gameState, move, player);
     for (const pattern of winPatterns) {
-      if (pattern.includes(move.position)) {
-        const cells = pattern.map(p => getTopCone(newState.board[p]));
-        const playerCells = cells.filter(c => c?.player === player).length;
-        const emptyCells = cells.filter(c => c === null).length;
-        
-        // Creating a threat (2 in a row with empty/gobbable third)
-        if (playerCells === 2 && emptyCells === 1) {
-          score += 80;
+      if (!pattern.includes(move.position)) continue;
+      const cells = pattern.map(p => getTopCone(newState.board[p]));
+      const playerCells = cells.filter(c => c?.player === player).length;
+      const emptyCells = cells.filter(c => c === null).length;
+      const opponentCells = cells.filter(c => c?.player === opponent).length;
+
+      // Creating a threat (2-in-a-row with empty third)
+      if (playerCells === 2 && emptyCells === 1) score += 100;
+
+      // Even better: 2-in-a-row where third can be gobbled (opponent's small piece)
+      if (playerCells === 2 && opponentCells === 1) {
+        const oppCell = cells.find(c => c?.player === opponent);
+        if (oppCell && move.coneSize > oppCell.size) {
+          score += 200; // We can capture to win!
         }
       }
     }
-    
-    // Memory-based penalty: avoid moves that lead to known losing patterns
+
+    // ========== AVOID LOSSES via memory ==========
     const memoryPenalty = aiMemory.getPatternPenalty(newState.board);
     score -= memoryPenalty;
-    
+
     return score;
   }, [simulateMove]);
+
 
   const makeAIMove = useCallback((gameState: GameState, difficulty: string): AIMove | null => {
     const validMoves = getAllValidMoves(gameState, 2);
@@ -546,9 +547,9 @@ export const useAI = () => {
           const minimaxScore = minimaxCached(ns, searchDepth, false, -Infinity, Infinity);
           const strategicScore = scoreMoveStrategically(gameState, move, 2);
 
-          // Extra gobble bonus so it actively disrupts your board.
+          // MASSIVE capture bonus so AI actively hunts your pieces
           const top = getTopCone(gameState.board[move.position]);
-          const gobbleBonus = top && top.player === 1 ? 160 + top.size * 40 : 0;
+          const gobbleBonus = top && top.player === 1 ? 400 + top.size * 100 : 0;
 
           const total = minimaxScore + strategicScore + gobbleBonus;
           if (total > bestScore) {
