@@ -170,11 +170,18 @@ export const useGameLogic = (config: GameConfig) => {
       newPlayerHistory[currentPlayer - 1].push({ ...newCone, position } as any);
       newPlayerMoves[currentPlayer - 1]++;
 
-      // Keep the game playable: every 4 moves by the current player,
-      // return their OLDEST *visible* (top-most) cone back to inventory.
-      // (If the oldest cone is currently covered, skip it and try the next.)
+      // RETURN RULE: When a player has 4 visible (top-most) cones on the board,
+      // their oldest visible cone returns to inventory to keep the game fluid.
       let returnedCone: CellData | undefined;
-      if (newPlayerMoves[currentPlayer - 1] > 0 && newPlayerMoves[currentPlayer - 1] % 4 === 0) {
+
+      // Count how many top-cones belong to the current player
+      let visibleCount = 0;
+      for (let i = 0; i < 9; i++) {
+        const top = getTopCone(newBoard[i]);
+        if (top && top.player === currentPlayer) visibleCount++;
+      }
+
+      if (visibleCount >= 4) {
         const playerHistory = newPlayerHistory[currentPlayer - 1];
 
         // Find the oldest move that is still visible on top of its cell.
@@ -201,13 +208,11 @@ export const useGameLogic = (config: GameConfig) => {
 
           const stackAtPos = newBoard[posToRemove];
           if (stackAtPos && stackAtPos.length > 0) {
-            // It must be the top cone by construction above
             const removed = stackAtPos.pop();
             if (removed) {
               returnedCone = removed;
               newInventories[currentPlayer - 1].push(removed.size);
 
-              // If stack is empty, set cell to null
               if (stackAtPos.length === 0) {
                 newBoard[posToRemove] = null;
               }
@@ -225,6 +230,7 @@ export const useGameLogic = (config: GameConfig) => {
           }
         }
       }
+
 
       // Track board state for AI memory
       aiMemory.trackBoardState(newBoard);
